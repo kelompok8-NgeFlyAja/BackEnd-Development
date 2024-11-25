@@ -4,6 +4,8 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// Prisma schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,4 +14,145 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Airports {
+  id              BigInt @id @default(autoincrement())
+  name            String
+  city            String
+  country         String
+  continent       String
+  airportCode     String @unique
+
+  departureRoutes Routes[] @relation("DepartureAirport")
+  arrivalRoutes   Routes[] @relation("ArrivalAirport")
+}
+
+model Routes {
+  id                  BigInt    @id @default(autoincrement())
+  departureAirportId  BigInt
+  arrivalAirportId    BigInt
+  duration            DateTime
+
+  departureAirport    Airports @relation("DepartureAirport", fields: [departureAirportId], references: [id])
+  arrivalAirport      Airports @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id])
+  flights             Flights[]
+}
+
+model Flights {
+  id              BigInt     @id @default(autoincrement()) // Primary key harus BigInt
+  seatClassId     BigInt
+  routeId         BigInt
+  planeId         BigInt
+  promotionId     BigInt?
+  dateFlight      DateTime
+  departureTime   DateTime
+  arrivalTime     DateTime
+  flightCode      String
+
+  seatClass       SeatClasses  @relation(fields: [seatClassId], references: [id])
+  route           Routes       @relation(fields: [routeId], references: [id])
+  plane           Planes       @relation(fields: [planeId], references: [id])
+  promotion       Promotions?  @relation(fields: [promotionId], references: [id])
+
+  bookings        Bookings[]   // Relasi dengan model Bookings
+}
+
+model Planes {
+  id           BigInt   @id @default(autoincrement())
+  planeName    String
+  totalSeat    Int
+  planeCode    String
+  description  String
+  baggage      Int
+  cabinBaggage Int
+
+  flights Flights[] // Relasi dengan model Flights
+  seats   Seats[]   // Relasi dengan model Seats
+}
+
+model Seats {
+  id          BigInt  @id @default(autoincrement())
+  planeId     BigInt
+  seatNumber  String
+  isAvailable Boolean
+
+  plane       Planes  @relation(fields: [planeId], references: [id])
+}
+
+model Users {
+  id          BigInt  @id @default(autoincrement())
+  name        String
+  email       String  @unique
+  phoneNumber String
+  password    String
+  isActivated Boolean
+
+  bookings    Bookings[] // Relasi dengan model Bookings
+}
+
+model Bookings {
+  id          BigInt      @id @default(autoincrement())
+  userId      BigInt
+  flightId    BigInt
+  bookingCode String
+  bookingDate DateTime
+  status      String // Gunakan enum bila perlu
+  bookerName  String
+  bookerEmail String
+  bookerPhone String
+  totalPrice  Int
+
+  user        Users       @relation(fields: [userId], references: [id])
+  flight      Flights     @relation(fields: [flightId], references: [id])
+  passengers  Passengers[] // Relasi dengan model Passengers
+  payments    Payments[]   // Relasi dengan model Payments
+}
+
+model Passengers {
+  id              BigInt  @id @default(autoincrement())
+  bookingId       BigInt
+  title           String
+  fullName        String
+  familyName      String
+  birthDate       DateTime
+  nationality     String
+  identityNumber  String
+  identityCountry String
+  identityExpired DateTime
+
+  booking         Bookings @relation(fields: [bookingId], references: [id])
+}
+
+model Payments {
+  id            BigInt  @id @default(autoincrement())
+  bookingId     BigInt
+  paymentMethod String
+  amount        Int
+  expiredDate   DateTime
+  status        String // Gunakan enum bila perlu
+
+  booking       Bookings @relation(fields: [bookingId], references: [id])
+}
+
+model Promotions {
+  id            BigInt  @id @default(autoincrement())
+  promotionName String
+  image         String
+  startDate     DateTime
+  endDate       DateTime
+  discount      Int
+
+  flights       Flights[] // Relasi dengan model Flights
+}
+
+model SeatClasses {
+  id         BigInt   @id @default(autoincrement())
+  name       String
+  priceAdult Int
+  priceChild Int
+  priceBaby  Int
+
+  flights    Flights[] // Relasi dengan model Flights
+}
+
 
