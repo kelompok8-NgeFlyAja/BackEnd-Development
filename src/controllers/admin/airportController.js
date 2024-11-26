@@ -14,13 +14,11 @@ const addNewAirport = async (req, res, next) => {
         if(typeof(name)!== 'string' || typeof(city)!== 'string' || typeof(country)!== 'string' || typeof(airportCode)!== 'string' || typeof(continent)!== 'string') {
             return res.status(400).json({message: "Invalid input data"});
         }
-        if(name || city || country || airportCode || continent) {
-            name = name.trim();
-            city = city.trim();
-            country = country.trim();
-            airportCode = airportCode.trim();
-            continent = continent.trim();
-        }
+        name = name.trim();
+        city = city.trim();
+        country = country.trim();
+        airportCode = airportCode.trim();
+        continent = continent.trim();
         if (!name || !city || !country || !airportCode ||!continent) {
             return res.status(400).send('Please provide all required fields');
         }
