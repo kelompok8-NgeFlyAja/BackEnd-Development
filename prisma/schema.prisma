@@ -33,8 +33,8 @@ model Routes {
   arrivalAirportId    BigInt
   duration            DateTime
 
-  departureAirport    Airports @relation("DepartureAirport", fields: [departureAirportId], references: [id])
-  arrivalAirport      Airports @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id])
+  departureAirport    Airports @relation("DepartureAirport", fields: [departureAirportId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  arrivalAirport      Airports @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   flights             Flights[]
 }
 
@@ -49,10 +49,10 @@ model Flights {
   arrivalTime     DateTime
   flightCode      String
 
-  seatClass       SeatClasses  @relation(fields: [seatClassId], references: [id])
-  route           Routes       @relation(fields: [routeId], references: [id])
-  plane           Planes       @relation(fields: [planeId], references: [id])
-  promotion       Promotions?  @relation(fields: [promotionId], references: [id])
+  seatClass       SeatClasses  @relation(fields: [seatClassId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  route           Routes       @relation(fields: [routeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  plane           Planes       @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  promotion       Promotions?  @relation(fields: [promotionId], references: [id],onUpdate: Cascade, onDelete: SetNull)
 
   bookings        Bookings[]   // Relasi dengan model Bookings
 }
@@ -76,7 +76,7 @@ model Seats {
   seatNumber  String
   isAvailable Boolean
 
-  plane       Planes  @relation(fields: [planeId], references: [id])
+  plane       Planes  @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Users {
@@ -102,8 +102,8 @@ model Bookings {
   bookerPhone String
   totalPrice  Int
 
-  user        Users       @relation(fields: [userId], references: [id])
-  flight      Flights     @relation(fields: [flightId], references: [id])
+  user        Users       @relation(fields: [userId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  flight      Flights     @relation(fields: [flightId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   passengers  Passengers[] // Relasi dengan model Passengers
   payments    Payments[]   // Relasi dengan model Payments
 }
@@ -120,7 +120,7 @@ model Passengers {
   identityCountry String
   identityExpired DateTime
 
-  booking         Bookings @relation(fields: [bookingId], references: [id])
+  booking         Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Payments {
@@ -131,7 +131,7 @@ model Payments {
   expiredDate   DateTime
   status        String // Gunakan enum bila perlu
 
-  booking       Bookings @relation(fields: [bookingId], references: [id])
+  booking       Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Promotions {
