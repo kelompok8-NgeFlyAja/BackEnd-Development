@@ -30,26 +30,25 @@ model Airports {
 model Routes {
   id                  BigInt    @id @default(autoincrement())
   departureAirportId  BigInt
-  arrivalAirportId    BigInt
-  duration            DateTime
+  arrivalAirportId    BigInt  
+  seatClassId         BigInt  @unique
 
   departureAirport    Airports @relation("DepartureAirport", fields: [departureAirportId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   arrivalAirport      Airports @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  seatClass           SeatClasses @relation(fields: [seatClassId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   flights             Flights[]
 }
 
 model Flights {
   id              BigInt     @id @default(autoincrement()) // Primary key harus BigInt
-  seatClassId     BigInt
   routeId         BigInt
   planeId         BigInt
   promotionId     BigInt?
-  dateFlight      DateTime
-  departureTime   DateTime
-  arrivalTime     DateTime
+  duration        String
+  departureTime   DateTime  @db.Timestamptz(3)
+  arrivalTime     DateTime  @db.Timestamptz(3)
   flightCode      String
 
-  seatClass       SeatClasses  @relation(fields: [seatClassId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   route           Routes       @relation(fields: [routeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   plane           Planes       @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   promotion       Promotions?  @relation(fields: [promotionId], references: [id],onUpdate: Cascade, onDelete: SetNull)
@@ -152,7 +151,8 @@ model SeatClasses {
   priceChild Int
   priceBaby  Int
 
-  flights    Flights[] // Relasi dengan model Flights
+  route     Routes? // Relasi dengan model Routes
+
 }
 
 
