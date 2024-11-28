@@ -16,7 +16,7 @@ datasource db {
 }
 
 model Airports {
-  id              BigInt @id @default(autoincrement())
+  id              Int @id @default(autoincrement())
   name            String
   city            String
   country         String
@@ -28,10 +28,10 @@ model Airports {
 }
 
 model Routes {
-  id                  BigInt    @id @default(autoincrement())
-  departureAirportId  BigInt    
-  arrivalAirportId    BigInt    
-  seatClassId         BigInt    @unique
+  id                  Int    @id @default(autoincrement())
+  departureAirportId  Int    
+  arrivalAirportId    Int    
+  seatClassId         Int    @unique
 
   departureAirport    Airports @relation("DepartureAirport", fields: [departureAirportId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   arrivalAirport      Airports @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id],onUpdate: Cascade, onDelete: Cascade)
@@ -40,10 +40,10 @@ model Routes {
 }
 
 model Flights {
-  id              BigInt     @id @default(autoincrement()) // Primary key harus BigInt
-  routeId         BigInt     @unique
-  planeId         BigInt     @unique
-  promotionId     BigInt?    @unique
+  id              Int     @id @default(autoincrement())
+  routeId         Int     @unique
+  planeId         Int     @unique
+  promotionId     Int?    @unique
   duration        String
   departureTime   DateTime  @db.Timestamptz(3)
   arrivalTime     DateTime  @db.Timestamptz(3)
@@ -57,7 +57,7 @@ model Flights {
 }
 
 model Planes {
-  id           BigInt   @id @default(autoincrement())
+  id           Int   @id @default(autoincrement())
   planeName    String
   totalSeat    Int
   planeCode    String
@@ -70,8 +70,8 @@ model Planes {
 }
 
 model Seats {
-  id          BigInt  @id @default(autoincrement())
-  planeId     BigInt
+  id          Int  @id @default(autoincrement())
+  planeId     Int
   seatNumber  String
   isAvailable Boolean
 
@@ -79,7 +79,7 @@ model Seats {
 }
 
 model Users {
-  id          BigInt  @id @default(autoincrement())
+  id          Int  @id @default(autoincrement())
   name        String
   email       String  @unique
   phoneNumber String
@@ -90,9 +90,9 @@ model Users {
 }
 
 model Bookings {
-  id          BigInt      @id @default(autoincrement())
-  userId      BigInt
-  flightId    BigInt
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  flightId    Int
   bookingCode String
   bookingDate DateTime
   status      BookingsStatus @default(PENDING)
@@ -108,8 +108,8 @@ model Bookings {
 }
 
 model Passengers {
-  id              BigInt  @id @default(autoincrement())
-  bookingId       BigInt
+  id              Int  @id @default(autoincrement())
+  bookingId       Int
   title           String
   fullName        String
   familyName      String
@@ -123,8 +123,8 @@ model Passengers {
 }
 
 model Payments {
-  id            BigInt  @id @default(autoincrement())
-  bookingId     BigInt  @unique
+  id            Int  @id @default(autoincrement())
+  bookingId     Int  @unique
   paymentMethod String
   amount        Int
   expiredDate   DateTime
@@ -134,7 +134,7 @@ model Payments {
 }
 
 model Promotions {
-  id            BigInt  @id @default(autoincrement())
+  id            Int  @id @default(autoincrement())
   promotionName String
   image         String
   startDate     DateTime
@@ -145,7 +145,7 @@ model Promotions {
 }
 
 model SeatClasses {
-  id         BigInt   @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   name       String
   priceAdult Int
   priceChild Int
