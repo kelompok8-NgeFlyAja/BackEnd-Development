@@ -1,6 +1,12 @@
+-- CreateEnum
+CREATE TYPE "BookingsStatus" AS ENUM ('PENDING', 'SUCCESS', 'CANCEL');
+
+-- CreateEnum
+CREATE TYPE "PaymentsStatus" AS ENUM ('Unpaid', 'Issued', 'Cancelled');
+
 -- CreateTable
 CREATE TABLE "Airports" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "country" TEXT NOT NULL,
@@ -12,24 +18,23 @@ CREATE TABLE "Airports" (
 
 -- CreateTable
 CREATE TABLE "Routes" (
-    "id" BIGSERIAL NOT NULL,
-    "departureAirportId" BIGINT NOT NULL,
-    "arrivalAirportId" BIGINT NOT NULL,
-    "duration" TIMESTAMP(3) NOT NULL,
+    "id" SERIAL NOT NULL,
+    "departureAirportId" INTEGER NOT NULL,
+    "arrivalAirportId" INTEGER NOT NULL,
+    "seatClassId" INTEGER NOT NULL,
 
     CONSTRAINT "Routes_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Flights" (
-    "id" BIGSERIAL NOT NULL,
-    "seatClassId" BIGINT NOT NULL,
-    "routeId" BIGINT NOT NULL,
-    "planeId" BIGINT NOT NULL,
-    "promotionId" BIGINT,
-    "dateFlight" TIMESTAMP(3) NOT NULL,
-    "departureTime" TIMESTAMP(3) NOT NULL,
-    "arrivalTime" TIMESTAMP(3) NOT NULL,
+    "id" SERIAL NOT NULL,
+    "routeId" INTEGER NOT NULL,
+    "planeId" INTEGER NOT NULL,
+    "promotionId" INTEGER,
+    "duration" TEXT NOT NULL,
+    "departureTime" TIMESTAMPTZ(3) NOT NULL,
+    "arrivalTime" TIMESTAMPTZ(3) NOT NULL,
     "flightCode" TEXT NOT NULL,
 
     CONSTRAINT "Flights_pkey" PRIMARY KEY ("id")
@@ -37,7 +42,7 @@ CREATE TABLE "Flights" (
 
 -- CreateTable
 CREATE TABLE "Planes" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "planeName" TEXT NOT NULL,
     "totalSeat" INTEGER NOT NULL,
     "planeCode" TEXT NOT NULL,
@@ -50,8 +55,8 @@ CREATE TABLE "Planes" (
 
 -- CreateTable
 CREATE TABLE "Seats" (
-    "id" BIGSERIAL NOT NULL,
-    "planeId" BIGINT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "planeId" INTEGER NOT NULL,
     "seatNumber" TEXT NOT NULL,
     "isAvailable" BOOLEAN NOT NULL,
 
@@ -60,7 +65,7 @@ CREATE TABLE "Seats" (
 
 -- CreateTable
 CREATE TABLE "Users" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phoneNumber" TEXT NOT NULL,
@@ -72,12 +77,12 @@ CREATE TABLE "Users" (
 
 -- CreateTable
 CREATE TABLE "Bookings" (
-    "id" BIGSERIAL NOT NULL,
-    "userId" BIGINT NOT NULL,
-    "flightId" BIGINT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "flightId" INTEGER NOT NULL,
     "bookingCode" TEXT NOT NULL,
     "bookingDate" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "BookingsStatus" NOT NULL DEFAULT 'PENDING',
     "bookerName" TEXT NOT NULL,
     "bookerEmail" TEXT NOT NULL,
     "bookerPhone" TEXT NOT NULL,
@@ -88,8 +93,8 @@ CREATE TABLE "Bookings" (
 
 -- CreateTable
 CREATE TABLE "Passengers" (
-    "id" BIGSERIAL NOT NULL,
-    "bookingId" BIGINT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "bookingId" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
     "fullName" TEXT NOT NULL,
     "familyName" TEXT NOT NULL,
@@ -104,19 +109,19 @@ CREATE TABLE "Passengers" (
 
 -- CreateTable
 CREATE TABLE "Payments" (
-    "id" BIGSERIAL NOT NULL,
-    "bookingId" BIGINT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "bookingId" INTEGER NOT NULL,
     "paymentMethod" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
     "expiredDate" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "PaymentsStatus" NOT NULL DEFAULT 'Unpaid',
 
     CONSTRAINT "Payments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Promotions" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "promotionName" TEXT NOT NULL,
     "image" TEXT NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,
@@ -128,7 +133,7 @@ CREATE TABLE "Promotions" (
 
 -- CreateTable
 CREATE TABLE "SeatClasses" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "priceAdult" INTEGER NOT NULL,
     "priceChild" INTEGER NOT NULL,
@@ -141,37 +146,52 @@ CREATE TABLE "SeatClasses" (
 CREATE UNIQUE INDEX "Airports_airportCode_key" ON "Airports"("airportCode");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Routes_seatClassId_key" ON "Routes"("seatClassId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Flights_routeId_key" ON "Flights"("routeId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Flights_planeId_key" ON "Flights"("planeId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Flights_promotionId_key" ON "Flights"("promotionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 
--- AddForeignKey
-ALTER TABLE "Routes" ADD CONSTRAINT "Routes_departureAirportId_fkey" FOREIGN KEY ("departureAirportId") REFERENCES "Airports"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Payments_bookingId_key" ON "Payments"("bookingId");
 
 -- AddForeignKey
-ALTER TABLE "Routes" ADD CONSTRAINT "Routes_arrivalAirportId_fkey" FOREIGN KEY ("arrivalAirportId") REFERENCES "Airports"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Routes" ADD CONSTRAINT "Routes_departureAirportId_fkey" FOREIGN KEY ("departureAirportId") REFERENCES "Airports"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Flights" ADD CONSTRAINT "Flights_seatClassId_fkey" FOREIGN KEY ("seatClassId") REFERENCES "SeatClasses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Routes" ADD CONSTRAINT "Routes_arrivalAirportId_fkey" FOREIGN KEY ("arrivalAirportId") REFERENCES "Airports"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Flights" ADD CONSTRAINT "Flights_routeId_fkey" FOREIGN KEY ("routeId") REFERENCES "Routes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Routes" ADD CONSTRAINT "Routes_seatClassId_fkey" FOREIGN KEY ("seatClassId") REFERENCES "SeatClasses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Flights" ADD CONSTRAINT "Flights_planeId_fkey" FOREIGN KEY ("planeId") REFERENCES "Planes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Flights" ADD CONSTRAINT "Flights_routeId_fkey" FOREIGN KEY ("routeId") REFERENCES "Routes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Flights" ADD CONSTRAINT "Flights_planeId_fkey" FOREIGN KEY ("planeId") REFERENCES "Planes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Flights" ADD CONSTRAINT "Flights_promotionId_fkey" FOREIGN KEY ("promotionId") REFERENCES "Promotions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Seats" ADD CONSTRAINT "Seats_planeId_fkey" FOREIGN KEY ("planeId") REFERENCES "Planes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Seats" ADD CONSTRAINT "Seats_planeId_fkey" FOREIGN KEY ("planeId") REFERENCES "Planes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Bookings" ADD CONSTRAINT "Bookings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Bookings" ADD CONSTRAINT "Bookings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Bookings" ADD CONSTRAINT "Bookings_flightId_fkey" FOREIGN KEY ("flightId") REFERENCES "Flights"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Bookings" ADD CONSTRAINT "Bookings_flightId_fkey" FOREIGN KEY ("flightId") REFERENCES "Flights"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Passengers" ADD CONSTRAINT "Passengers_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Passengers" ADD CONSTRAINT "Passengers_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Bookings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Payments" ADD CONSTRAINT "Payments_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Bookings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
