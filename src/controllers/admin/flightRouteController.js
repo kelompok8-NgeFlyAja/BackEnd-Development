@@ -14,9 +14,9 @@ const addNewRoute = async (req, res, next) => {
     // Tambahkan route baru
     const newRoute = await prisma.routes.create({
       data: {
-        seatClassId: BigInt(seatClassId),
-        departureAirportId: BigInt(departureId),
-        arrivalAirportId: BigInt(arrivalId),
+        seatClassId: Number(seatClassId),
+        departureAirportId: Number(departureId),
+        arrivalAirportId: Number(arrivalId),
       },
     });
 
@@ -60,7 +60,7 @@ const getUniqueRoute = async (req, res, next) => {
     }
 
     const route = await prisma.routes.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: Number(id) },
       include: {
         departureAirport: true,
         arrivalAirport: true,
@@ -93,11 +93,11 @@ const updateRoute = async (req, res, next) => {
     }
 
     const updatedRoute = await prisma.routes.update({
-      where: { id: BigInt(id) },
+      where: { id: Number(id) },
       data: {
-        ...(seatClassId && { seatClassId: BigInt(seatClassId) }),
-        ...(departureId && { departureAirportId: BigInt(departureId) }),
-        ...(arrivalId && { arrivalAirportId: BigInt(arrivalId) }),
+        ...(seatClassId && { seatClassId: Number(seatClassId) }),
+        ...(departureId && { departureAirportId: Number(departureId) }),
+        ...(arrivalId && { arrivalAirportId: Number(arrivalId) }),
       },
     });
 
@@ -124,7 +124,7 @@ const deleteRoute = async (req, res, next) => {
     }
 
     await prisma.routes.delete({
-      where: { id: BigInt(id) },
+      where: { id: Number(id) },
     });
 
     return res.status(200).json({ message: "Route deleted successfully!" });
