@@ -1,4 +1,4 @@
-if(process.env.NODE_ENV !== 'production'){
+if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 const { PrismaClient } = require('@prisma/client');
@@ -229,4 +229,4 @@ const addMultipleAirports = async (req, res, next) => {
 }
 
 
-module.exports = {addNewAirport, deleteAirport, getAllAirports, addMultipleAirports};
+module.exports = { addNewAirport, deleteAirport, getAllAirports, addMultipleAirports };
