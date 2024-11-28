@@ -90,7 +90,7 @@ model Users {
 }
 
 model Bookings {
-  id          Int      @id @default(autoincrement()
+  id          Int      @id @default(autoincrement())
   userId      Int
   flightId    Int
   bookingCode String
