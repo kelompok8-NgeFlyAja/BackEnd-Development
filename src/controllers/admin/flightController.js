@@ -1,3 +1,4 @@
+const moment = require('moment-timezone');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -8,7 +9,20 @@ const addNewFlight = async (req, res, next) => {
 const getAllFlight = async (req, res, next) => {
     try {
         const flights = await prisma.flights.findMany();
-        res.status(200).json({flights});
+        
+        const timeZone = 'Asia/Jakarta';
+        const updatedFlights = flights.map(flight => {
+            const departureTimeConvert = moment.utc(flight.departureTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
+            const arrivalTimeConvert = moment.utc(flight.arrivalTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
+
+            return {
+                ...flight,
+                departureTime: departureTimeConvert,
+                arrivalTime: arrivalTimeConvert
+            };
+        });
+
+        res.status(200).json({updatedFlights});
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
