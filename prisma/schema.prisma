@@ -76,6 +76,7 @@ model Seats {
   isAvailable Boolean
 
   plane       Planes  @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  passengers  Passengers?
 }
 
 model Users {
@@ -90,12 +91,15 @@ model Users {
 }
 
 model Bookings {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
   flightId    Int
   bookingCode String
-  bookingDate DateTime
-  status      BookingsStatus @default(PENDING)
+  bookingDate DateTime  @db.Timestamptz(3)
+  adultPassenger Int    @default(0)
+  childPassenger Int    @default(0)
+  babyPassenger  Int    @default(0)
+  status      String
   bookerName  String
   bookerEmail String
   bookerPhone String
@@ -113,13 +117,15 @@ model Passengers {
   title           String
   fullName        String
   familyName      String
-  birthDate       DateTime
+  birthDate       DateTime @db.Timestamptz(3)
   nationality     String
   identityNumber  String
   identityCountry String
-  identityExpired DateTime
+  identityExpired DateTime @db.Timestamptz(3)
+  seatId          Int @unique
 
   booking         Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  seat            Seats    @relation(fields: [seatId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Payments {
@@ -127,8 +133,8 @@ model Payments {
   bookingId     Int  @unique
   paymentMethod String
   amount        Int
-  expiredDate   DateTime
-  status        PaymentsStatus @default(Unpaid)
+  expiredDate   DateTime @db.Timestamptz(3)
+  status        String
 
   booking       Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
@@ -137,8 +143,8 @@ model Promotions {
   id            Int  @id @default(autoincrement())
   promotionName String
   image         String
-  startDate     DateTime
-  endDate       DateTime
+  startDate     DateTime @db.Timestamptz(3)
+  endDate       DateTime @db.Timestamptz(3)
   discount      Int
 
   flights       Flights? // Relasi dengan model Flights
@@ -155,14 +161,3 @@ model SeatClasses {
 
 }
 
-enum BookingsStatus {
-  PENDING
-  SUCCESS
-  CANCEL
-}
-
-enum PaymentsStatus {
-  Unpaid
-  Issued
-  Cancelled
-}
