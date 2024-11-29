@@ -4,6 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const midtrans = require("../../config/midtrans");
 const randomGenerator = require("../../utils/randomGenerator");
+const { parseArgs } = require("util");
 
 const getTicketDetails = async (req, res, next) => {
 	try {
@@ -103,7 +104,7 @@ const getTicketDetails = async (req, res, next) => {
 const createBooking = async (req, res, next) => {
 	try {
 		const passengerData = [];
-		let { bookingTicket, passengerDetail } = req.body;
+		let { bookingTicket, passengerDetail, adultPassenger, childPassenger, babyPassenger } = req.body;
 		const timeZone = "Asia/Jakarta";
 
 		if (!bookingTicket || !passengerDetail) {
@@ -121,24 +122,67 @@ const createBooking = async (req, res, next) => {
 				flightId: bookingTicket.flightId,
 				bookingCode: randomCode,
 				bookingDate: BookingDateUtc7,
+				adultPassenger: adultPassenger,
+				childPassenger: childPassenger,
+				babyPassenger: babyPassenger,
 				status: bookingTicket.status,
 				bookerName: bookingTicket.bookerName,
 				bookerEmail: bookingTicket.bookerEmail,
 				bookerPhone: bookingTicket.bookerPhone,
-				totalPrice: bookingTicket.totalPrice,
+				totalPrice: 0,
 			},
 		});
 
-		const flight = await prisma.flights.findUnique({
+		const seatClassInfo = await prisma.flights.findUnique({
+			where: { id: bookingTicket.flightId },
+			include: {
+				route: {
+					include: {
+						seatClass: true,
+					},
+				},
+			},
+		});
+
+		if (!seatClassInfo) {
+			const error = new Error("Seat Class Not Found");
+			error.status = 400;
+			throw error;
+		}
+
+		const seatClass = seatClassInfo.route.seatClass;
+		console.log(seatClass.priceAdult);
+		console.log(adultCount);
+		
+
+		const totalAdultPrice = seatClass.priceAdult * adultCount;
+		console.log(totalAdultPrice);
+		const totalChildPrice = seatClass.priceChild * childCount;
+		console.log(totalChildPrice);
+		const totalBabyPrice = seatClass.priceBaby * babyCount;
+		console.log(totalBabyPrice);
+		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice;
+		console.log(parseInt(totalPrice));
+		
+
+		await prisma.bookings.update({
+			where: { id: createdBooking.id },
+			data: { totalPrice: totalPrice },
+		});
+
+
+		const planeInfo = await prisma.flights.findUnique({
 			where: { id: bookingTicket.flightId },
 			select: { planeId: true },
 		});
 
-		if (!flight) {
-			throw new Error("Flight not found.");
+		if (!planeInfo) {
+			const error = new Error("Plane Not Found");
+			error.status = 400;
+			throw error;
 		}
 
-		const planeId = flight.planeId;
+		const planeId = planeInfo.planeId;
 
 		for (let i = 0; i < passengerDetail.length; i++) {
 			const dateBirth = moment
@@ -221,7 +265,7 @@ const createPayment = async (req, res, next) => {
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
-			error.status = 404;
+			error.status = 400;
 			throw error;
 		}
 
