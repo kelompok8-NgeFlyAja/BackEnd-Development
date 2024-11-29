@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const moment = require('moment-timezone');
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const midtrans = require("../../config/midtrans");
@@ -44,14 +45,18 @@ const getFlightDetails = async (req, res, next) => {
 			},
 		});
 
-		console.log("Raw flight details fetched from Prisma:", flightDetails);
-
+		const timeZone = 'Asia/Jakarta';
 		const formattedFlightDetails = flightDetails.map((flight) => {
-			console.log("Processing flight:", flight);
+			const departureTimeConvert = moment.utc(flight.departureTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
+            const arrivalTimeConvert = moment.utc(flight.arrivalTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
+
+			const convertDepartureTimeToDate = new Date(departureTimeConvert);
+			
+            const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
 
 			return {
-				departureTime: flight.departureTime.toLocaleTimeString(),
-				departureDate: flight.departureTime.toLocaleDateString(),
+				departureTime: convertDepartureTimeToDate.toLocaleTimeString(),
+				departureDate: convertDepartureTimeToDate.toLocaleDateString(),
 				departureAirportName: flight.route.departureAirport.name,
 				planeName: flight.plane.planeName,
 				seatClassName: flight.route.seatClass.name,
@@ -59,14 +64,16 @@ const getFlightDetails = async (req, res, next) => {
 				description: flight.plane.description,
 				baggage: flight.plane.baggage,
 				cabinBaggage: flight.plane.cabinBaggage,
-				arrivalTime: flight.arrivalTime.toLocaleTimeString(),
-				arrivalDate: flight.arrivalTime.toLocaleDateString(),
+				arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
+				arrivalDate: convertArrivalTimeToDate.toLocaleDateString(),
 				arrivalAirportName: flight.route.arrivalAirport.name,
 				priceAdult: flight.route.seatClass.priceAdult,
 				priceChild: flight.route.seatClass.priceChild,
 				priceBaby: flight.route.seatClass.priceBaby,
 			};
 		});
+
+		console.log(formattedFlightDetails, '-> From FormattedFlight');
 
 		return formattedFlightDetails;
 	} catch (error) {
@@ -77,8 +84,9 @@ const getFlightDetails = async (req, res, next) => {
 
 const createBooking = async (req, res, next) => {
 	try {
+		const passengerData = [];
 		let { bookingTicket, passengerDetail } = req.body;
-		let dateBirth, dateExpired;
+		const timeZone = 'Asia/Jakarta';
 
 		if (!bookingTicket || !passengerDetail) {
 			const error = new Errror("Make Sure To Fill All Forms!");
@@ -87,23 +95,14 @@ const createBooking = async (req, res, next) => {
 		}
 
 		const randomCode = await randomGenerator();
-		for (let i = 0; i < passengerDetail.length; i++) {
-			dateBirth = new Date(
-				`${passengerDetail[i].birthDate} 00:00:00:00Z`
-			);
-		}
-		for (let i = 0; i < passengerDetail.length; i++) {
-			dateExpired = new Date(
-				`${passengerDetail[i].identityExpired} 00:00:00:00Z`
-			);
-		}
+		const BookingDateUtc7 = moment.utc(new Date()).tz(timeZone).format();
 
 		const createdBooking = await prisma.bookings.create({
 			data: {
 				userId: bookingTicket.userId,
 				flightId: bookingTicket.flightId,
 				bookingCode: randomCode,
-				bookingDate: bookingTicket.bookingDate,
+				bookingDate: BookingDateUtc7,
 				status: bookingTicket.status,
 				bookerName: bookingTicket.bookerName,
 				bookerEmail: bookingTicket.bookerEmail,
@@ -112,22 +111,29 @@ const createBooking = async (req, res, next) => {
 			},
 		});
 
-		const createdPassengers = await prisma.passengers.createMany({
-			data: passengerDetail.map((passengerDetail) => ({
+		for (let i = 0; i < passengerDetail.length; i++) {
+			const dateBirth = moment.utc(`${passengerDetail[i].birthDate}T00:00:00Z`).tz(timeZone).format();
+			const dateExpired = moment.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`).tz(timeZone).format();
+
+			passengerData.push({
 				bookingId: createdBooking.id,
-				title: passengerDetail.title,
-				fullName: passengerDetail.fullName,
-				familyName: passengerDetail.familyName,
+				title: passengerDetail[i].title,
+				fullName: passengerDetail[i].fullName,
+				familyName: passengerDetail[i].familyName,
 				birthDate: dateBirth,
-				nationality: passengerDetail.nationality,
-				identityNumber: passengerDetail.identityNumber,
-				identityCountry: passengerDetail.identityCountry,
+				nationality: passengerDetail[i].nationality,
+				identityNumber: passengerDetail[i].identityNumber,
+				identityCountry: passengerDetail[i].identityCountry,
 				identityExpired: dateExpired,
-			})),
+			});
+		}
+
+		const createdPassengers = await prisma.passengers.createMany({
+			data: passengerData
 		});
 
 		if (createdBooking && createdPassengers) {
-			res.status(201).json({
+			res.status(200).json({
 				status: "Success",
 				message: "Booking Successfully Created",
 				bookingId: createdBooking.id,
@@ -143,7 +149,6 @@ const createPayment = async (req, res, next) => {
 	try {
 		const { bookingId } = req.params;
 		const convertBookingId = parseInt(bookingId);
-		// const flightDetails = await getFlightDetails();
 
 		if (!bookingId) {
 			const error = new Error("Booking Ticket ID is required");
