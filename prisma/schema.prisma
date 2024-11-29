@@ -61,7 +61,9 @@ model Seats {
   planeId     Int
   seatNumber  String
   isAvailable Boolean
-  plane       Planes  @relation(fields: [planeId], references: [id], onDelete: Cascade)
+
+  plane       Planes  @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  passengers  Passengers?
 }
 
 model Users {
@@ -75,12 +77,16 @@ model Users {
 }
 
 model Bookings {
-  id          Int            @id @default(autoincrement())
+
+  id          Int       @id @default(autoincrement())
   userId      Int
   flightId    Int
   bookingCode String
-  bookingDate DateTime       @db.Timestamptz(6)
-  status      BookingsStatus @default(PENDING)
+  bookingDate DateTime  @db.Timestamptz(3)
+  adultPassenger Int    @default(0)
+  childPassenger Int    @default(0)
+  babyPassenger  Int    @default(0)
+  status      String
   bookerName  String
   bookerEmail String
   bookerPhone String
@@ -97,12 +103,15 @@ model Passengers {
   title           String
   fullName        String
   familyName      String
-  birthDate       DateTime @db.Timestamptz(6)
+  birthDate       DateTime @db.Timestamptz(3)
   nationality     String
   identityNumber  String
   identityCountry String
-  identityExpired DateTime @db.Timestamptz(6)
-  booking         Bookings @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  identityExpired DateTime @db.Timestamptz(3)
+  seatId          Int @unique
+
+  booking         Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  seat            Seats    @relation(fields: [seatId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Payments {
@@ -110,17 +119,18 @@ model Payments {
   bookingId     Int            @unique
   paymentMethod String
   amount        Int
-  expiredDate   DateTime       @db.Timestamptz(6)
-  status        PaymentsStatus @default(Unpaid)
-  booking       Bookings       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  expiredDate   DateTime @db.Timestamptz(3)
+  status        String
+
+  booking       Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Promotions {
   id            Int      @id @default(autoincrement())
   promotionName String
   image         String
-  startDate     DateTime @db.Timestamptz(6)
-  endDate       DateTime @db.Timestamptz(6)
+  startDate     DateTime @db.Timestamptz(3)
+  endDate       DateTime @db.Timestamptz(3)
   discount      Int
   flights       Flights?
 }
@@ -134,14 +144,3 @@ model SeatClasses {
   route      Routes?
 }
 
-enum BookingsStatus {
-  PENDING
-  SUCCESS
-  CANCEL
-}
-
-enum PaymentsStatus {
-  Unpaid
-  Issued
-  Cancelled
-}
