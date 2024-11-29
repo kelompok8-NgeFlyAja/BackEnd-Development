@@ -239,7 +239,6 @@ const midtransNotification = async (req, res, next) => {
 			notification
 		);
 		const { order_id, transaction_status, payment_type } = statusResponse;
-		console.log(statusResponse, "-> The Response");
 
 		let newStatusPayment, newStatusBooking;
 		switch (transaction_status) {
