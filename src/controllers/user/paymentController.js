@@ -1,13 +1,22 @@
 const crypto = require("crypto");
-const moment = require('moment-timezone');
+const moment = require("moment-timezone");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const midtrans = require("../../config/midtrans");
 const randomGenerator = require("../../utils/randomGenerator");
 
-const getFlightDetails = async (req, res, next) => {
+const getTicketDetails = async (req, res, next) => {
 	try {
-		const flightDetails = await prisma.flights.findMany({
+		const { flightId } = req.params;
+
+		if (!flightId) {
+			const error = new Error("Flight ID is required");
+			error.status = 400;
+			throw error;
+		}
+
+		const flightDetails = await prisma.flights.findUnique({
+			where: { id: parseInt(flightId) },
 			select: {
 				departureTime: true,
 				arrivalTime: true,
@@ -45,39 +54,48 @@ const getFlightDetails = async (req, res, next) => {
 			},
 		});
 
-		const timeZone = 'Asia/Jakarta';
-		const formattedFlightDetails = flightDetails.map((flight) => {
-			const departureTimeConvert = moment.utc(flight.departureTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
-            const arrivalTimeConvert = moment.utc(flight.arrivalTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
+		if (!flightDetails) {
+			const error = new Error("Flight not found");
+			error.status = 400;
+			throw error;
+		}
 
-			const convertDepartureTimeToDate = new Date(departureTimeConvert);
-			
-            const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+		const timeZone = "Asia/Jakarta";
+		const departureTimeConvert = moment
+			.utc(flightDetails.departureTime)
+			.tz(timeZone)
+			.format("YYYY-MM-DD HH:mm:ss");
+		const arrivalTimeConvert = moment
+			.utc(flightDetails.arrivalTime)
+			.tz(timeZone)
+			.format("YYYY-MM-DD HH:mm:ss");
 
-			return {
+		const convertDepartureTimeToDate = new Date(departureTimeConvert);
+		const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+
+		return res.status(200).json({
+			status: "Success",
+			message: "Flight details retrieved successfully",
+			data: {
+				flightId: flightDetails.id,
 				departureTime: convertDepartureTimeToDate.toLocaleTimeString(),
 				departureDate: convertDepartureTimeToDate.toLocaleDateString(),
-				departureAirportName: flight.route.departureAirport.name,
-				planeName: flight.plane.planeName,
-				seatClassName: flight.route.seatClass.name,
-				planeCode: flight.plane.planeCode,
-				description: flight.plane.description,
-				baggage: flight.plane.baggage,
-				cabinBaggage: flight.plane.cabinBaggage,
+				departureAirportName: flightDetails.route.departureAirport.name,
+				planeName: flightDetails.plane.planeName,
+				seatClassName: flightDetails.route.seatClass.name,
+				planeCode: flightDetails.plane.planeCode,
+				description: flightDetails.plane.description,
+				baggage: flightDetails.plane.baggage,
+				cabinBaggage: flightDetails.plane.cabinBaggage,
 				arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
 				arrivalDate: convertArrivalTimeToDate.toLocaleDateString(),
-				arrivalAirportName: flight.route.arrivalAirport.name,
-				priceAdult: flight.route.seatClass.priceAdult,
-				priceChild: flight.route.seatClass.priceChild,
-				priceBaby: flight.route.seatClass.priceBaby,
-			};
+				arrivalAirportName: flightDetails.route.arrivalAirport.name,
+				priceAdult: flightDetails.route.seatClass.priceAdult,
+				priceChild: flightDetails.route.seatClass.priceChild,
+				priceBaby: flightDetails.route.seatClass.priceBaby,
+			},
 		});
-
-		console.log(formattedFlightDetails, '-> From FormattedFlight');
-
-		return formattedFlightDetails;
 	} catch (error) {
-		console.error("Error fetching flight details:", error);
 		next(error);
 	}
 };
@@ -86,7 +104,7 @@ const createBooking = async (req, res, next) => {
 	try {
 		const passengerData = [];
 		let { bookingTicket, passengerDetail } = req.body;
-		const timeZone = 'Asia/Jakarta';
+		const timeZone = "Asia/Jakarta";
 
 		if (!bookingTicket || !passengerDetail) {
 			const error = new Errror("Make Sure To Fill All Forms!");
@@ -111,9 +129,48 @@ const createBooking = async (req, res, next) => {
 			},
 		});
 
+		const flight = await prisma.flights.findUnique({
+			where: { id: bookingTicket.flightId },
+			select: { planeId: true },
+		});
+
+		if (!flight) {
+			throw new Error("Flight not found.");
+		}
+
+		const planeId = flight.planeId;
+
 		for (let i = 0; i < passengerDetail.length; i++) {
-			const dateBirth = moment.utc(`${passengerDetail[i].birthDate}T00:00:00Z`).tz(timeZone).format();
-			const dateExpired = moment.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`).tz(timeZone).format();
+			const dateBirth = moment
+				.utc(`${passengerDetail[i].birthDate}T00:00:00Z`)
+				.tz(timeZone)
+				.format();
+			const dateExpired = moment
+				.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`)
+				.tz(timeZone)
+				.format();
+
+			const selectedSeatName = passengerDetail[i].seatName;
+
+			const selectedSeat = await prisma.seats.findFirst({
+				where: {
+					seatNumber: selectedSeatName,
+					planeId: planeId,
+				},
+			});
+
+			if (!selectedSeat) {
+				throw new Error(`No available seat for passenger ${i + 1}`);
+			}
+
+			if (!selectedSeat.isAvailable) {
+				throw new Error(`Seat ${selectedSeatName} is already taken.`);
+			}
+
+			await prisma.seats.update({
+				where: { id: selectedSeat.id },
+				data: { isAvailable: false },
+			});
 
 			passengerData.push({
 				bookingId: createdBooking.id,
@@ -125,11 +182,12 @@ const createBooking = async (req, res, next) => {
 				identityNumber: passengerDetail[i].identityNumber,
 				identityCountry: passengerDetail[i].identityCountry,
 				identityExpired: dateExpired,
+				seatid: selectedSeat.id,
 			});
 		}
 
 		const createdPassengers = await prisma.passengers.createMany({
-			data: passengerData
+			data: passengerData,
 		});
 
 		if (createdBooking && createdPassengers) {
@@ -287,4 +345,4 @@ const midtransNotification = async (req, res, next) => {
 	}
 };
 
-module.exports = { createBooking, createPayment, midtransNotification };
+module.exports = { createBooking, createPayment, midtransNotification, getTicketDetails };
