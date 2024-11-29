@@ -9,6 +9,7 @@ const airportRoute = require('./src/routes/admin/airportRoute')
 const planeRoute = require('./src/routes/admin/planeRoute')
 const flightRoute = require("./src/routes/admin/flightRoutesRoute");
 const promotionRoute = require("./src/routes/admin/promotionRoute");
+const transactionRoute = require("./src/routes/user/paymentsRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,6 +17,7 @@ app.use(planeRoute)
 app.use(airportRoute);
 app.use(flightRoute);
 app.use(promotionRoute);
+app.use(transactionRoute);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
