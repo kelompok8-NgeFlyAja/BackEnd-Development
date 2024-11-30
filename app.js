@@ -10,7 +10,9 @@ const classRoute = require('./src/routes/admin/classRoute')
 const planeRoute = require('./src/routes/admin/planeRoute')
 const flightRoute = require("./src/routes/admin/flightRoutesRoute");
 const promotionRoute = require("./src/routes/admin/promotionRoute");
+const search = require('./src/routes/user/searchRoute')
 
+app.use(search)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(planeRoute)
