@@ -1,11 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-// Prisma schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,152 +8,139 @@ datasource db {
 }
 
 model Airports {
-  id              Int @id @default(autoincrement())  
+  id              Int      @id @default(autoincrement())
   name            String
   city            String
   country         String
   continent       String
-  airportCode     String @unique
-
-  departureRoutes Routes[] @relation("DepartureAirport")
+  airportCode     String   @unique
   arrivalRoutes   Routes[] @relation("ArrivalAirport")
+  departureRoutes Routes[] @relation("DepartureAirport")
 }
 
 model Routes {
-  id                  Int @id @default(autoincrement())  
-  departureAirportId  Int    
-  arrivalAirportId    Int    
-  seatClassId         Int @unique
-
-  departureAirport    Airports @relation("DepartureAirport", fields: [departureAirportId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  arrivalAirport      Airports @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  seatClass           SeatClasses @relation(fields: [seatClassId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  flights             Flights?
+  id                 Int         @id @default(autoincrement())
+  departureAirportId Int
+  arrivalAirportId   Int
+  seatClassId        Int         @unique
+  flights            Flights?
+  arrivalAirport     Airports    @relation("ArrivalAirport", fields: [arrivalAirportId], references: [id], onDelete: Cascade)
+  departureAirport   Airports    @relation("DepartureAirport", fields: [departureAirportId], references: [id], onDelete: Cascade)
+  seatClass          SeatClasses @relation(fields: [seatClassId], references: [id], onDelete: Cascade)
 }
 
 model Flights {
-  id              Int     @id @default(autoincrement())
-  routeId         Int     @unique
-  planeId         Int     @unique
-  promotionId     Int?    @unique
-  duration        String
-  departureTime   DateTime  @db.Timestamptz(3)
-  arrivalTime     DateTime  @db.Timestamptz(3)
-  flightCode      String
-
-  route           Routes       @relation(fields: [routeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  plane           Planes       @relation(fields: [planeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  promotion       Promotions?  @relation(fields: [promotionId], references: [id], onUpdate: Cascade, onDelete: SetNull)
-
-  bookings        Bookings[]   // Relasi dengan model Bookings
+  id            Int         @id @default(autoincrement())
+  routeId       Int         @unique
+  planeId       Int         @unique
+  promotionId   Int?        @unique
+  duration      String
+  departureTime DateTime    @db.Timestamptz(3)
+  arrivalTime   DateTime    @db.Timestamptz(3)
+  flightCode    String
+  bookings      Bookings[]
+  plane         Planes      @relation(fields: [planeId], references: [id], onDelete: Cascade)
+  promotion     Promotions? @relation(fields: [promotionId], references: [id])
+  route         Routes      @relation(fields: [routeId], references: [id], onDelete: Cascade)
 }
 
 model Planes {
-  id           Int   @id @default(autoincrement())  
+  id           Int      @id @default(autoincrement())
   planeName    String
   totalSeat    Int
   planeCode    String
   description  String
   baggage      Int
   cabinBaggage Int
-
-  flights Flights? // Relasi dengan model Flights
-  seats   Seats[]   // Relasi dengan model Seats
+  flights      Flights?
+  seats        Seats[]
 }
 
 model Seats {
-  id          Int  @id @default(autoincrement())  
+  id          Int     @id @default(autoincrement())
   planeId     Int
   seatNumber  String
   isAvailable Boolean
 
-  plane       Planes  @relation(fields: [planeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  plane       Planes  @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  passengers  Passengers?
 }
 
 model Users {
-  id          Int  @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   name        String
-  email       String  @unique
+  email       String     @unique
   phoneNumber String
   password    String
   isActivated Boolean
-
-  bookings    Bookings[] // Relasi dengan model Bookings
+  bookings    Bookings[]
 }
 
 model Bookings {
-  id          Int      @id @default(autoincrement())
+
+  id          Int       @id @default(autoincrement())
   userId      Int
   flightId    Int
   bookingCode String
-  bookingDate DateTime
-  status      BookingsStatus @default(PENDING)
+  bookingDate DateTime  @db.Timestamptz(3)
+  adultPassenger Int    @default(0)
+  childPassenger Int    @default(0)
+  babyPassenger  Int    @default(0)
+  status      String
   bookerName  String
   bookerEmail String
   bookerPhone String
   totalPrice  Int
-
-  user        Users       @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  flight      Flights     @relation(fields: [flightId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  passengers  Passengers[] // Relasi dengan model Passengers
-  payments    Payments?   // Relasi dengan model Payments
+  flight      Flights        @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user        Users          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passengers  Passengers[]
+  payments    Payments?
 }
 
 model Passengers {
-  id              Int  @id @default(autoincrement())  
+  id              Int      @id @default(autoincrement())
   bookingId       Int
   title           String
   fullName        String
   familyName      String
-  birthDate       DateTime
+  birthDate       DateTime @db.Timestamptz(3)
   nationality     String
   identityNumber  String
   identityCountry String
-  identityExpired DateTime
+  identityExpired DateTime @db.Timestamptz(3)
+  seatId          Int @unique
 
-  booking         Bookings @relation(fields: [bookingId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  booking         Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  seat            Seats    @relation(fields: [seatId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Payments {
-  id            Int  @id @default(autoincrement())  
-  bookingId     Int  @unique
+  id            Int            @id @default(autoincrement())
+  bookingId     Int            @unique
   paymentMethod String
   amount        Int
-  expiredDate   DateTime
-  status        PaymentsStatus @default(Unpaid)
+  expiredDate   DateTime @db.Timestamptz(3)
+  status        String
 
-  booking       Bookings @relation(fields: [bookingId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  booking       Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Promotions {
-  id            Int  @id @default(autoincrement()) 
+  id            Int      @id @default(autoincrement())
   promotionName String
   image         String
-  startDate     DateTime
-  endDate       DateTime
+  startDate     DateTime @db.Timestamptz(3)
+  endDate       DateTime @db.Timestamptz(3)
   discount      Int
-
-  flights       Flights? // Relasi dengan model Flights
+  flights       Flights?
 }
 
 model SeatClasses {
-  id         Int   @id @default(autoincrement())  
+  id         Int     @id @default(autoincrement())
   name       String
   priceAdult Int
   priceChild Int
   priceBaby  Int
-
-  route     Routes? // Relasi dengan model Routes
+  route      Routes?
 }
 
-enum BookingsStatus {
-  PENDING
-  SUCCESS
-  CANCEL
-}
-
-enum PaymentsStatus {
-  Unpaid
-  Issued
-  Cancelled
-}
