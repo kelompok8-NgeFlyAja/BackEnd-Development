@@ -5,18 +5,24 @@ const searchFlights = async (req, res) => {
     try {
         const { departureAirportId, arrivalAirportId, departureTime, seatClasses, adultPassenger, childPassenger, babyPassenger } = req.query;
         if (isNaN(departureAirportId) || isNaN(arrivalAirportId) || typeof seatClasses !== "string" || isNaN(adultPassenger) || isNaN(childPassenger) || isNaN(babyPassenger)) {
-            return res.status(400).json({ message: "Invalid input data." });
+            const error = new Error("Invalid input data");
+			error.status = 400;
+			throw error;
         }
 
         if (!departureAirportId || !arrivalAirportId || !departureTime || !seatClasses || !adultPassenger || !childPassenger || !babyPassenger) {
-            return res.status(400).json({ message: "Please provide all required fields." });
+            const error = new Error("Please provide all required fields");
+			error.status = 400;
+			throw error;
         }
 
         const totalPassengers = parseInt(adultPassenger) + parseInt(childPassenger) + parseInt(babyPassenger);
 
         const parsedDate = new Date(departureTime);
         if (isNaN(parsedDate)) {
-            return res.status(400).json({ message: "Invalid date format." });
+            const error = new Error("Invalid date format");
+			error.status = 400;
+			throw error;
         }
 
         const flights = await prisma.flights.findMany({
@@ -54,16 +60,17 @@ const searchFlights = async (req, res) => {
         });
 
         if (availableFlights.length === 0) {
-            return res.status(404).json({ message: "No flights available for the given criteria." });
+            const error = new Error("No flights available for the given criteria");
+			error.status = 404;
+			throw error;
         }
 
         return res.status(200).json({
-            message: "Flights found.",
+            message: "Flights found",
             flights: availableFlights,
     });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Error searching for flights.", error: error.message });
+        next(error);
     }
 };
 
