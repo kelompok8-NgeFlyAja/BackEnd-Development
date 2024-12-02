@@ -5,10 +5,12 @@ const addNewAirport = async (req, res, next) => {
     try {
         const { name, city, country, continent, airportCode } = req.body;
         if(typeof(name)!== 'string' || typeof(city)!== 'string' || typeof(country)!== 'string' || typeof(airportCode)!== 'string' || typeof(continent)!== 'string') {
-            return res.status(400).json({message: "Invalid input data"});
+            const error = new Errror("Invalid input data");
+			error.status(400);
+			throw error;
         }
         if (!name || !city || !country || !continent || !airportCode) {
-            return res.status(400).json({ message: 'Please provide all required fields.' });
+            return res.status(400).json({ message: 'Please provide all required fields' });
         }
         const airport = await prisma.airports.create({
             data: {
@@ -20,12 +22,11 @@ const addNewAirport = async (req, res, next) => {
             },
         });
         return res.status(201).json({
-            message: 'Airport added successfully.',
+            message: 'Airport added successfully',
             airport,
         });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error adding airport.', error: error.message });
+        next(error);
     }
 };
 
@@ -35,7 +36,7 @@ const getAllAirports = async (req, res, next) => {
         return res.status(200).json({ airports });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Error fetching airports.', error: error.message });
+        return res.status(500).json({ message: 'Error fetching airports', error: error.message });
     }
 }
 
@@ -43,7 +44,9 @@ const deleteAirport = async (req, res, next) => {
     try {
         const id = Number(req.params.id);
         if (!id) {
-            return res.status(400).json({ message: 'Please provide an ID.' });
+            const error = new Errror("Please provide an ID");
+			error.status(400);
+			throw error;
         }
 
         const airport = await prisma.airports.findUnique({
@@ -51,17 +54,19 @@ const deleteAirport = async (req, res, next) => {
         });
 
         if (!airport) {
-            return res.status(404).json({ message: 'Airport not found.' });
+            const error = new Errror("Airport not found");
+			error.status(404);
+			throw error;
         }
 
         await prisma.airports.delete({
             where: { id },
         });
 
-        return res.status(200).json({ message: 'Airport deleted successfully.', airport });
+        return res.status(200).json({ message: 'Airport deleted successfully', airport });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Error deleting airport.', error: error.message });
+        next(error);
     }
 }
 
@@ -87,12 +92,12 @@ const addMultipleAirports = async (req, res, next) => {
         });
 
         return res.status(201).json({
-            message: 'Airports added successfully.',
+            message: 'Airports added successfully',
             airports: newAirports,
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Error adding airports.', error: error.message });
+        return res.status(500).json({ message: 'Error adding airports', error: error.message });
     }
 }
 
