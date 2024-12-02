@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const midtrans = require("../../config/midtrans");
 const randomGenerator = require("../../utils/randomGenerator");
-const { parseArgs } = require("util");
+const seatPassengerCount = require("../../utils/seatPassengerCount");
 
 const getTicketDetails = async (req, res, next) => {
 	try {
@@ -104,7 +104,13 @@ const getTicketDetails = async (req, res, next) => {
 const createBooking = async (req, res, next) => {
 	try {
 		const passengerData = [];
-		let { bookingTicket, passengerDetail, adultPassenger, childPassenger, babyPassenger } = req.body;
+		let {
+			bookingTicket,
+			passengerDetail,
+			adultPassenger,
+			childPassenger,
+			babyPassenger,
+		} = req.body;
 		const timeZone = "Asia/Jakarta";
 
 		if (!bookingTicket || !passengerDetail) {
@@ -125,7 +131,7 @@ const createBooking = async (req, res, next) => {
 				adultPassenger: adultPassenger,
 				childPassenger: childPassenger,
 				babyPassenger: babyPassenger,
-				status: bookingTicket.status,
+				status: "PENDING",
 				bookerName: bookingTicket.bookerName,
 				bookerEmail: bookingTicket.bookerEmail,
 				bookerPhone: bookingTicket.bookerPhone,
@@ -151,25 +157,16 @@ const createBooking = async (req, res, next) => {
 		}
 
 		const seatClass = seatClassInfo.route.seatClass;
-		console.log(seatClass.priceAdult);
-		console.log(adultCount);
-		
 
-		const totalAdultPrice = seatClass.priceAdult * adultCount;
-		console.log(totalAdultPrice);
-		const totalChildPrice = seatClass.priceChild * childCount;
-		console.log(totalChildPrice);
-		const totalBabyPrice = seatClass.priceBaby * babyCount;
-		console.log(totalBabyPrice);
+		const totalAdultPrice = seatClass.priceAdult * adultPassenger;
+		const totalChildPrice = seatClass.priceChild * childPassenger;
+		const totalBabyPrice = seatClass.priceBaby * babyPassenger;
 		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice;
-		console.log(parseInt(totalPrice));
-		
 
 		await prisma.bookings.update({
 			where: { id: createdBooking.id },
 			data: { totalPrice: totalPrice },
 		});
-
 
 		const planeInfo = await prisma.flights.findUnique({
 			where: { id: bookingTicket.flightId },
@@ -226,7 +223,7 @@ const createBooking = async (req, res, next) => {
 				identityNumber: passengerDetail[i].identityNumber,
 				identityCountry: passengerDetail[i].identityCountry,
 				identityExpired: dateExpired,
-				seatid: selectedSeat.id,
+				seatId: selectedSeat.id,
 			});
 		}
 
@@ -251,6 +248,7 @@ const createPayment = async (req, res, next) => {
 	try {
 		const { bookingId } = req.params;
 		const convertBookingId = parseInt(bookingId);
+		let itemDetails = [];
 
 		if (!bookingId) {
 			const error = new Error("Booking Ticket ID is required");
@@ -260,8 +258,23 @@ const createPayment = async (req, res, next) => {
 
 		const booking = await prisma.bookings.findUnique({
 			where: { id: convertBookingId },
-			include: { passengers: true },
+			include: {
+				passengers: true,
+				flight: {
+					include: {
+						route: {
+							include: {
+								departureAirport: true,
+								arrivalAirport: true,
+								seatClass: true,
+							},
+						},
+					},
+				},
+			},
 		});
+
+		const seatClass = booking.flight.route.seatClass;
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
@@ -269,38 +282,62 @@ const createPayment = async (req, res, next) => {
 			throw error;
 		}
 
-		const changePrice = parseFloat(booking.totalPrice);
-		const passengerPrice = changePrice / booking.passengers.length;
+		if (booking.adultPassenger > 0) {
+			itemDetails.push({
+				id: `adult-passenger`,
+				price: seatClass.priceAdult,
+				quantity: booking.adultPassenger,
+				name: `Adult Passenger`,
+				seat_class: seatClass.name
+			});
+		}
+		if (booking.childPassenger > 0) {
+			itemDetails.push({
+				id: `child-passenger`,
+				price: seatClass.priceChild,
+				quantity: booking.childPassenger,
+				name: `Adult Passenger`
+			});
+		}
+		if (booking.babyPassenger > 0) {
+			itemDetails.push({
+				id: `baby-passenger`,
+				price: seatClass.priceBaby,
+				quantity: booking.babyPassenger,
+				name: `Baby Passenger`
+			});
+		}
+
+		const totalPrice = itemDetails.reduce((sum, item) => {
+			return sum + item.price * item.quantity;
+		}, 0);
 
 		const transactionDetails = {
 			transaction_details: {
-				order_id: booking.id,
+				order_id: booking.bookingCode,
 				order_code: booking.bookingCode,
-				gross_amount: changePrice,
+				gross_amount: totalPrice,
 			},
 			customer_details: {
-				first_name: booking.bookerName,
-				phoneNumber: booking.bookerPhone,
-				email: booking.bookerEmail,
+				first_name: `Booker: ${booking.bookerName}`,
+				phone: booking.bookerPhone,
+				billing_address: {
+					address: `Email: ${booking.bookerEmail}`
+				}
+
 			},
-			item_details: booking.passengers.map((passengers) => ({
-				id: passengers.identityNumber,
-				price: passengerPrice,
-				quantity: 1,
-				name: passengers.fullName,
-			})),
+			item_details: itemDetails,
 		};
 
 		const midtransResponse = await midtrans.createTransaction(
 			transactionDetails
 		);
-		console.log(bookingId);
 
 		const newPayment = await prisma.payments.create({
 			data: {
 				booking: convertBookingId,
 				paymentMethod: "Pending",
-				amount: 0,
+				amount: totalPrice,
 				expiredDate: new Date(Date.now() + 60 * 60 * 1000),
 				status: "Unpaid",
 				booking: {
@@ -360,6 +397,7 @@ const midtransNotification = async (req, res, next) => {
 			case "cancel":
 				newStatusPayment = "Cancelled";
 				newStatusBooking = "CANCEL";
+				break
 			case "expire":
 				newStatusPayment = "Cancelled";
 				newStatusBooking = "CANCEL";
@@ -370,7 +408,7 @@ const midtransNotification = async (req, res, next) => {
 		}
 
 		await prisma.bookings.update({
-			where: { id: parseInt(order_id) },
+			where: { bookingCode: order_id },
 			data: {
 				status: newStatusBooking,
 			},
@@ -389,4 +427,9 @@ const midtransNotification = async (req, res, next) => {
 	}
 };
 
-module.exports = { createBooking, createPayment, midtransNotification, getTicketDetails };
+module.exports = {
+	createBooking,
+	createPayment,
+	midtransNotification,
+	getTicketDetails,
+};
