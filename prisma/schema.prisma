@@ -50,6 +50,7 @@ model Planes {
   totalSeat    Int
   planeCode    String
   description  String
+  airline      String
   baggage      Int
   cabinBaggage Int
   flights      Flights?

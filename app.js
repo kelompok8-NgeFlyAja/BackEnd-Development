@@ -14,6 +14,7 @@ const transactionRoute = require("./src/routes/user/paymentsRoute");
 const flightRoute = require('./src/routes/admin/flightRoute')
 const filterFlight = require("./src/routes/user/filterRoute");
 const search = require('./src/routes/user/searchRoute')
+const flightRouteUser = require('./src/routes/user/flightRoute')
 
 app.use(search)
 app.use(express.json());
@@ -26,6 +27,7 @@ app.use(flightRoutesRoute);
 app.use(promotionRoute);
 app.use(transactionRoute);
 app.use(filterFlight);
+app.use(flightRouteUser)
 app.use(errorHandler);
 
 app.listen(PORT, () => {
