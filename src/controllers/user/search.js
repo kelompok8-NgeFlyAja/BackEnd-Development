@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const searchFlights = async (req, res) => {
+const searchFlights = async (req, res, next) => {
     try {
         const { departureAirportId, arrivalAirportId, departureTime, seatClasses, adultPassenger, childPassenger, babyPassenger } = req.query;
         if (isNaN(departureAirportId) || isNaN(arrivalAirportId) || typeof seatClasses !== "string" || isNaN(adultPassenger) || isNaN(childPassenger) || isNaN(babyPassenger)) {

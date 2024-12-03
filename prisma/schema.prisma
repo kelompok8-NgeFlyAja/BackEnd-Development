@@ -58,13 +58,12 @@ model Planes {
 }
 
 model Seats {
-  id          Int     @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   planeId     Int
   seatNumber  String
   isAvailable Boolean
-
-  plane       Planes  @relation(fields: [planeId], references: [id],onUpdate: Cascade, onDelete: Cascade)
   passengers  Passengers?
+  plane       Planes      @relation(fields: [planeId], references: [id], onDelete: Cascade)
 }
 
 model Users {
@@ -78,24 +77,23 @@ model Users {
 }
 
 model Bookings {
-
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  flightId    Int
-  bookingCode String
-  bookingDate DateTime  @db.Timestamptz(3)
-  adultPassenger Int    @default(0)
-  childPassenger Int    @default(0)
-  babyPassenger  Int    @default(0)
-  status      String
-  bookerName  String
-  bookerEmail String
-  bookerPhone String
-  totalPrice  Int
-  flight      Flights        @relation(fields: [flightId], references: [id], onDelete: Cascade)
-  user        Users          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  passengers  Passengers[]
-  payments    Payments?
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  flightId       Int
+  bookingCode    String
+  bookingDate    DateTime     @db.Timestamptz(3)
+  bookerName     String
+  bookerEmail    String
+  bookerPhone    String
+  totalPrice     Int
+  adultPassenger Int          @default(0)
+  babyPassenger  Int          @default(0)
+  childPassenger Int          @default(0)
+  status         String
+  flight         Flights      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user           Users        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passengers     Passengers[]
+  payments       Payments?
 }
 
 model Passengers {
@@ -109,21 +107,19 @@ model Passengers {
   identityNumber  String
   identityCountry String
   identityExpired DateTime @db.Timestamptz(3)
-  seatId          Int @unique
-
-  booking         Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
-  seat            Seats    @relation(fields: [seatId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  seatId          Int      @unique
+  booking         Bookings @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seat            Seats    @relation(fields: [seatId], references: [id], onDelete: Cascade)
 }
 
 model Payments {
-  id            Int            @id @default(autoincrement())
-  bookingId     Int            @unique
+  id            Int      @id @default(autoincrement())
+  bookingId     Int      @unique
   paymentMethod String
   amount        Int
   expiredDate   DateTime @db.Timestamptz(3)
   status        String
-
-  booking       Bookings @relation(fields: [bookingId], references: [id],onUpdate: Cascade, onDelete: Cascade)
+  booking       Bookings @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 model Promotions {
@@ -144,4 +140,3 @@ model SeatClasses {
   priceBaby  Int
   route      Routes?
 }
-

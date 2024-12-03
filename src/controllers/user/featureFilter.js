@@ -19,10 +19,13 @@ const getFilteredFlights = async (req, res, next) => {
 
     const {
       page = 1,
-      pageSize = 10,
+      limit = 10,
       sortBy = "price",
       order = "asc",
-    } = req.body;
+    } = req.query;
+
+    const parsePage = parseInt(page)
+    const parseLimit = parseInt(limit)
 
     // Validasi input
     const validSortBy = ["price", "duration", "departureTime", "arrivalTime"];
@@ -31,7 +34,7 @@ const getFilteredFlights = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid sortBy or order value" });
     }
 
-    const skip = (page - 1) * pageSize;
+    const skip = (parsePage - 1) * parseLimit;
 
     // Tentukan field untuk sorting
     const sortFieldMap = {
@@ -47,7 +50,7 @@ const getFilteredFlights = async (req, res, next) => {
       prisma.flights.count(),
       prisma.flights.findMany({
         skip,
-        take: pageSize,
+        take: parseLimit,
         ...(sortField && { orderBy: sortField }),
         include: {
           route: {
@@ -84,10 +87,10 @@ const getFilteredFlights = async (req, res, next) => {
     }
 
     return res.status(200).json({
-      page,
-      pageSize,
+      page: parsePage,
+      limit: parseLimit,
       totalCount,
-      totalPages: Math.ceil(totalCount / pageSize),
+      totalPages: Math.ceil(totalCount / parseLimit),
       data: sortedFlights,
     });
   } catch (error) {
