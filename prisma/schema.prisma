@@ -73,6 +73,7 @@ model Users {
   phoneNumber String
   password    String
   isActivated Boolean
+  role        String     @default("user")
   bookings    Bookings[]
 }
 
@@ -85,6 +86,7 @@ model Bookings {
   bookerName     String
   bookerEmail    String
   bookerPhone    String
+  tax            Int          @default(0)
   totalPrice     Int
   adultPassenger Int          @default(0)
   babyPassenger  Int          @default(0)
