@@ -314,7 +314,7 @@ const createPayment = async (req, res, next) => {
 
 		const transactionDetails = {
 			transaction_details: {
-				order_id: booking.bookingCode,
+				order_id: booking.id,
 				order_code: booking.bookingCode,
 				gross_amount: totalPrice,
 			},
@@ -353,6 +353,7 @@ const createPayment = async (req, res, next) => {
 			});
 		}
 	} catch (error) {
+		console.log(error);
 		next(error);
 	}
 };
@@ -408,7 +409,7 @@ const midtransNotification = async (req, res, next) => {
 		}
 
 		await prisma.bookings.update({
-			where: { bookingCode: order_id },
+			where: { id: parseInt(order_id) },
 			data: {
 				status: newStatusBooking,
 			},
