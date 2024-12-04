@@ -14,6 +14,7 @@ const randomGenerator = async () => {
 			const randomIndex = Math.floor(Math.random() * characters.length);
 			bookingCode += characters[randomIndex];
 		}
+		
 		const isCodeAvailable = await prisma.bookings.findFirst({
             where: { bookingCode: bookingCode }
         });

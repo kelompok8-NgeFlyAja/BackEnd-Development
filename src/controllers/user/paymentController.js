@@ -1,13 +1,23 @@
 const crypto = require("crypto");
-const moment = require('moment-timezone');
+const moment = require("moment-timezone");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const midtrans = require("../../config/midtrans");
 const randomGenerator = require("../../utils/randomGenerator");
+const seatPassengerCount = require("../../utils/seatPassengerCount");
 
-const getFlightDetails = async (req, res, next) => {
+const getTicketDetails = async (req, res, next) => {
 	try {
-		const flightDetails = await prisma.flights.findMany({
+		const { flightId } = req.params;
+
+		if (!flightId) {
+			const error = new Error("Flight ID is required");
+			error.status = 400;
+			throw error;
+		}
+
+		const flightDetails = await prisma.flights.findUnique({
+			where: { id: parseInt(flightId) },
 			select: {
 				departureTime: true,
 				arrivalTime: true,
@@ -45,39 +55,48 @@ const getFlightDetails = async (req, res, next) => {
 			},
 		});
 
-		const timeZone = 'Asia/Jakarta';
-		const formattedFlightDetails = flightDetails.map((flight) => {
-			const departureTimeConvert = moment.utc(flight.departureTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
-            const arrivalTimeConvert = moment.utc(flight.arrivalTime).tz(timeZone).format('YYYY-MM-DD HH:mm:ss');
+		if (!flightDetails) {
+			const error = new Error("Flight not found");
+			error.status = 400;
+			throw error;
+		}
 
-			const convertDepartureTimeToDate = new Date(departureTimeConvert);
-			
-            const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+		const timeZone = "Asia/Jakarta";
+		const departureTimeConvert = moment
+			.utc(flightDetails.departureTime)
+			.tz(timeZone)
+			.format("YYYY-MM-DD HH:mm:ss");
+		const arrivalTimeConvert = moment
+			.utc(flightDetails.arrivalTime)
+			.tz(timeZone)
+			.format("YYYY-MM-DD HH:mm:ss");
 
-			return {
+		const convertDepartureTimeToDate = new Date(departureTimeConvert);
+		const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+
+		return res.status(200).json({
+			status: "Success",
+			message: "Flight details retrieved successfully",
+			data: {
+				flightId: flightDetails.id,
 				departureTime: convertDepartureTimeToDate.toLocaleTimeString(),
 				departureDate: convertDepartureTimeToDate.toLocaleDateString(),
-				departureAirportName: flight.route.departureAirport.name,
-				planeName: flight.plane.planeName,
-				seatClassName: flight.route.seatClass.name,
-				planeCode: flight.plane.planeCode,
-				description: flight.plane.description,
-				baggage: flight.plane.baggage,
-				cabinBaggage: flight.plane.cabinBaggage,
+				departureAirportName: flightDetails.route.departureAirport.name,
+				planeName: flightDetails.plane.planeName,
+				seatClassName: flightDetails.route.seatClass.name,
+				planeCode: flightDetails.plane.planeCode,
+				description: flightDetails.plane.description,
+				baggage: flightDetails.plane.baggage,
+				cabinBaggage: flightDetails.plane.cabinBaggage,
 				arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
 				arrivalDate: convertArrivalTimeToDate.toLocaleDateString(),
-				arrivalAirportName: flight.route.arrivalAirport.name,
-				priceAdult: flight.route.seatClass.priceAdult,
-				priceChild: flight.route.seatClass.priceChild,
-				priceBaby: flight.route.seatClass.priceBaby,
-			};
+				arrivalAirportName: flightDetails.route.arrivalAirport.name,
+				priceAdult: flightDetails.route.seatClass.priceAdult,
+				priceChild: flightDetails.route.seatClass.priceChild,
+				priceBaby: flightDetails.route.seatClass.priceBaby,
+			},
 		});
-
-		console.log(formattedFlightDetails, '-> From FormattedFlight');
-
-		return formattedFlightDetails;
 	} catch (error) {
-		console.error("Error fetching flight details:", error);
 		next(error);
 	}
 };
@@ -85,8 +104,14 @@ const getFlightDetails = async (req, res, next) => {
 const createBooking = async (req, res, next) => {
 	try {
 		const passengerData = [];
-		let { bookingTicket, passengerDetail } = req.body;
-		const timeZone = 'Asia/Jakarta';
+		let {
+			bookingTicket,
+			passengerDetail,
+			adultPassenger,
+			childPassenger,
+			babyPassenger,
+		} = req.body;
+		const timeZone = "Asia/Jakarta";
 
 		if (!bookingTicket || !passengerDetail) {
 			const error = new Errror("Make Sure To Fill All Forms!");
@@ -103,17 +128,90 @@ const createBooking = async (req, res, next) => {
 				flightId: bookingTicket.flightId,
 				bookingCode: randomCode,
 				bookingDate: BookingDateUtc7,
-				status: bookingTicket.status,
+				adultPassenger: adultPassenger,
+				childPassenger: childPassenger,
+				babyPassenger: babyPassenger,
+				status: "PENDING",
 				bookerName: bookingTicket.bookerName,
 				bookerEmail: bookingTicket.bookerEmail,
 				bookerPhone: bookingTicket.bookerPhone,
-				totalPrice: bookingTicket.totalPrice,
+				totalPrice: 0,
 			},
 		});
 
+		const seatClassInfo = await prisma.flights.findUnique({
+			where: { id: bookingTicket.flightId },
+			include: {
+				route: {
+					include: {
+						seatClass: true,
+					},
+				},
+			},
+		});
+
+		if (!seatClassInfo) {
+			const error = new Error("Seat Class Not Found");
+			error.status = 400;
+			throw error;
+		}
+
+		const seatClass = seatClassInfo.route.seatClass;
+
+		const totalAdultPrice = seatClass.priceAdult * adultPassenger;
+		const totalChildPrice = seatClass.priceChild * childPassenger;
+		const totalBabyPrice = seatClass.priceBaby * babyPassenger;
+		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice;
+
+		await prisma.bookings.update({
+			where: { id: createdBooking.id },
+			data: { totalPrice: totalPrice },
+		});
+
+		const planeInfo = await prisma.flights.findUnique({
+			where: { id: bookingTicket.flightId },
+			select: { planeId: true },
+		});
+
+		if (!planeInfo) {
+			const error = new Error("Plane Not Found");
+			error.status = 400;
+			throw error;
+		}
+
+		const planeId = planeInfo.planeId;
+
 		for (let i = 0; i < passengerDetail.length; i++) {
-			const dateBirth = moment.utc(`${passengerDetail[i].birthDate}T00:00:00Z`).tz(timeZone).format();
-			const dateExpired = moment.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`).tz(timeZone).format();
+			const dateBirth = moment
+				.utc(`${passengerDetail[i].birthDate}T00:00:00Z`)
+				.tz(timeZone)
+				.format();
+			const dateExpired = moment
+				.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`)
+				.tz(timeZone)
+				.format();
+
+			const selectedSeatName = passengerDetail[i].seatName;
+
+			const selectedSeat = await prisma.seats.findFirst({
+				where: {
+					seatNumber: selectedSeatName,
+					planeId: planeId,
+				},
+			});
+
+			if (!selectedSeat) {
+				throw new Error(`No available seat for passenger ${i + 1}`);
+			}
+
+			if (!selectedSeat.isAvailable) {
+				throw new Error(`Seat ${selectedSeatName} is already taken.`);
+			}
+
+			await prisma.seats.update({
+				where: { id: selectedSeat.id },
+				data: { isAvailable: false },
+			});
 
 			passengerData.push({
 				bookingId: createdBooking.id,
@@ -125,11 +223,12 @@ const createBooking = async (req, res, next) => {
 				identityNumber: passengerDetail[i].identityNumber,
 				identityCountry: passengerDetail[i].identityCountry,
 				identityExpired: dateExpired,
+				seatId: selectedSeat.id,
 			});
 		}
 
 		const createdPassengers = await prisma.passengers.createMany({
-			data: passengerData
+			data: passengerData,
 		});
 
 		if (createdBooking && createdPassengers) {
@@ -149,6 +248,7 @@ const createPayment = async (req, res, next) => {
 	try {
 		const { bookingId } = req.params;
 		const convertBookingId = parseInt(bookingId);
+		let itemDetails = [];
 
 		if (!bookingId) {
 			const error = new Error("Booking Ticket ID is required");
@@ -158,47 +258,86 @@ const createPayment = async (req, res, next) => {
 
 		const booking = await prisma.bookings.findUnique({
 			where: { id: convertBookingId },
-			include: { passengers: true },
+			include: {
+				passengers: true,
+				flight: {
+					include: {
+						route: {
+							include: {
+								departureAirport: true,
+								arrivalAirport: true,
+								seatClass: true,
+							},
+						},
+					},
+				},
+			},
 		});
+
+		const seatClass = booking.flight.route.seatClass;
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
-			error.status = 404;
+			error.status = 400;
 			throw error;
 		}
 
-		const changePrice = parseFloat(booking.totalPrice);
-		const passengerPrice = changePrice / booking.passengers.length;
+		if (booking.adultPassenger > 0) {
+			itemDetails.push({
+				id: `adult-passenger`,
+				price: seatClass.priceAdult,
+				quantity: booking.adultPassenger,
+				name: `Adult Passenger`,
+				seat_class: seatClass.name
+			});
+		}
+		if (booking.childPassenger > 0) {
+			itemDetails.push({
+				id: `child-passenger`,
+				price: seatClass.priceChild,
+				quantity: booking.childPassenger,
+				name: `Adult Passenger`
+			});
+		}
+		if (booking.babyPassenger > 0) {
+			itemDetails.push({
+				id: `baby-passenger`,
+				price: seatClass.priceBaby,
+				quantity: booking.babyPassenger,
+				name: `Baby Passenger`
+			});
+		}
+
+		const totalPrice = itemDetails.reduce((sum, item) => {
+			return sum + item.price * item.quantity;
+		}, 0);
 
 		const transactionDetails = {
 			transaction_details: {
 				order_id: booking.id,
 				order_code: booking.bookingCode,
-				gross_amount: changePrice,
+				gross_amount: totalPrice,
 			},
 			customer_details: {
-				first_name: booking.bookerName,
-				phoneNumber: booking.bookerPhone,
-				email: booking.bookerEmail,
+				first_name: `Booker: ${booking.bookerName}`,
+				phone: booking.bookerPhone,
+				billing_address: {
+					address: `Email: ${booking.bookerEmail}`
+				}
+
 			},
-			item_details: booking.passengers.map((passengers) => ({
-				id: passengers.identityNumber,
-				price: passengerPrice,
-				quantity: 1,
-				name: passengers.fullName,
-			})),
+			item_details: itemDetails,
 		};
 
 		const midtransResponse = await midtrans.createTransaction(
 			transactionDetails
 		);
-		console.log(bookingId);
 
 		const newPayment = await prisma.payments.create({
 			data: {
 				booking: convertBookingId,
 				paymentMethod: "Pending",
-				amount: 0,
+				amount: totalPrice,
 				expiredDate: new Date(Date.now() + 60 * 60 * 1000),
 				status: "Unpaid",
 				booking: {
@@ -214,6 +353,7 @@ const createPayment = async (req, res, next) => {
 			});
 		}
 	} catch (error) {
+		console.log(error);
 		next(error);
 	}
 };
@@ -258,6 +398,7 @@ const midtransNotification = async (req, res, next) => {
 			case "cancel":
 				newStatusPayment = "Cancelled";
 				newStatusBooking = "CANCEL";
+				break
 			case "expire":
 				newStatusPayment = "Cancelled";
 				newStatusBooking = "CANCEL";
@@ -287,4 +428,9 @@ const midtransNotification = async (req, res, next) => {
 	}
 };
 
-module.exports = { createBooking, createPayment, midtransNotification };
+module.exports = {
+	createBooking,
+	createPayment,
+	midtransNotification,
+	getTicketDetails,
+};
