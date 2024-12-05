@@ -16,6 +16,8 @@ const filterFlight = require("./src/routes/user/filterRoute");
 const search = require('./src/routes/user/searchRoute')
 const flightRouteUser = require('./src/routes/user/flightRoute')
 
+console.log('Server coba key : ', process.env.MIDTRANS_SERVER_KEY)
+
 app.use(search)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
