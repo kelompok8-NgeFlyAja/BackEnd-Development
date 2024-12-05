@@ -336,6 +336,15 @@ async function main() {
                 baggage: 5,
                 cabinBaggage: 15,
                 description: "In Flight Entertainment",
+            },
+            {
+                planeName: 'Boeing 787-9',
+                totalSeat: 36,
+                planeCode: 'B-787-9',
+                airline: 'Air Asia',
+                baggage: 2,
+                cabinBaggage: 8,
+                description: "In Flight Entertainment",
             }
         ];
 
@@ -356,257 +365,246 @@ async function main() {
         }
 
 
+        // Economy - Jakarta to Bangkok
         await prisma.seatClasses.create({
-            data:
-            {
+            data: {
                 name: 'Economy',
-                priceAdult: 4950000,
-                priceChild: 4500000,
+                priceAdult: 5500000,
+                priceChild: 4800000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 1, //jakarta
-                        arrivalAirportId: 2,//bangkok
-                    },
-                },
-            },
-            include: {
-                route: true,
-            },
+                        departureAirportId: 1, // Jakarta
+                        arrivalAirportId: 2,  // Bangkok
+                    }
+                }
+            }
+        });
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Economy',
+                priceAdult: 5400000,
+                priceChild: 4600000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 2, // Bangkok
+                        arrivalAirportId: 1,  // Jakarta
+                    }
+                }
+            }
         });
 
+        // Business - Jakarta to Melbourne
         await prisma.seatClasses.create({
-            data:
-            {
+            data: {
                 name: 'Business',
-                priceAdult: 9950000,
-                priceChild: 9500000,
+                priceAdult: 10200000,
+                priceChild: 9800000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 1,//jakarta
-                        arrivalAirportId: 4,//melbourne
-                    },
-                },
-            },
-            include: {
-                route: true,
-            },
+                        departureAirportId: 1, // Jakarta
+                        arrivalAirportId: 4,  // Melbourne
+                    }
+                }
+            }
+        });
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Business',
+                priceAdult: 10400000,
+                priceChild: 9600000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 4, // Melbourne
+                        arrivalAirportId: 1,  // Jakarta
+                    }
+                }
+            }
         });
 
+        // First Class - Jakarta to Paris
         await prisma.seatClasses.create({
-            data:
-            {
+            data: {
                 name: 'First Class',
-                priceAdult: 14950000,
+                priceAdult: 15300000,
                 priceChild: 14500000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 1,//jakarta
-                        arrivalAirportId: 6,//paris
-                    },
-                },
-            },
-            include: {
-                route: true,
-            },
+                        departureAirportId: 1, // Jakarta
+                        arrivalAirportId: 6,  // Paris
+                    }
+                }
+            }
+        });
+        await prisma.seatClasses.create({
+            data: {
+                name: 'First Class',
+                priceAdult: 15000000,
+                priceChild: 14700000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 6, // Paris
+                        arrivalAirportId: 1,  // Jakarta
+                    }
+                }
+            }
         });
 
+        // Economy - Bangkok to Sydney
         await prisma.seatClasses.create({
             data: {
                 name: 'Economy',
-                priceAdult: 4950000,
+                priceAdult: 4900000,
+                priceChild: 4700000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 2, // Bangkok
+                        arrivalAirportId: 3,  // Sydney
+                    }
+                }
+            }
+        });
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Economy',
+                priceAdult: 5000000,
                 priceChild: 4500000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 2,//bangkok
-                        arrivalAirportId: 3,//sydney
-                    },
-                },
+                        departureAirportId: 3, // Sydney
+                        arrivalAirportId: 2,  // Bangkok
+                    }
+                }
             }
         });
 
+        // Business - Bangkok to Cairo
         await prisma.seatClasses.create({
             data: {
                 name: 'Business',
-                priceAdult: 9950000,
-                priceChild: 9500000,
+                priceAdult: 10900000,
+                priceChild: 10400000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 2,//bangkok
-                        arrivalAirportId: 5,//cairo
-                    },
-                },
-            }
-        });
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'First Class',
-                priceAdult: 14950000,
-                priceChild: 14500000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 4,//melbourne
-                        arrivalAirportId: 9,//los angeles
-                    },
-                },
-            }
-        });
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'Premium Economy',
-                priceAdult: 6450000,
-                priceChild: 6000000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 4,//melbourne
-                        arrivalAirportId: 10,//dubai
-                    },
-                },
-            }
-        })
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'Economy',
-                priceAdult: 6000000,
-                priceChild: 5500000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 5,//cairo
-                        arrivalAirportId: 7,//london
+                        departureAirportId: 2, // Bangkok
+                        arrivalAirportId: 5,  // Cairo
                     }
                 }
             }
-        })
-
+        });
         await prisma.seatClasses.create({
             data: {
                 name: 'Business',
-                priceAdult: 11000000,
-                priceChild: 10500000,
+                priceAdult: 11100000,
+                priceChild: 10300000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 5,//cairo
-                        arrivalAirportId: 8,//new york
+                        departureAirportId: 5, // Cairo
+                        arrivalAirportId: 2,  // Bangkok
                     }
                 }
             }
         });
 
-        await prisma.seatClasses.create({
-            data: {
-                name: 'First Class',
-                priceAdult: 16500000,
-                priceChild: 16000000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 6,//paris
-                        arrivalAirportId: 8,//new york
-                    }
-                }
-            }
-        });
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'Economy',
-                priceAdult: 6500000,
-                priceChild: 6000000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 7,//london
-                        arrivalAirportId: 8,//new york
-                    }
-                }
-            }
-        });
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'Business',
-                priceAdult: 11500000,
-                priceChild: 11000000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 7,//london
-                        arrivalAirportId: 9,//washington
-                    }
-                }
-            }
-        });
-
+        // First Class - Melbourne to Washington
         await prisma.seatClasses.create({
             data: {
                 name: 'First Class',
                 priceAdult: 17000000,
-                priceChild: 16500000,
+                priceChild: 16000000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 8,//new york
-                        arrivalAirportId: 9,//washington
+                        departureAirportId: 4, // Melbourne
+                        arrivalAirportId: 9,  // Washington
                     }
                 }
             }
         });
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'Economy',
-                priceAdult: 7000000,
-                priceChild: 6500000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 9,//washington
-                        arrivalAirportId: 10,//dubai
-                    }
-                }
-            }
-        });
-
-        await prisma.seatClasses.create({
-            data: {
-                name: 'Business',
-                priceAdult: 12000000,
-                priceChild: 11500000,
-                priceBaby: 0,
-                route: {
-                    create: {
-                        departureAirportId: 9,//washington
-                        arrivalAirportId: 11,//singapore
-                    }
-                }
-            },
-        });
-
         await prisma.seatClasses.create({
             data: {
                 name: 'First Class',
-                priceAdult: 17500000,
-                priceChild: 17000000,
+                priceAdult: 16800000,
+                priceChild: 16200000,
                 priceBaby: 0,
                 route: {
                     create: {
-                        departureAirportId: 10,//dubai
-                        arrivalAirportId: 11,//singapore
+                        departureAirportId: 9, // Washington
+                        arrivalAirportId: 4,  // Melbourne
                     }
                 }
             }
         });
+
+        // Premium Economy - Sydney to Los Angeles
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Premium Economy',
+                priceAdult: 6600000,
+                priceChild: 6200000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 3, // Sydney
+                        arrivalAirportId: 10, // Los Angeles
+                    }
+                }
+            }
+        });
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Premium Economy',
+                priceAdult: 6700000,
+                priceChild: 6300000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 10, // Los Angeles
+                        arrivalAirportId: 3,  // Sydney
+                    }
+                }
+            }
+        });
+
+        // Economy - Cairo to London
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Economy',
+                priceAdult: 5900000,
+                priceChild: 5500000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 5, // Cairo
+                        arrivalAirportId: 7,  // London
+                    }
+                }
+            }
+        });
+        await prisma.seatClasses.create({
+            data: {
+                name: 'Economy',
+                priceAdult: 6000000,
+                priceChild: 5700000,
+                priceBaby: 0,
+                route: {
+                    create: {
+                        departureAirportId: 7, // London
+                        arrivalAirportId: 5,  // Cairo
+                    }
+                }
+            }
+        });
+
 
         const promoData = [
             {
@@ -748,12 +746,12 @@ async function main() {
                     flightCode: 'Flight-001',
                 },
                 {
-                    departureTime: new Date('2024-12-01T09:00:00.000'),
-                    arrivalTime: new Date('2024-12-01T14:45:00.000'),
+                    departureTime: new Date('2024-12-03T08:00:00.000'),
+                    arrivalTime: new Date('2024-12-03T11:30:00.000'),
                     promotionId: 2,
                     planeId: 2,
                     routeId: 2,
-                    duration: generateDuration('2024-12-01T09:00:00.000', '2024-12-01T14:45:00.000'),
+                    duration: generateDuration('2024-12-03T08:00:00.000', '2024-12-03T11:30:00.000'),
                     flightCode: 'Flight-002',
                 },
                 {
@@ -766,112 +764,121 @@ async function main() {
                     flightCode: 'Flight-003',
                 },
                 {
-                    departureTime: new Date('2024-12-02T08:25:00.000'),
-                    arrivalTime: new Date('2024-12-02T11:40:00.000'),
+                    departureTime: new Date('2024-12-04T07:15:00.000'),
+                    arrivalTime: new Date('2024-12-04T23:55:00.000'),
                     promotionId: 4,
                     planeId: 4,
                     routeId: 4,
-                    duration: generateDuration('2024-12-02T08:25:00.000', '2024-12-02T11:40:00.000'),
+                    duration: generateDuration('2024-12-04T07:15:00.000', '2024-12-04T23:55:00.000'),
                     flightCode: 'Flight-004',
+                },
+                {
+                    departureTime: new Date('2024-12-03T08:25:00.000'),
+                    arrivalTime: new Date('2024-12-03T11:40:00.000'),
+                    promotionId: 5,
+                    planeId: 5,
+                    routeId: 5,
+                    duration: generateDuration('2024-12-03T08:25:00.000', '2024-12-03T11:40:00.000'),
+                    flightCode: 'Flight-005',
+                },
+                {
+                    departureTime: new Date('2024-12-05T08:25:00.000'),
+                    arrivalTime: new Date('2024-12-05T11:40:00.000'),
+                    promotionId: 6,
+                    planeId: 6,
+                    routeId: 6,
+                    duration: generateDuration('2024-12-05T08:25:00.000', '2024-12-05T11:40:00.000'),
+                    flightCode: 'Flight-006',
                 },
                 {
                     departureTime: new Date('2024-12-03T08:40:00.000'),
                     arrivalTime: new Date('2024-12-03T12:10:00.000'),
-                    promotionId: 5,
-                    planeId: 5,
-                    routeId: 5,
+                    promotionId: 7,
+                    planeId: 7,
+                    routeId: 7,
                     duration: generateDuration('2024-12-03T08:40:00.000', '2024-12-03T12:10:00.000'),
-                    flightCode: 'Flight-005',
+                    flightCode: 'Flight-007',
                 },
                 {
-                    departureTime: new Date('2024-12-03T09:15:00.000'),
-                    arrivalTime: new Date('2024-12-03T15:10:00.000'),
-                    promotionId: 6,
-                    planeId: 6,
-                    routeId: 6,
-                    duration: generateDuration('2024-12-03T09:15:00.000', '2024-12-03T15:10:00.000'),
-                    flightCode: 'Flight-006',
+                    departureTime: new Date('2024-12-05T08:40:00.000'),
+                    arrivalTime: new Date('2024-12-05T12:10:00.000'),
+                    promotionId: 8,
+                    planeId: 8,
+                    routeId: 8,
+                    duration: generateDuration('2024-12-05T08:40:00.000', '2024-12-05T12:10:00.000'),
+                    flightCode: 'Flight-008',
                 },
                 {
                     departureTime: new Date('2024-12-04T06:50:00.000'),
                     arrivalTime: new Date('2024-12-05T00:25:00.000'),
-                    promotionId: 7,
-                    planeId: 7,
-                    routeId: 7,
+                    promotionId: 9,
+                    planeId: 9,
+                    routeId: 9,
                     duration: generateDuration('2024-12-04T06:50:00.000', '2024-12-05T00:25:00.000'),
-                    flightCode: 'Flight-007',
+                    flightCode: 'Flight-009',
+                },
+                {
+                    departureTime: new Date('2024-12-06T06:50:00.000'),
+                    arrivalTime: new Date('2024-12-07T00:25:00.000'),
+                    promotionId: 10,
+                    planeId: 10,
+                    routeId: 10,
+                    duration: generateDuration('2024-12-06T06:50:00.000', '2024-12-07T00:25:00.000'),
+                    flightCode: 'Flight-010',
                 },
                 {
                     departureTime: new Date('2024-12-04T08:05:00.000'),
                     arrivalTime: new Date('2024-12-04T11:20:00.000'),
-                    promotionId: 8,
-                    planeId: 8,
-                    routeId: 8,
+                    promotionId: 11,
+                    planeId: 11,
+                    routeId: 11,
                     duration: generateDuration('2024-12-04T08:05:00.000', '2024-12-04T11:20:00.000'),
-                    flightCode: 'Flight-008',
+                    flightCode: 'Flight-011',
+                },
+                {
+                    departureTime: new Date('2024-12-06T08:05:00.000'),
+                    arrivalTime: new Date('2024-12-06T11:20:00.000'),
+                    promotionId: 12,
+                    planeId: 12,
+                    routeId: 12,
+                    duration: generateDuration('2024-12-06T08:05:00.000', '2024-12-06T11:20:00.000'),
+                    flightCode: 'Flight-012',
                 },
                 {
                     departureTime: new Date('2024-12-05T07:50:00.000'),
                     arrivalTime: new Date('2024-12-05T12:15:00.000'),
-                    promotionId: 9,
-                    planeId: 9,
-                    routeId: 9,
+                    promotionId: 13,
+                    planeId: 13,
+                    routeId: 13,
                     duration: generateDuration('2024-12-05T07:50:00.000', '2024-12-05T12:15:00.000'),
-                    flightCode: 'Flight-009',
+                    flightCode: 'Flight-013',
                 },
                 {
-                    departureTime: new Date('2024-12-05T09:10:00.000'),
-                    arrivalTime: new Date('2024-12-05T15:30:00.000'),
-                    promotionId: 10,
-                    planeId: 10,
-                    routeId: 10,
-                    duration: generateDuration('2024-12-05T09:10:00.000', '2024-12-05T15:30:00.000'),
-                    flightCode: 'Flight-010',
+                    departureTime: new Date('2024-12-07T07:50:00.000'),
+                    arrivalTime: new Date('2024-12-07T12:15:00.000'),
+                    promotionId: 14,
+                    planeId: 14,
+                    routeId: 14,
+                    duration: generateDuration('2024-12-07T07:50:00.000', '2024-12-07T12:15:00.000'),
+                    flightCode: 'Flight-014',
                 },
                 {
                     departureTime: new Date('2024-12-06T06:45:00.000'),
                     arrivalTime: new Date('2024-12-07T00:30:00.000'),
-                    promotionId: 11,
-                    planeId: 11,
-                    routeId: 11,
-                    duration: generateDuration('2024-12-06T06:45:00.000', '2024-12-07T00:30:00.000'),
-                    flightCode: 'Flight-011',
-                },
-                {
-                    departureTime: new Date('2024-12-06T08:10:00.000'),
-                    arrivalTime: new Date('2024-12-06T11:25:00.000'),
-                    promotionId: 12,
-                    planeId: 12,
-                    routeId: 12,
-                    duration: generateDuration('2024-12-06T08:10:00.000', '2024-12-06T11:25:00.000'),
-                    flightCode: 'Flight-012',
-                },
-                {
-                    departureTime: new Date('2024-12-07T08:30:00.000'),
-                    arrivalTime: new Date('2024-12-07T11:40:00.000'),
-                    promotionId: 13,
-                    planeId: 13,
-                    routeId: 13,
-                    duration: generateDuration('2024-12-07T08:30:00.000', '2024-12-07T11:40:00.000'),
-                    flightCode: 'Flight-013',
-                },
-                {
-                    departureTime: new Date('2024-12-07T09:20:00.000'),
-                    arrivalTime: new Date('2024-12-07T15:35:00.000'),
-                    promotionId: 14,
-                    planeId: 14,
-                    routeId: 14,
-                    duration: generateDuration('2024-12-07T09:20:00.000', '2024-12-07T15:35:00.000'),
-                    flightCode: 'Flight-014',
-                },
-                {
-                    departureTime: new Date('2024-12-08T07:15:00.000'),
-                    arrivalTime: new Date('2024-12-08T23:50:00.000'),
                     promotionId: 15,
                     planeId: 15,
                     routeId: 15,
-                    duration: generateDuration('2024-12-08T07:15:00.000', '2024-12-08T23:50:00.000'),
+                    duration: generateDuration('2024-12-06T06:45:00.000', '2024-12-07T00:30:00.000'),
                     flightCode: 'Flight-015',
+                },
+                {
+                    departureTime: new Date('2024-12-08T06:45:00.000'),
+                    arrivalTime: new Date('2024-12-09T00:30:00.000'),
+                    promotionId: 16,
+                    planeId: 16,
+                    routeId: 16,
+                    duration: generateDuration('2024-12-08T06:45:00.000', '2024-12-09T00:30:00.000'),
+                    flightCode: 'Flight-016',
                 },
             ]
         });
