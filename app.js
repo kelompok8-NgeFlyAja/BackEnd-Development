@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 const express = require("express");
+const cookieParser = require('cookie-parser')
 const errorHandler = require("./src/middlewares/errorHandler");
 const app = express();
 const PORT = 3000;
@@ -16,22 +17,25 @@ const filterFlight = require("./src/routes/user/filterRoute");
 const search = require("./src/routes/user/searchRoute");
 const flightRouteUser = require("./src/routes/user/flightRoute");
 const registerRoute = require("./src/routes/user/registerRoute");
-
-console.log("Server coba key : ", process.env.MIDTRANS_SERVER_KEY);
+const loginRoute = require("./src/routes/user/loginRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+//Admin Routes
 app.use(planeRoute);
 app.use(airportRoute);
 app.use(classRoute);
 app.use(flightRoute);
 app.use(flightRoutesRoute);
 app.use(promotionRoute);
+//User Routes
 app.use(transactionRoute);
 app.use(filterFlight);
 app.use(flightRouteUser);
 app.use(search);
 app.use(registerRoute);
+app.use(loginRoute);
 
 app.use(errorHandler);
 
