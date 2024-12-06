@@ -142,7 +142,7 @@ const verifyOtp = async (req, res, next) => {
 // Fungsi untuk mengirim ulang OTP
 const resendOtp = async (req, res, next) => {
   try {
-    const { email } = req.query;
+    const { email } = req.body;
 
     // Validasi email
     if (!email) {
