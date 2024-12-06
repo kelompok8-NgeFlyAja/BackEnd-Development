@@ -16,6 +16,7 @@ const filterFlight = require("./src/routes/user/filterRoute");
 const search = require("./src/routes/user/searchRoute");
 const flightRouteUser = require("./src/routes/user/flightRoute");
 const registerRoute = require("./src/routes/user/registerRoute");
+const resetPasswordRoute = require("./src/routes/user/resetPasswordRoute");
 
 console.log("Server coba key : ", process.env.MIDTRANS_SERVER_KEY);
 
@@ -32,6 +33,7 @@ app.use(filterFlight);
 app.use(flightRouteUser);
 app.use(search);
 app.use(registerRoute);
+app.use(resetPasswordRoute);
 
 app.use(errorHandler);
 

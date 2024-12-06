@@ -27,16 +27,21 @@ const verifyEmail = async (req, res, next) => {
             let transporter = nodemailer.createTransport({
                 host: 'smtp.gmail.com',
                 auth: {
-                    user: process.env.MAIL_EMAIL,
-                    pass: process.env.MAIL_PASSWORD
+                    user: process.env.USER_EMAIL,
+                    pass: process.env.USER_APP
                 }
             });
 
+            const resetUrl = `http://localhost:3000/verify-token/${token}`;
+
             const mailOptions = {
-                from: process.env.MAIL_EMAIL,
+                from: '"NgeFlyAja" <no-reply@ngeflyaja.com>',
                 to: email,
                 subject: 'Reset Password',
-                html: `<a href="http://localhost:3000/forgot-password/${token}">Klik disini untuk reset password</a>`
+                html: `<h1>Need to reset your Password?</h1>
+                <p>Click the button below to reset your password</p>
+                <a href="${resetUrl}">Reset Password</a>
+                <p>If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 1 hour.</p>`
             }
 
             transporter.sendMail(mailOptions, (err, info) => {
@@ -56,7 +61,7 @@ const verifyEmail = async (req, res, next) => {
     }
 }
 
-const forgotPassword = async (req, res, next) => {
+const verifyToken = (req, res, next) => {
     try {
         const { token } = req.params;
 
@@ -68,13 +73,11 @@ const forgotPassword = async (req, res, next) => {
         if (!decoded || !decoded.id) {
             throw { error: 'Unauthorized', status: 401, message: 'Token tidak valid' };
         }
-
         res.status(200).json({
             message: 'Token valid',
             status: 200,
-            token: token
+            data: decoded,
         });
-
     } catch (error) {
         next(error);
     }
@@ -82,10 +85,19 @@ const forgotPassword = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
     try {
-        const { password, token } = req.body;
+        const { token } = req.params;
+        const { newPassword, confirmPassword } = req.body;
 
-        if (!token || !password) {
+        if (!token || !newPassword) {
             throw { error: 'Bad Request', status: 400, message: 'Token dan password diperlukan' };
+        }
+
+        if (newPassword !== confirmPassword) {
+            throw { error: 'Bad Request', status: 400, message: 'Password tidak sama' };
+        }
+
+        if (newPassword.length < 8) {
+            throw { error: 'Bad Request', status: 400, message: 'Password minimal 8 karakter' };
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -93,7 +105,7 @@ const resetPassword = async (req, res, next) => {
             throw { error: 'Unauthorized', status: 401, message: 'Token tidak valid' };
         }
 
-        const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT);
+        const hashedPassword = bcrypt.hashSync(newPassword, BCRYPT_SALT);
 
         const updateUser = await prisma.users.update({
             where: { id: decoded.id },
@@ -110,4 +122,4 @@ const resetPassword = async (req, res, next) => {
     }
 }
 
-module.exports = { verifyEmail, forgotPassword, resetPassword }
+module.exports = { verifyEmail, resetPassword, verifyToken };

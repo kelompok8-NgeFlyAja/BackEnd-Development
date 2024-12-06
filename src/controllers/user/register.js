@@ -17,7 +17,7 @@ const otpStore = {}; // Menyimpan OTP dan waktu kedaluwarsa untuk setiap penggun
 
 const newRegister = async (req, res, next) => {
   try {
-    const { name, email, phoneNumber, password } = req.query;
+    const { name, email, phoneNumber, password } = req.body;
 
     //cek apakah semua kolom sudah terisi
     if (!name || !email || !phoneNumber || !password) {
@@ -91,7 +91,7 @@ const newRegister = async (req, res, next) => {
 //verifikasi otp dan aktivasi akun
 const verifyOtp = async (req, res, next) => {
   try {
-    const { email, otp } = req.query;
+    const { email, otp } = req.body;
     const storedOtp = otpStore[email];
 
     if (!storedOtp) {
@@ -140,7 +140,7 @@ const verifyOtp = async (req, res, next) => {
 // Fungsi untuk mengirim ulang OTP
 const resendOtp = async (req, res, next) => {
   try {
-    const { email } = req.query;
+    const { email } = req.body;
 
     // Validasi email
     if (!email) {
