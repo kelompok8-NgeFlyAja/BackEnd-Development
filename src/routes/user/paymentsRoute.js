@@ -4,8 +4,10 @@ const {createBooking, createSnapPayment, createCCPayment, midtransNotification, 
 
 router.get('/ticket-details/:flightId', getTicketDetails)
 router.post('/ticket-booking', createBooking);
-router.post('/ticket-payment/:bookingId', createSnapPayment);
-router.post('/payment-creditcard/:bookingId', createCCPayment);
+router.post('/ticket-payment/:bookingId?', createSnapPayment);
+
+router.post('/payment-creditcard/:bookingId?', createCCPayment);
+
 router.post('/midtrans/notification', midtransNotification);
 
 module.exports = router;
