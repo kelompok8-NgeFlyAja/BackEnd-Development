@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const nodemailer = require("nodemailer");
-const BCRYPT_SALT = parseInt(process.env.BCRYPT_SALT);
+const SALT = parseInt(process.env.SALT);
 
 //konfigurasi  nodemailer  untuk mengirim  email
 const transporter = nodemailer.createTransport({
@@ -50,7 +50,7 @@ const newRegister = async (req, res, next) => {
       });
     }
 
-    const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT);
+    const hashedPassword = bcrypt.hashSync(password, SALT);
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
