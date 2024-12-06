@@ -2,10 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const authentication = async (req, res, next) => {
     try {
-        console.log(req.cookies.token);
-        console.log(req.headers.authorization);
         const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
-        
         
 		if (!token) {
 			const error = new Error("Unauthorized Page!");
@@ -28,7 +25,6 @@ const authentication = async (req, res, next) => {
                 role: decode.role
             };
 
-			console.log(req.user, "-> from authMiddleware");
 			next();
 		});
 	} catch (error) {
