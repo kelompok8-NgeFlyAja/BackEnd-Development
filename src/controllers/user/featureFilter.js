@@ -99,4 +99,49 @@ const getFilteredFlights = async (req, res, next) => {
   }
 };
 
-module.exports = { getFilteredFlights };
+const getFilteredBaggage = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, sortBy, order} = req.query;
+    const validSortBy = ["baggage", "cabin baggage", "in flight entertaiment"];
+    const validOrder = ["asc", "desc"];
+    if (!validSortBy.includes(sortBy) || !validOrder.includes(order)) {
+      const error = new Error("Invalid sort by or order value");
+      error.status = 400;
+      throw error;
+    }
+    const parsePage = parseInt(page);
+    const parseLimit = parseInt(limit);
+    const skip = (parsePage - 1) * parseLimit;
+    const sortFieldMapping = {
+      baggage: "baggage",
+      "cabin baggage": "cabinBaggage",
+      "in flight entertainment": "inFlightEntertainment",
+    };
+    const sortField = sortFieldMapping[sortBy];
+    const [totalCount, planes] = await prisma.$transaction([
+      prisma.planes.count(),
+      prisma.planes.findMany({
+        skip,
+        take: parseLimit,
+        orderBy: {
+          [sortField]: order, 
+        },
+      }),
+    ]);
+
+    return res.status(200).json({
+      status: "success",
+      statusCode: 200,
+      page: parsePage,
+      limit: parseLimit,
+      totalCount,
+      totalPages: Math.ceil(totalCount / parseLimit),
+      data: planes,
+    });
+  } catch (error) {
+    console.error("Error fetching baggage:", error);
+    next(error);
+  }
+};
+
+module.exports = { getFilteredFlights, getFilteredBaggage};
