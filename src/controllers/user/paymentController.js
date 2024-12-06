@@ -2,7 +2,8 @@ const crypto = require("crypto");
 const moment = require("moment-timezone");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const {snap, core} = require("../../config/midtrans");
+const { snap, core } = require("../../config/midtrans");
+const { mandiriDetail, bcaDetail, bniDetail, briDetail } = require("../../utils/paymentProcessor");
 const randomGenerator = require("../../utils/randomGenerator");
 const randomIdGenerator = require("../../utils/randomIdGenerator");
 
@@ -37,8 +38,6 @@ const getTicketDetails = async (req, res, next) => {
 							select: {
 								name: true,
 								priceAdult: true,
-								priceChild: true,
-								priceBaby: true,
 							},
 						},
 					},
@@ -362,39 +361,52 @@ const createSnapPayment = async (req, res, next) => {
 const createCCPayment = async (req, res, next) => {
 	try {
 		const { bookingId } = req.params;
-		const { card_number, card_exp_month, card_exp_year, card_cvv } = req.body;
+		const { card_number, card_exp_month, card_exp_year, card_cvv } =
+			req.body;
 		const convertBookingId = parseInt(bookingId);
 		let itemDetails = [];
 
 		if (!card_number || !card_exp_month || !card_exp_year || !card_cvv) {
-            const error = new Error("Card details are required");
-            error.statusCode = 400;
-            throw error;
-        }
+			const error = new Error("Card details are required");
+			error.statusCode = 400;
+			throw error;
+		}
 
 		if (isNaN(card_number) || card_number.length !== 16) {
-            const error = new Error("Invalid card_number. It should be a 16-digit number.");
-            error.statusCode = 400;
-            throw error;
-        }
+			const error = new Error(
+				"Invalid card_number. It should be a 16-digit number."
+			);
+			error.statusCode = 400;
+			throw error;
+		}
 
-		if (isNaN(card_exp_month) || card_exp_month < 1 || card_exp_month > 12) {
-            const error = new Error("Invalid card_exp_month. It should be a number between 1 and 12.");
-            error.statusCode = 400;
-            throw error;
-        }
+		if (
+			isNaN(card_exp_month) ||
+			card_exp_month < 1 ||
+			card_exp_month > 12
+		) {
+			const error = new Error(
+				"Invalid card_exp_month. It should be a number between 1 and 12."
+			);
+			error.statusCode = 400;
+			throw error;
+		}
 
 		if (isNaN(card_exp_year) || card_exp_year < new Date().getFullYear()) {
-            const error = new Error("Invalid card_exp_year. It should be a valid year.");
-            error.statusCode = 400;
-            throw error;
-        }
+			const error = new Error(
+				"Invalid card_exp_year. It should be a valid year."
+			);
+			error.statusCode = 400;
+			throw error;
+		}
 
 		if (isNaN(card_cvv) || card_cvv.length !== 3) {
-            const error = new Error("Invalid card_cvv. It should be a 3-digit number.");
-            error.statusCode = 400;
-            throw error;
-        }
+			const error = new Error(
+				"Invalid card_cvv. It should be a 3-digit number."
+			);
+			error.statusCode = 400;
+			throw error;
+		}
 
 		if (!bookingId) {
 			const error = new Error("Booking Ticket ID is required");
@@ -459,12 +471,12 @@ const createCCPayment = async (req, res, next) => {
 		}, 0);
 
 		const cardData = {
-            card_number,
-            card_exp_month,
-            card_exp_year,
-            card_cvv,
-			client_key: process.env.MIDTRANS_CLIENT_KEY
-        };
+			card_number,
+			card_exp_month,
+			card_exp_year,
+			card_cvv,
+			client_key: process.env.MIDTRANS_CLIENT_KEY,
+		};
 
 		const tokenResponse = await core.cardToken(cardData);
 
@@ -508,17 +520,135 @@ const createCCPayment = async (req, res, next) => {
 				return res.status(201).json({
 					status: "success",
 					statusCode: 201,
-					message: "Payment created successfully, Please Wait For A Minute!",
-					token: midtransResponse
+					message:
+						"Payment created successfully, Please Wait For A Minute!",
+					token: midtransResponse,
 				});
 			}
 		}
 	} catch (error) {
-		if (error.httpStatusCode === '406') {
-            const err = new Error('Failed to create payment because of its already been created! Please Make A new Booking');
-            err.statusCode = 406;
-            return next(err); 
-        }
+		if (error.httpStatusCode === "406") {
+			const err = new Error(
+				"Failed to create payment because of its already been created! Please Make A new Booking"
+			);
+			err.statusCode = 406;
+			return next(err);
+		}
+
+		next(error);
+	}
+};
+
+const createVAPayment = async (req, res, next) => {
+	try {
+		const { bookingId, bank } = req.params;
+		const convertBookingId = parseInt(bookingId);
+		let itemDetails = [];
+
+		const booking = await prisma.bookings.findUnique({
+			where: { id: convertBookingId },
+			include: {
+				passengers: true,
+				flight: {
+					include: {
+						route: {
+							include: {
+								departureAirport: true,
+								arrivalAirport: true,
+								seatClass: true,
+							},
+						},
+					},
+				},
+			},
+		});
+
+		const seatClass = booking.flight.route.seatClass;
+
+		if (!booking) {
+			const error = new Error("Booking Ticket not found");
+			error.status = 400;
+			throw error;
+		}
+
+		if (booking.adultPassenger > 0) {
+			itemDetails.push({
+				id: `adult-passenger`,
+				price: seatClass.priceAdult,
+				quantity: booking.adultPassenger,
+				name: `Adult Passenger`,
+				seat_class: seatClass.name,
+			});
+		}
+		if (booking.childPassenger > 0) {
+			itemDetails.push({
+				id: `child-passenger`,
+				price: seatClass.priceChild,
+				quantity: booking.childPassenger,
+				name: `Child Passenger`,
+			});
+		}
+		if (booking.babyPassenger > 0) {
+			itemDetails.push({
+				id: `baby-passenger`,
+				price: seatClass.priceBaby,
+				quantity: booking.babyPassenger,
+				name: `Baby Passenger`,
+			});
+		}
+
+		const totalPrice = itemDetails.reduce((sum, item) => {
+			return sum + item.price * item.quantity;
+		}, 0);
+
+		let midtransResponse;
+		if (bank === "mandiri") {
+			midtransResponse = await mandiriDetail(booking, itemDetails, totalPrice);
+		} else if (bank === "bca") {
+			midtransResponse = await bcaDetail(booking, itemDetails, totalPrice);
+		} else if (bank === "bni") {
+			midtransResponse = await bniDetail(booking, itemDetails, totalPrice);
+		} else if (bank === "bri") {
+			midtransResponse = await briDetail(booking, itemDetails, totalPrice);
+		} else {
+			const error = new Error("Bank not supported");
+			error.status = 400;
+			throw error;
+		}
+
+		if (midtransResponse) {
+			const newPayment = await prisma.payments.create({
+				data: {
+					booking: convertBookingId,
+					paymentMethod: "Credit Card",
+					amount: totalPrice,
+					expiredDate: new Date(Date.now() + 60 * 60 * 1000),
+					status: "Unpaid",
+					booking: {
+						connect: { id: convertBookingId },
+					},
+				},
+			});
+
+			if (newPayment) {
+				return res.status(201).json({
+					status: "success",
+					statusCode: 201,
+					message:
+						"Payment created successfully, Please Use The VA Number Below To Pay!",
+					vaCode: midtransResponse.biller_code,
+					vaNumber: midtransResponse.bill_key,
+				});
+			}
+		}
+	} catch (error) {
+		if (error.httpStatusCode === "406") {
+			const err = new Error(
+				"Failed to create payment because of its already been created! Please Make A new Booking"
+			);
+			err.statusCode = 406;
+			return next(err);
+		}
 
 		next(error);
 	}
@@ -602,6 +732,7 @@ module.exports = {
 	createBooking,
 	createSnapPayment,
 	createCCPayment,
+	createVAPayment,
 	midtransNotification,
 	getTicketDetails,
 };
