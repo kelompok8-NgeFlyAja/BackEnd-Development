@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const nodemailer = require("nodemailer");
-const BCRYPT_SALT = parseInt(process.env.BCRYPT_SALT);
+const SALT = parseInt(process.env.SALT);
 
 const otpStore = {}; // Menyimpan OTP dan waktu kedaluwarsa untuk setiap pengguna
 //konfigurasi  nodemailer  untuk mengirim  email
@@ -17,6 +17,7 @@ const transporter = nodemailer.createTransport({
 const newRegister = async (req, res, next) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
+    
     //cek apakah semua kolom sudah terisi
     if (!name || !email || !phoneNumber || !password) {
       return res.status(400).json({
@@ -57,7 +58,7 @@ const newRegister = async (req, res, next) => {
       });
     }
 
-    const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT);
+    const hashedPassword = bcrypt.hashSync(password, SALT);
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -99,7 +100,7 @@ const newRegister = async (req, res, next) => {
 const verifyOtp = async (req, res, next) => {
   try {
     const { otp } = req.body;
-
+    
     if (!otp) {
       return res.status(400).json({
         status: "failed",
