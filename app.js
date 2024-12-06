@@ -11,14 +11,14 @@ const planeRoute = require("./src/routes/admin/planeRoute");
 const flightRoutesRoute = require("./src/routes/admin/flightRoutesRoute");
 const promotionRoute = require("./src/routes/admin/promotionRoute");
 const transactionRoute = require("./src/routes/user/paymentsRoute");
-const flightRoute = require('./src/routes/admin/flightRoute')
+const flightRoute = require("./src/routes/admin/flightRoute");
 const filterFlight = require("./src/routes/user/filterRoute");
-const search = require('./src/routes/user/searchRoute')
-const flightRouteUser = require('./src/routes/user/flightRoute')
+const search = require("./src/routes/user/searchRoute");
+const flightRouteUser = require("./src/routes/user/flightRoute");
+const registerRoute = require("./src/routes/user/registerRoute");
 
-console.log('Server coba key : ', process.env.MIDTRANS_SERVER_KEY)
+console.log("Server coba key : ", process.env.MIDTRANS_SERVER_KEY);
 
-app.use(search)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(planeRoute);
@@ -29,7 +29,9 @@ app.use(flightRoutesRoute);
 app.use(promotionRoute);
 app.use(transactionRoute);
 app.use(filterFlight);
-app.use(flightRouteUser)
+app.use(flightRouteUser);
+app.use(search);
+app.use(registerRoute);
 
 app.use(errorHandler);
 
