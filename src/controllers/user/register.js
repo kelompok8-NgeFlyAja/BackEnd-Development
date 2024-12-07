@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 const nodemailer = require("nodemailer");
 const SALT = parseInt(process.env.SALT);
 
+const otpStore = {}; // Menyimpan OTP dan waktu kedaluwarsa untuk setiap pengguna
 //konfigurasi  nodemailer  untuk mengirim  email
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -13,18 +14,25 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const otpStore = {}; // Menyimpan OTP dan waktu kedaluwarsa untuk setiap pengguna
-
 const newRegister = async (req, res, next) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
-
+    
     //cek apakah semua kolom sudah terisi
     if (!name || !email || !phoneNumber || !password) {
       return res.status(400).json({
         status: "failed",
         statusCode: 400,
         message: "All fields are required",
+      });
+    }
+
+    // Validasi panjang password
+    if (password.length < 8) {
+      return res.status(400).json({
+        status: "failed",
+        statusCode: 400,
+        message: "Password must be at least 8 characters long",
       });
     }
 
@@ -57,7 +65,7 @@ const newRegister = async (req, res, next) => {
     const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // OTP kedaluwarsa dalam 15 menit
 
     // Simpan OTP di dalam memori server
-    otpStore[email] = { otp, expiresAt: otpExpiresAt };
+    otpStore[email] = { otp, expiresAt: otpExpiresAt, email };
 
     // Buat user baru
     await prisma.users.create({
@@ -91,26 +99,29 @@ const newRegister = async (req, res, next) => {
 //verifikasi otp dan aktivasi akun
 const verifyOtp = async (req, res, next) => {
   try {
-    const { email, otp } = req.body;
-    const storedOtp = otpStore[email];
-    console.log(storedOtp); 
+    const { otp } = req.body;
     
-
-    if (!storedOtp) {
+    if (!otp) {
       return res.status(400).json({
         status: "failed",
         statusCode: 400,
-        message: "OTP not found",
+        message: "OTP is required",
       });
     }
 
-    if (storedOtp.otp !== otp) {
+    // Cari OTP di otpStore
+    const email = Object.keys(otpStore).find(
+      (key) => otpStore[key].otp === otp
+    );
+
+    if (!email) {
       return res.status(400).json({
         status: "failed",
         statusCode: 400,
-        message: "Incorrect OTP code",
+        message: "OTP not found or invalid",
       });
     }
+    const storedOtp = otpStore[email];
 
     if (new Date() > storedOtp.expiresAt) {
       return res.status(400).json({
