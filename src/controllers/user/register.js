@@ -91,7 +91,7 @@ const newRegister = async (req, res, next) => {
 //verifikasi otp dan aktivasi akun
 const verifyOtp = async (req, res, next) => {
   try {
-    const { email, otp } = req.body;
+    const { otp } = req.body;
     const storedOtp = otpStore[email];
     console.log(storedOtp); 
     

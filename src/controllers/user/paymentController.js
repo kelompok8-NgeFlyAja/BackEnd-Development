@@ -13,7 +13,7 @@ const getTicketDetails = async (req, res, next) => {
 
 		if (!flightId) {
 			const error = new Error("Flight ID is required");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -56,7 +56,7 @@ const getTicketDetails = async (req, res, next) => {
 
 		if (!flightDetails) {
 			const error = new Error("Flight not found");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -75,6 +75,7 @@ const getTicketDetails = async (req, res, next) => {
 
 		return res.status(200).json({
 			status: "Success",
+			statusCode: 200,
 			message: "Flight details retrieved successfully",
 			data: {
 				flightId: flightDetails.id,
@@ -112,11 +113,93 @@ const createBooking = async (req, res, next) => {
 		} = req.body;
 		const timeZone = "Asia/Jakarta";
 
-		if (!bookingTicket || !passengerDetail) {
-			const error = new Errror("Make Sure To Fill All Forms!");
-			error.status(400);
-			throw error;
+		if (!bookingTicket || !passengerDetail || !bookingTicket.flightId || !bookingTicket.bookerName || !bookingTicket.bookerEmail || !bookingTicket.bookerPhone || passengerDetail.length === 0) {
+            const error = new Error("Make Sure To Fill All The Booker Forms!");
+            error.statusCode = 400;
+            throw error;
+        }
+		
+		for (let i = 0; i < passengerDetail.length; i++) {
+			if (!passengerDetail[i].title || !passengerDetail[i].fullName || !passengerDetail[i].birthDate || !passengerDetail[i].nationality || !passengerDetail[i].identityNumber || !passengerDetail[i].identityCountry || !passengerDetail[i].identityExpired || !passengerDetail[i].seatName) {
+				const error = new Error("Make Sure To Fill All The Passenger Forms!");
+				error.statusCode = 400;
+				throw error;
+			}
 		}
+
+		if (!Number.isInteger(adultPassenger) || !Number.isInteger(childPassenger) || !Number.isInteger(babyPassenger)) {
+            const error = new Error("Passenger counts must be Number!");
+            error.statusCode = 400;
+            throw error;
+        }
+		const totalPassengers = adultPassenger + childPassenger + babyPassenger;
+        if (totalPassengers !== passengerDetail.length) {
+            const error = new Error("The total of passenger details does not match the number of passengers provided!");
+            error.statusCode = 400;
+            throw error;
+        }
+
+		const planeInfo = await prisma.flights.findUnique({
+            where: { id: bookingTicket.flightId },
+            select: { planeId: true },
+        });
+
+		if (!planeInfo) {
+            const error = new Error("Plane Not Found");
+            error.statusCode = 400;
+            throw error;
+        }
+
+		const planeId = planeInfo.planeId;
+
+		for (let i = 0; i < passengerDetail.length; i++) {
+            const selectedSeatName = passengerDetail[i].seatName;
+            const selectedSeat = await prisma.seats.findFirst({
+                where: {
+                    seatNumber: selectedSeatName,
+                    planeId: planeId,
+                },
+            });
+
+            if (!selectedSeat) {
+				const error = new Error(`No available seat for passenger ${i + 1}`);
+				error.statusCode = 400;
+				throw error;
+            }
+
+            if (!selectedSeat.isAvailable) {
+				const error = new Error(`Seat ${selectedSeatName} is already taken`);
+				error.statusCode = 400;
+				throw error;
+            }
+
+            await prisma.seats.update({
+                where: { id: selectedSeat.id },
+                data: { isAvailable: false },
+            });
+
+            const dateBirth = moment
+                .utc(`${passengerDetail[i].birthDate}T00:00:00Z`)
+                .tz(timeZone)
+                .format();
+            const dateExpired = moment
+                .utc(`${passengerDetail[i].identityExpired}T00:00:00Z`)
+                .tz(timeZone)
+                .format();
+
+            passengerData.push({
+                bookingId: null,
+                title: passengerDetail[i].title,
+                fullName: passengerDetail[i].fullName,
+                familyName: passengerDetail[i].familyName,
+                birthDate: dateBirth,
+                nationality: passengerDetail[i].nationality,
+                identityNumber: passengerDetail[i].identityNumber,
+                identityCountry: passengerDetail[i].identityCountry,
+                identityExpired: dateExpired,
+                seatId: selectedSeat.id,
+            });
+        }
 
 		const randomCode = await randomGenerator();
 		const randomId = await randomIdGenerator();
@@ -125,7 +208,7 @@ const createBooking = async (req, res, next) => {
 		const createdBooking = await prisma.bookings.create({
 			data: {
 				id: parseInt(randomId),
-				userId: bookingTicket.userId,
+				userId: req.user.id,
 				flightId: bookingTicket.flightId,
 				bookingCode: randomCode,
 				bookingDate: BookingDateUtc7,
@@ -153,7 +236,7 @@ const createBooking = async (req, res, next) => {
 
 		if (!seatClassInfo) {
 			const error = new Error("Seat Class Not Found");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -169,72 +252,18 @@ const createBooking = async (req, res, next) => {
 			data: { totalPrice: totalPrice },
 		});
 
-		const planeInfo = await prisma.flights.findUnique({
-			where: { id: bookingTicket.flightId },
-			select: { planeId: true },
-		});
-
-		if (!planeInfo) {
-			const error = new Error("Plane Not Found");
-			error.status = 400;
-			throw error;
-		}
-
-		const planeId = planeInfo.planeId;
-
-		for (let i = 0; i < passengerDetail.length; i++) {
-			const dateBirth = moment
-				.utc(`${passengerDetail[i].birthDate}T00:00:00Z`)
-				.tz(timeZone)
-				.format();
-			const dateExpired = moment
-				.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`)
-				.tz(timeZone)
-				.format();
-
-			const selectedSeatName = passengerDetail[i].seatName;
-
-			const selectedSeat = await prisma.seats.findFirst({
-				where: {
-					seatNumber: selectedSeatName,
-					planeId: planeId,
-				},
-			});
-
-			if (!selectedSeat) {
-				throw new Error(`No available seat for passenger ${i + 1}`);
-			}
-
-			if (!selectedSeat.isAvailable) {
-				throw new Error(`Seat ${selectedSeatName} is already taken.`);
-			}
-
-			await prisma.seats.update({
-				where: { id: selectedSeat.id },
-				data: { isAvailable: false },
-			});
-
-			passengerData.push({
-				bookingId: createdBooking.id,
-				title: passengerDetail[i].title,
-				fullName: passengerDetail[i].fullName,
-				familyName: passengerDetail[i].familyName,
-				birthDate: dateBirth,
-				nationality: passengerDetail[i].nationality,
-				identityNumber: passengerDetail[i].identityNumber,
-				identityCountry: passengerDetail[i].identityCountry,
-				identityExpired: dateExpired,
-				seatId: selectedSeat.id,
-			});
-		}
+		for (let i = 0; i < passengerData.length; i++) {
+            passengerData[i].bookingId = createdBooking.id;
+        }
 
 		const createdPassengers = await prisma.passengers.createMany({
 			data: passengerData,
 		});
 
 		if (createdBooking && createdPassengers) {
-			res.status(200).json({
+			res.status(201).json({
 				status: "Success",
+				statusCode: 201,
 				message: "Booking Successfully Created",
 				bookingId: createdBooking.id,
 				bookingCode: createdBooking.bookingCode,
@@ -253,7 +282,7 @@ const createSnapPayment = async (req, res, next) => {
 
 		if (!bookingId) {
 			const error = new Error("Booking Ticket ID is required");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -279,7 +308,7 @@ const createSnapPayment = async (req, res, next) => {
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -348,7 +377,9 @@ const createSnapPayment = async (req, res, next) => {
 
 		if (newPayment) {
 			return res.status(200).json({
-				message: "Transaction created successfully",
+				status: "Success",
+				statusCode: "201",
+				message: "Transaction successfully Created",
 				token: midtransResponse,
 			});
 		}
@@ -436,7 +467,7 @@ const createCCPayment = async (req, res, next) => {
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -567,7 +598,7 @@ const createVAPayment = async (req, res, next) => {
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -612,7 +643,7 @@ const createVAPayment = async (req, res, next) => {
 			midtransResponse = await briDetail(booking, itemDetails, totalPrice);
 		} else {
 			const error = new Error("Bank not supported");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -671,15 +702,18 @@ const midtransNotification = async (req, res, next) => {
 
 		if (signature !== notification.signature_key) {
 			console.log("Invalid Midtrans signature!");
-			return res.status(400).send("Invalid signature");
+			const error = new Error("Midtrans Error: Signature's not The Same!")
+			error.statusCode = 400
+			throw error
 		}
-
-		console.log("Valid notification received:", notification);
 
 		const statusResponse = await core.transaction.notification(
 			notification
 		);
 		const { order_id, transaction_status, payment_type } = statusResponse;
+
+		console.log(statusResponse, '-> from statusResponse');
+		
 
 		let newStatusPayment, newStatusBooking;
 		switch (transaction_status) {
