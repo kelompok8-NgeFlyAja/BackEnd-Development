@@ -80,7 +80,7 @@ const newRegister = async (req, res, next) => {
 
     // Kirim email OTP
     await transporter.sendMail({
-      from: process.env.USER_EMAIL,
+      from: '"NgeFlyAja" <no-reply@ngeflyaja.com>',
       to: email,
       subject: "Your OTP code",
       text: `Your OTP code is ${otp}. Valid for 15 minutes.`,
@@ -193,12 +193,11 @@ const resendOtp = async (req, res, next) => {
 
     // Kirim email OTP baru
     await transporter.sendMail({
-      from: process.env.USER_EMAIL,
+      from: '"NgeFlyAja" <no-reply@ngeflyaja.com>',
       to: email,
       subject: "Your new OTP code",
       text: `Your new OTP code is ${otp}. Valid for 15 minutes.`,
     });
-
     res.status(200).json({
       status: "succes",
       statusCode: 200,
