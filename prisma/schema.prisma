@@ -74,6 +74,7 @@ model Users {
   password    String
   isActivated Boolean
   role        String     @default("user")
+  notifications Notifications[]
   bookings    Bookings[]
 }
 
@@ -141,4 +142,14 @@ model SeatClasses {
   priceChild Int
   priceBaby  Int
   route      Routes?
+}
+
+model Notifications {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String
+  createdAt   DateTime @db.Timestamptz(3)
+  isRead      Boolean
+  user        Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
