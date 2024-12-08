@@ -117,12 +117,11 @@ const searchFlights = async (req, res, next) => {
                 },
                 plane: {
                     planeId: flight.plane.id,
-                    name: flight.plane.name,
+                    planeName: flight.plane.name,
                     planeCode: flight.plane.planeCode,
                     description: flight.plane.description,
                     baggage: flight.plane.baggage,
                     cabinBaggage: flight.plane.cabinBaggage,
-                    seats: flight.plane.seats,
                 },
             };
         });
