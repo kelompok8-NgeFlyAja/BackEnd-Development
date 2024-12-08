@@ -20,7 +20,11 @@ const registerRoute = require("./src/routes/user/registerRoute");
 const resetPasswordRoute = require("./src/routes/user/resetPasswordRoute");
 const loginRoute = require("./src/routes/user/loginRoute");
 
-//This Comment is for testing the github action 2
+//This Comment is for testing the github action 3
+//It Shoul Work Fine
+app.get("/test", (req, res) => {
+	res.send("Now I try the action and it should be fine!");
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
