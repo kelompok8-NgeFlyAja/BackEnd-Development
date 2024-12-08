@@ -34,7 +34,7 @@ jobs:
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         env_vars: |
-            NODE_ENV="production"
+            NODE_ENV=production
             PASSWORD_SALT=${{ secrets.PASSWORD_SALT }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             SALT=${{ secrets.SALT }}
