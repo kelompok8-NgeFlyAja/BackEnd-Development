@@ -10,20 +10,26 @@ const login = async (req, res, next) => {
 
 		if (!email || !password) {
 			const error = new Error("Email and password are required!");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
 		}
 
 		if (!user) {
 			const error = new Error("Email or password is wrong");
-			error.status = 401;
+			error.statusCode = 400;
 			throw error;
 		}
 
 		const passwordCheck = await bcrypt.compare(password, user.password);
 		if (!passwordCheck) {
 			const error = new Error("Email or password is wrong");
-			error.status = 401;
+			error.statusCode = 400;
+			throw error;
+		}
+
+		if (!user.isActivated) {
+			const error = new Error("Please Activate Your Account First");
+			error.statusCode = 400;
 			throw error;
 		}
 
@@ -50,7 +56,7 @@ const login = async (req, res, next) => {
 			accessToken: accessToken,
 		});
 	} catch (error) {
-		next(Error);
+		next(error);
 	}
 };
 
