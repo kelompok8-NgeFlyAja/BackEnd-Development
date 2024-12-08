@@ -1,5 +1,8 @@
 const {snap, core} = require("../config/midtrans");
 
+const expiryDate = new Date()
+expiryDate.setMinutes(expiryDate.getMinutes() + 1)
+
 const mandiriDetail = async (booking, itemDetails, totalPrice) => {
     const transactionDetails = {
         payment_type: "echannel",
@@ -18,6 +21,11 @@ const mandiriDetail = async (booking, itemDetails, totalPrice) => {
         echannel: {
             "bill_info1": "Payment:",
             "bill_info2": "Online Ticket Purchase",
+        },
+        expiry: {
+            start_time: expiryDate.toISOString(),
+            unit: "minute",
+            duration: 1,
         },
     };
 
