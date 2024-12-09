@@ -18,15 +18,10 @@ const getFilteredFlights = async (req, res, next) => {
       return `${hours}h ${remainingMinutes}m`;
     };
 
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = "price",
-      order = "asc",
-    } = req.query;
+    const { page = 1, limit = 10, sortBy = "price", order = "asc" } = req.query;
 
-    const parsePage = parseInt(page)
-    const parseLimit = parseInt(limit)
+    const parsePage = parseInt(page);
+    const parseLimit = parseInt(limit);
 
     // Validasi input
     const validSortBy = ["price", "duration", "departureTime", "arrivalTime"];
@@ -87,7 +82,40 @@ const getFilteredFlights = async (req, res, next) => {
       }));
     }
 
+    // Pisahkan tanggal dan waktu
+    const timeZone = "Asia/Jakarta";
+    sortedFlights = sortedFlights.map((flight) => {
+      const departureTimeConvert = moment
+        .utc(flight.departureTime)
+        .tz(timeZone)
+        .format("YYYY-MM-DD HH:mm:ss");
+      const arrivalTimeConvert = moment
+        .utc(flight.arrivalTime)
+        .tz(timeZone)
+        .format("YYYY-MM-DD HH:mm:ss");
+
+      const convertDepartureTimeToDate = new Date(departureTimeConvert);
+      const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+
+      return {
+        id: flight.id,
+        routeId: flight.routeId,
+        planeId: flight.planeId,
+        promotionId: flight.promotionId,
+        duration: flight.duration,
+        durationMinutes: flight.durationMinutes, // Dipindahkan ke atas
+        departureDate: convertDepartureTimeToDate.toLocaleDateString(), // Dipindahkan ke atas
+        departureTime: convertDepartureTimeToDate.toLocaleTimeString(),
+        arrivalDate: convertArrivalTimeToDate.toLocaleDateString(), // Dipindahkan ke atas
+        arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
+        flightCode: flight.flightCode,
+        route: flight.route,
+      };
+    });
+
     return res.status(200).json({
+      status: "success",
+      statusCode: 200,
       page: parsePage,
       limit: parseLimit,
       totalCount,
@@ -95,7 +123,6 @@ const getFilteredFlights = async (req, res, next) => {
       data: sortedFlights,
     });
   } catch (error) {
-    console.error("Error fetching flights:", error);
     next(error);
   }
 };
@@ -148,13 +175,23 @@ const getFilteredBaggage = async (req, res, next) => {
       const route = flight?.route;
       const timeZone = "Asia/Jakarta";
       const departureTimeConvert = flight
-        ? moment.utc(flight.departureTime).tz(timeZone).format("YYYY-MM-DD HH:mm:ss")
+        ? moment
+            .utc(flight.departureTime)
+            .tz(timeZone)
+            .format("YYYY-MM-DD HH:mm:ss")
         : null;
       const arrivalTimeConvert = flight
-        ? moment.utc(flight.arrivalTime).tz(timeZone).format("YYYY-MM-DD HH:mm:ss")
+        ? moment
+            .utc(flight.arrivalTime)
+            .tz(timeZone)
+            .format("YYYY-MM-DD HH:mm:ss")
         : null;
-      const convertDepartureTimeToDate = departureTimeConvert ? new Date(departureTimeConvert) : null;
-      const convertArrivalTimeToDate = arrivalTimeConvert ? new Date(arrivalTimeConvert) : null;
+      const convertDepartureTimeToDate = departureTimeConvert
+        ? new Date(departureTimeConvert)
+        : null;
+      const convertArrivalTimeToDate = arrivalTimeConvert
+        ? new Date(arrivalTimeConvert)
+        : null;
 
       return {
         planeId: plane.id,
@@ -245,13 +282,23 @@ const getFilteredCabinBaggage = async (req, res, next) => {
       const route = flight?.route;
       const timeZone = "Asia/Jakarta";
       const departureTimeConvert = flight
-        ? moment.utc(flight.departureTime).tz(timeZone).format("YYYY-MM-DD HH:mm:ss")
+        ? moment
+            .utc(flight.departureTime)
+            .tz(timeZone)
+            .format("YYYY-MM-DD HH:mm:ss")
         : null;
       const arrivalTimeConvert = flight
-        ? moment.utc(flight.arrivalTime).tz(timeZone).format("YYYY-MM-DD HH:mm:ss")
+        ? moment
+            .utc(flight.arrivalTime)
+            .tz(timeZone)
+            .format("YYYY-MM-DD HH:mm:ss")
         : null;
-      const convertDepartureTimeToDate = departureTimeConvert ? new Date(departureTimeConvert) : null;
-      const convertArrivalTimeToDate = arrivalTimeConvert ? new Date(arrivalTimeConvert) : null;
+      const convertDepartureTimeToDate = departureTimeConvert
+        ? new Date(departureTimeConvert)
+        : null;
+      const convertArrivalTimeToDate = arrivalTimeConvert
+        ? new Date(arrivalTimeConvert)
+        : null;
 
       return {
         planeId: plane.id,
@@ -316,22 +363,22 @@ const getFilteredDesc = async (req, res, next) => {
     }
 
     const sortOrder = order.toLowerCase();
-    const searchDescription = description.toLowerCase(); 
+    const searchDescription = description.toLowerCase();
 
     const [totalCount, exactMatch] = await prisma.$transaction([
       prisma.planes.count({
         where: {
           description: {
             contains: searchDescription,
-            mode: "insensitive", 
+            mode: "insensitive",
           },
         },
       }),
       prisma.planes.findMany({
         where: {
           description: {
-            contains: searchDescription, 
-            mode: "insensitive", 
+            contains: searchDescription,
+            mode: "insensitive",
           },
         },
         skip,
@@ -360,13 +407,23 @@ const getFilteredDesc = async (req, res, next) => {
       const route = flight?.route;
       const timeZone = "Asia/Jakarta";
       const departureTimeConvert = flight
-        ? moment.utc(flight.departureTime).tz(timeZone).format("YYYY-MM-DD HH:mm:ss")
+        ? moment
+            .utc(flight.departureTime)
+            .tz(timeZone)
+            .format("YYYY-MM-DD HH:mm:ss")
         : null;
       const arrivalTimeConvert = flight
-        ? moment.utc(flight.arrivalTime).tz(timeZone).format("YYYY-MM-DD HH:mm:ss")
+        ? moment
+            .utc(flight.arrivalTime)
+            .tz(timeZone)
+            .format("YYYY-MM-DD HH:mm:ss")
         : null;
-      const convertDepartureTimeToDate = departureTimeConvert ? new Date(departureTimeConvert) : null;
-      const convertArrivalTimeToDate = arrivalTimeConvert ? new Date(arrivalTimeConvert) : null;
+      const convertDepartureTimeToDate = departureTimeConvert
+        ? new Date(departureTimeConvert)
+        : null;
+      const convertArrivalTimeToDate = arrivalTimeConvert
+        ? new Date(arrivalTimeConvert)
+        : null;
 
       return {
         planeId: plane.id,
@@ -410,6 +467,9 @@ const getFilteredDesc = async (req, res, next) => {
   }
 };
 
-
-
-module.exports = { getFilteredFlights, getFilteredBaggage, getFilteredCabinBaggage, getFilteredDesc};
+module.exports = {
+  getFilteredFlights,
+  getFilteredBaggage,
+  getFilteredCabinBaggage,
+  getFilteredDesc,
+};
