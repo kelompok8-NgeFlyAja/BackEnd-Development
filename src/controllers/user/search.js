@@ -123,6 +123,7 @@ const searchFlights = async (req, res, next) => {
                     baggage: flight.plane.baggage,
                     cabinBaggage: flight.plane.cabinBaggage,
                 },
+                price: flight.route.seatClass.priceAdult
             };
         });
 

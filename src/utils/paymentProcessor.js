@@ -1,7 +1,7 @@
 const {snap, core} = require("../config/midtrans");
 
 const expiryDate = new Date()
-expiryDate.setMinutes(expiryDate.getMinutes() + 1)
+expiryDate.setMinutes(expiryDate.getMinutes() + 5)
 
 const mandiriDetail = async (booking, itemDetails, totalPrice) => {
     const transactionDetails = {
@@ -25,7 +25,7 @@ const mandiriDetail = async (booking, itemDetails, totalPrice) => {
         expiry: {
             start_time: expiryDate.toISOString(),
             unit: "minute",
-            duration: 1,
+            duration: 5,
         },
     };
 
