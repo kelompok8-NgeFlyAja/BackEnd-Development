@@ -32,6 +32,12 @@ const corstOption = {
   optionSuccessStatus: 200
 }
 
+//This Comment is for testing the github action 5
+//It Shoul Work Fine
+app.get("/test", (req, res) => {
+	res.send("Now I try the action and it should be fine! now it should add this sentences too (2)");
+});
+
 app.use(cors(corstOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
