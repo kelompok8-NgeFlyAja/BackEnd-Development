@@ -6,8 +6,8 @@ const imagekit = require('../src/config/imagekit');
 const fs = require('fs').promises;
 const bcrypt = require('bcrypt');
 
-const password = process.env.PASSWORD
-const salt = parseInt(process.env.PASSWORD_SALT)
+const password = process.env.PASSWORD_SALT
+const salt = parseInt(process.env.SALT)
 
 const hashedPassword = bcrypt.hashSync(password, salt);
 
