@@ -27,7 +27,7 @@ const loginRoute = require("./src/routes/user/loginRoute");
 const userRoute = require("./src/routes/user/userAccountRoute");
 
 const corstOption = {
-  origin: 'https://ngeflyaja.shop',
+  origin: '*',
   credential: true,
   optionSuccessStatus: 200
 }
