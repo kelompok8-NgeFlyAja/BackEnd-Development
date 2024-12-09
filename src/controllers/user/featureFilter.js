@@ -105,8 +105,8 @@ const getFilteredFlights = async (req, res, next) => {
         duration: flight.duration,
         durationMinutes: flight.durationMinutes, // Dipindahkan ke atas
         departureDate: convertDepartureTimeToDate.toLocaleDateString(), // Dipindahkan ke atas
-        departureTime: convertArrivalTimeToDate.toLocaleTimeString(),
-        arrivalDate: convertDepartureTimeToDate.toLocaleDateString(), // Dipindahkan ke atas
+        departureTime: convertDepartureTimeToDate.toLocaleTimeString(),
+        arrivalDate: convertArrivalTimeToDate.toLocaleDateString(), // Dipindahkan ke atas
         arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
         flightCode: flight.flightCode,
         route: flight.route,
