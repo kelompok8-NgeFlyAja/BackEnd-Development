@@ -110,9 +110,9 @@ model Passengers {
   identityNumber  String
   identityCountry String
   identityExpired DateTime @db.Timestamptz(3)
-  seatId          Int      @unique
+  seatId          Int?    @unique
   booking         Bookings @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  seat            Seats    @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  seat            Seats?    @relation(fields: [seatId], references: [id], onDelete: Cascade)
 }
 
 model Payments {
