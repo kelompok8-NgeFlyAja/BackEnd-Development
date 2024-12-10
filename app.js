@@ -19,6 +19,7 @@ const flightRouteUser = require("./src/routes/user/flightRoute");
 const registerRoute = require("./src/routes/user/registerRoute");
 const resetPasswordRoute = require("./src/routes/user/resetPasswordRoute");
 const loginRoute = require("./src/routes/user/loginRoute");
+const userAccountRoute = require("./src/routes/user/userAccountRoute");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,6 +39,7 @@ app.use(search);
 app.use(registerRoute);
 app.use(resetPasswordRoute);
 app.use(loginRoute);
+app.use(userAccountRoute);
 
 app.use(errorHandler);
 
