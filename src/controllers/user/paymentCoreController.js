@@ -193,7 +193,8 @@ const createCCPayment = async (req, res, next) => {
 
 const createVAPayment = async (req, res, next) => {
 	try {
-		const { bookingId, bank } = req.params;
+		// const { bookingId, bank } = req.params;
+		const { bookingId } = req.params;
 		const convertBookingId = parseInt(bookingId);
 		let itemDetails = [];
 
@@ -253,56 +254,103 @@ const createVAPayment = async (req, res, next) => {
 			return sum + item.price * item.quantity;
 		}, 0);
 
-		// const banks = ["mandiri", "bca", "bni", "bri"];
-		// const responses = [];
+		const banks = ["mandiri", "bca", "bni", "bri"];
+		const responses = [];
 
-		// for (let bank of banks) {
-		// 	let midtransResponse;
-		// 	switch (bank) {
-		// 		case "mandiri":
-		// 			midtransResponse = await mandiriDetail(
-		// 				booking,
-		// 				itemDetails,
-		// 				totalPrice
-		// 			);
-		// 			break;
-		// 		case "bca":
-		// 			midtransResponse = await bcaDetail(
-		// 				booking,
-		// 				itemDetails,
-		// 				totalPrice
-		// 			);
-		// 			break;
-		// 		case "bni":
-		// 			midtransResponse = await bniDetail(
-		// 				booking,
-		// 				itemDetails,
-		// 				totalPrice
-		// 			);
-		// 			break;
-		// 		case "bri":
-		// 			midtransResponse = await briDetail(
-		// 				booking,
-		// 				itemDetails,
-		// 				totalPrice
-		// 			);
-		// 			break;
-		// 		default:
-		// 			const error = new Error("Bank not supported");
-		// 			error.statusCode = 400;
-		// 			throw error;
-		// 	}
+		for (let bank of banks) {
+			let midtransResponse;
+			switch (bank) {
+				case "mandiri":
+					midtransResponse = await mandiriDetail(
+						booking,
+						itemDetails,
+						totalPrice
+					);
+					break;
+				case "bca":
+					midtransResponse = await bcaDetail(
+						booking,
+						itemDetails,
+						totalPrice
+					);
+					break;
+				case "bni":
+					midtransResponse = await bniDetail(
+						booking,
+						itemDetails,
+						totalPrice
+					);
+					break;
+				case "bri":
+					midtransResponse = await briDetail(
+						booking,
+						itemDetails,
+						totalPrice
+					);
+					break;
+				default:
+					const error = new Error("Bank not supported");
+					error.statusCode = 400;
+					throw error;
+			}
 
-		// 	if (midtransResponse) {
-		// 		responses.push({
-		// 			bank: bank,
-		// 			vaCode: midtransResponse.biller_code,
-		// 			vaNumber: midtransResponse.bill_key,
-		// 		});
-		// 	}
+			if (midtransResponse) {
+				if (midtransResponse.payment_type === 'bank_transfer') {
+					responses.push({
+						bank: bank,
+						vaNumber: midtransResponse.va_numbers[0].va_number
+					});
+				} else {
+					responses.push({
+						bank: bank,
+						vaCode: midtransResponse.biller_code,
+						vaNumber: midtransResponse.bill_key,
+					});
+				}
+			}
+		}
+
+		if (responses.length > 0) {
+			const newPayment = await prisma.payments.create({
+				data: {
+					booking: convertBookingId,
+					paymentMethod: "Virtual Account	",
+					amount: totalPrice,
+					expiredDate: new Date(Date.now() + 60 * 60 * 1000),
+					status: "Unpaid",
+					booking: {
+						connect: { id: convertBookingId },
+					},
+				},
+			});
+
+			if (newPayment) {
+				return res.status(201).json({
+					status: "success",
+					statusCode: 201,
+					message:
+						"Payment created successfully, Please use the VA Number below to pay!",
+					bankDetails: responses,
+				});
+			}
+		}
+
+		// let midtransResponse;
+		// if (bank === "mandiri") {
+		// 	midtransResponse = await mandiriDetail(booking, itemDetails, totalPrice);
+		// } else if (bank === "bca") {
+		// 	midtransResponse = await bcaDetail(booking, itemDetails, totalPrice);
+		// } else if (bank === "bni") {
+		// 	midtransResponse = await bniDetail(booking, itemDetails, totalPrice);
+		// } else if (bank === "bri") {
+		// 	midtransResponse = await briDetail(booking, itemDetails, totalPrice);
+		// } else {
+		// 	const error = new Error("Bank not supported");
+		// 	error.statusCode = 400;
+		// 	throw error;
 		// }
 
-		// if (responses.length > 0) {
+		// if (midtransResponse) {
 		// 	const newPayment = await prisma.payments.create({
 		// 		data: {
 		// 			booking: convertBookingId,
@@ -321,52 +369,12 @@ const createVAPayment = async (req, res, next) => {
 		// 			status: "success",
 		// 			statusCode: 201,
 		// 			message:
-		// 				"Payment created successfully, Please use the VA Number below to pay!",
-		// 			bankDetails: responses,
+		// 				"Payment created successfully, Please Use The VA Number Below To Pay!",
+		// 			vaCode: midtransResponse.biller_code,
+		// 			vaNumber: midtransResponse.bill_key,
 		// 		});
 		// 	}
 		// }
-
-		let midtransResponse;
-		if (bank === "mandiri") {
-			midtransResponse = await mandiriDetail(booking, itemDetails, totalPrice);
-		} else if (bank === "bca") {
-			midtransResponse = await bcaDetail(booking, itemDetails, totalPrice);
-		} else if (bank === "bni") {
-			midtransResponse = await bniDetail(booking, itemDetails, totalPrice);
-		} else if (bank === "bri") {
-			midtransResponse = await briDetail(booking, itemDetails, totalPrice);
-		} else {
-			const error = new Error("Bank not supported");
-			error.statusCode = 400;
-			throw error;
-		}
-
-		if (midtransResponse) {
-			const newPayment = await prisma.payments.create({
-				data: {
-					booking: convertBookingId,
-					paymentMethod: "Credit Card",
-					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 60 * 60 * 1000),
-					status: "Unpaid",
-					booking: {
-						connect: { id: convertBookingId },
-					},
-				},
-			});
-
-			if (newPayment) {
-				return res.status(201).json({
-					status: "success",
-					statusCode: 201,
-					message:
-						"Payment created successfully, Please Use The VA Number Below To Pay!",
-					vaCode: midtransResponse.biller_code,
-					vaNumber: midtransResponse.bill_key,
-				});
-			}
-		}
 	} catch (error) {
 		if (error.httpStatusCode === "406") {
 			const err = new Error(
@@ -408,44 +416,68 @@ const midtransNotification = async (req, res, next) => {
 			notification
 		);
 		const { order_id, transaction_status, payment_type } = statusResponse;
-
-		console.log(statusResponse, "-> from statusResponse");
+		const bookingId = order_id.split('-')[0];
+		const listBank = [`${bookingId}-mandiri`, `${bookingId}-bca`, `${bookingId}-bri`, `${bookingId}-bni`,]
 
 		let newStatusPayment, newStatusBooking;
-		switch (transaction_status) {
-			case "settlement":
-				newStatusPayment = "Issued";
-				newStatusBooking = "SUCCESS";
-				break;
-			case "capture":
-				newStatusPayment = "Issued";
-				newStatusBooking = "SUCCESS";
-				break;
-			case "pending":
-				newStatusPayment = "Unpaid";
-				newStatusBooking = "PENDING";
-				break;
-			case "cancel":
-				newStatusPayment = "Cancelled";
-				newStatusBooking = "CANCEL";
-				break;
-			case "expire":
-				newStatusPayment = "Cancelled";
-				newStatusBooking = "CANCEL";
-				break;
-			default:
-				newStatusPayment = "Error";
-				newStatusBooking = "Error";
+
+		if (transaction_status === 'settlement' || transaction_status === 'capture') {
+			for (let orderId of listBank) {
+				if (orderId !== order_id) {
+					await core.transaction.cancel({order_id: orderId});
+					console.log(`Cancelled other transaction: ${orderId}`);
+				}
+			}
+
+			await prisma.bookings.update({
+				where: { id: parseInt(bookingId) },
+				data: {
+					status: newStatusBooking,
+				},
+			});
+			await prisma.payments.update({
+				where: { bookingId: parseInt(bookingId) },
+				data: {
+					paymentMethod: payment_type,
+					status: newStatusPayment,
+				},
+			});
 		}
 
+		// switch (transaction_status) {
+		// 	case "settlement":
+		// 		newStatusPayment = "Issued";
+		// 		newStatusBooking = "SUCCESS";
+		// 		break;
+		// 	case "capture":
+		// 		newStatusPayment = "Issued";
+		// 		newStatusBooking = "SUCCESS";
+		// 		break;
+		// 	case "pending":
+		// 		newStatusPayment = "Unpaid";
+		// 		newStatusBooking = "PENDING";
+		// 		break;
+		// 	case "cancel":
+		// 		newStatusPayment = "Cancelled";
+		// 		newStatusBooking = "CANCEL";
+		// 		break;
+		// 	case "expire":
+		// 		newStatusPayment = "Cancelled";
+		// 		newStatusBooking = "CANCEL";
+		// 		break;
+		// 	default:
+		// 		newStatusPayment = "Error";
+		// 		newStatusBooking = "Error";
+		// }
+
 		await prisma.bookings.update({
-			where: { id: parseInt(order_id) },
+			where: { id: parseInt(bookingId) },
 			data: {
 				status: newStatusBooking,
 			},
 		});
 		await prisma.payments.update({
-			where: { bookingId: parseInt(order_id) },
+			where: { bookingId: parseInt(bookingId) },
 			data: {
 				paymentMethod: payment_type,
 				status: newStatusPayment,
