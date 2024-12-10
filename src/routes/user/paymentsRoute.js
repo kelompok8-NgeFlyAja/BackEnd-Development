@@ -13,7 +13,8 @@ router.post('/ticket-payment/:bookingId?', authMiddleware, createSnapPayment);
 
 //This is Core
 router.post('/payment-creditcard/:bookingId?', authMiddleware, createCCPayment);
-router.post('/payment-va/:bookingId?/:bank?', authMiddleware, createVAPayment);
+router.post('/payment-va/:bookingId?', authMiddleware, createVAPayment);
+// router.post('/payment-va/:bookingId?/:bank?', authMiddleware, createVAPayment);
 
 //This is the Callback
 router.post('/midtrans/notification', midtransNotification);
