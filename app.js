@@ -35,7 +35,7 @@ const corstOption = {
 //This Comment is for testing the github action 5
 //It Shoul Work Fine
 app.get("/test", (req, res) => {
-	res.send("Now I try the action and it should be fine! now it should add this sentences too (2)");
+	res.send("Now I try the action and it should be fine! now it should add this sentences too (3)");
 });
 
 app.use(cors(corstOption));

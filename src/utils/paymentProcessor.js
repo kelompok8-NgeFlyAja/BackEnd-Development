@@ -4,10 +4,11 @@ const expiryDate = new Date()
 expiryDate.setMinutes(expiryDate.getMinutes() + 5)
 
 const mandiriDetail = async (booking, itemDetails, totalPrice) => {
+    const idBooking = `${booking.id}-mandiri`
     const transactionDetails = {
         payment_type: "echannel",
         transaction_details: {
-            order_id: booking.id,
+            order_id: idBooking,
             gross_amount: totalPrice,
         },
         customer_details: {
@@ -34,10 +35,11 @@ const mandiriDetail = async (booking, itemDetails, totalPrice) => {
 };
 
 const bcaDetail = async (booking, itemDetails, totalPrice) => {
+    const idBooking = `${booking.id}-bca`
     const transactionDetails = {
         payment_type: "bank_transfer",
         transaction_details: {
-            order_id: booking.id,
+            order_id: idBooking,
             gross_amount: totalPrice,
         },
         customer_details: {
@@ -58,10 +60,11 @@ const bcaDetail = async (booking, itemDetails, totalPrice) => {
 };
 
 const bniDetail = async (booking, itemDetails, totalPrice) => {
+    const idBooking = `${booking.id}-bni`
     const transactionDetails = {
         payment_type: "bank_transfer",
         transaction_details: {
-            order_id: booking.id,
+            order_id: idBooking,
             gross_amount: totalPrice,
         },
         customer_details: {
@@ -82,10 +85,11 @@ const bniDetail = async (booking, itemDetails, totalPrice) => {
 };
 
 const briDetail = async (booking, itemDetails, totalPrice) => {
+    const idBooking = `${booking.id}-bri`
     const transactionDetails = {
         payment_type: "bank_transfer",
         transaction_details: {
-            order_id: booking.id,
+            order_id: idBooking,
             gross_amount: totalPrice,
         },
         customer_details: {
