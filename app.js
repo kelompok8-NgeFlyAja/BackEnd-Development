@@ -31,10 +31,16 @@ const userRoutes = [
 ];
 
 const corstOption = {
-	origin: "*",
-	credential: true,
-	optionSuccessStatus: 200,
-};
+  origin: '*',
+  credential: true,
+  optionSuccessStatus: 200
+}
+
+//This Comment is for testing the github action 6
+//It Shoul Work Fine
+app.get("/test", (req, res) => {
+	res.send("Now I try the action and it should be fine! now it should add this sentences too (4)");
+});
 
 app.use(cors(corstOption));
 app.use(express.json());
