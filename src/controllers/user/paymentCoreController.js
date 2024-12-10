@@ -84,6 +84,14 @@ const createCCPayment = async (req, res, next) => {
 			},
 		});
 
+		if (booking.status !== "PENDING") {
+			const error = new Error(
+				"This Transaction Has Already been Finished! Please Make A New One"
+			);
+			error.statusCode = 409;
+			throw error;
+		}
+
 		const seatClass = booking.flight.route.seatClass;
 
 		if (!booking) {
@@ -216,6 +224,14 @@ const createVAPayment = async (req, res, next) => {
 			},
 		});
 
+		if (booking.status !== "PENDING") {
+			const error = new Error(
+				"This Transaction Has Already been Finished! Please Make A New One"
+			);
+			error.statusCode = 409;
+			throw error;
+		}
+
 		const seatClass = booking.flight.route.seatClass;
 
 		if (!booking) {
@@ -295,10 +311,10 @@ const createVAPayment = async (req, res, next) => {
 			}
 
 			if (midtransResponse) {
-				if (midtransResponse.payment_type === 'bank_transfer') {
+				if (midtransResponse.payment_type === "bank_transfer") {
 					responses.push({
 						bank: bank,
-						vaNumber: midtransResponse.va_numbers[0].va_number
+						vaNumber: midtransResponse.va_numbers[0].va_number,
 					});
 				} else {
 					responses.push({
@@ -316,7 +332,7 @@ const createVAPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 60 * 60 * 1000),
+					expiredDate: new Date(Date.now() + 30 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
@@ -416,30 +432,38 @@ const midtransNotification = async (req, res, next) => {
 			notification
 		);
 		const { order_id, transaction_status, payment_type } = statusResponse;
-		const bookingId = order_id.split('-')[0];
-		const listBank = [`${bookingId}-mandiri`, `${bookingId}-bca`, `${bookingId}-bri`, `${bookingId}-bni`,]
+		const bookingId = order_id.split("-")[0];
+		const listBank = [
+			`${bookingId}-mandiri`,
+			`${bookingId}-bca`,
+			`${bookingId}-bri`,
+			`${bookingId}-bni`,
+		];
 
 		let newStatusPayment, newStatusBooking;
 
-		if (transaction_status === 'settlement' || transaction_status === 'capture') {
+		if (
+			transaction_status === "settlement" ||
+			transaction_status === "capture"
+		) {
 			for (let orderId of listBank) {
+				console.log(orderId, "-> order id from for");
 				if (orderId !== order_id) {
-					await core.transaction.cancel({order_id: orderId});
-					console.log(`Cancelled other transaction: ${orderId}`);
+					await core.transaction.cancel(orderId);
 				}
 			}
 
 			await prisma.bookings.update({
 				where: { id: parseInt(bookingId) },
 				data: {
-					status: newStatusBooking,
+					status: "SUCCESS",
 				},
 			});
 			await prisma.payments.update({
 				where: { bookingId: parseInt(bookingId) },
 				data: {
 					paymentMethod: payment_type,
-					status: newStatusPayment,
+					status: "Issued",
 				},
 			});
 		}
