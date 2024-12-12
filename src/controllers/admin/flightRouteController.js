@@ -4,27 +4,75 @@ const prisma = new PrismaClient();
 // Add a new route
 const addNewRoute = async (req, res, next) => {
   try {
-    const { seatClassId, departureId, arrivalId } = req.body;
+    const { seatClassId, departureAirportCode, arrivalAirportCode } = req.body;
 
     // Validasi input
-    if (!seatClassId || !departureId || !arrivalId) {
-      return res.status(400).json({ message: "All fields are required!" });
+    if (!seatClassId || !departureAirportCode || !arrivalAirportCode) {
+      const error = new Error("All fields are required!");
+      error.status = 400;
+      throw error;
     }
 
+    const departureAirport = await prisma.airports.findFirst({
+      where: {
+        airportCode: {
+          equals: departureAirportCode,
+          mode: "insensitive", 
+        },
+      },
+    });
+
+    if (!departureAirport) {
+      const error = new Error("Departure airport not found!");
+      error.status = 404;
+      throw error;
+    }
+
+    const arrivalAirport = await prisma.airports.findFirst({
+      where: {
+        airportCode: {
+          equals: arrivalAirportCode,
+          mode: "insensitive", 
+        },
+      },
+    });
+
+    if (!arrivalAirport) {
+      const error = new Error("Arrival airport not found!");
+      error.status = 404;
+      throw error;
+    }
+
+    const existingRoute = await prisma.routes.findFirst({
+      where: {
+        seatClassId: Number(seatClassId),
+        departureAirportId: departureAirport.id,
+        arrivalAirportId: arrivalAirport.id,
+      },
+    });
+
+    if (existingRoute) {
+      const error = new Error("Route with these details already exists!");
+      error.status = 400;
+      throw error;
+    }
+    
     // Tambahkan route baru
     const newRoute = await prisma.routes.create({
       data: {
         seatClassId: Number(seatClassId),
-        departureAirportId: Number(departureId),
-        arrivalAirportId: Number(arrivalId),
+        departureAirportId: Number(departureAirport.id), 
+        arrivalAirportId: Number(arrivalAirport.id), 
       },
     });
 
-    return res
-      .status(201)
-      .json({ message: "Route added successfully!", data: newRoute });
+    return res.status(201).json({ 
+      status: "success",
+      statusCode: 200,
+      message: "Route added successfully!", 
+      data: newRoute 
+    });
   } catch (error) {
-    console.error(error);
     next(error);
   }
 };
