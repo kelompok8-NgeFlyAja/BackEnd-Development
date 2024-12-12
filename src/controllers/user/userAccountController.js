@@ -7,6 +7,7 @@ const updateUser = async (req, res, next) => {
     try {
         const userId = req.user.id; 
         const { name, phoneNumber, email } = req.body;
+
         if (!name && !phoneNumber && !email) {
             const error = new Error("At least one field is required to update.");
             error.status = 400;
@@ -16,6 +17,7 @@ const updateUser = async (req, res, next) => {
         if (name) data.name = name;
         if (phoneNumber) data.phoneNumber = phoneNumber;
         if (email) data.email = email;
+
         const updatedUser = await prisma.users.update({
             where: { id: userId },
             data: data,
