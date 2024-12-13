@@ -168,7 +168,7 @@ const createCCPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Credit Card",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 60 * 60 * 1000),
+					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
@@ -199,9 +199,8 @@ const createCCPayment = async (req, res, next) => {
 	}
 };
 
-const createVAPayment = async (req, res, next) => {
+const createPayment = async (req, res, next) => {
 	try {
-		// const { bookingId, bank } = req.params;
 		const { bookingId } = req.params;
 		const convertBookingId = parseInt(bookingId);
 		let itemDetails = [];
@@ -332,7 +331,7 @@ const createVAPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 30 * 1000),
+					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
@@ -341,6 +340,26 @@ const createVAPayment = async (req, res, next) => {
 			});
 
 			if (newPayment) {
+				const timeZone = "Asia/Jakarta";
+				const notifExpDate = moment
+					.utc(newPayment.expiredDate)
+					.tz(timeZone)
+					.format("YYYY-MM-DD HH:mm:ss");
+
+				const convertNotifExpDate = new Date(notifExpDate);
+				const expDate = convertNotifExpDate.toLocaleDateString();
+				const expTime = convertNotifExpDate.toLocaleTimeString();
+
+				await prisma.notifications.create({
+					data: {
+						userId: booking.userId,
+						title: "Payment Status (Unpaid)",
+						description: `Finish your Payment before ${expDate} at ${expTime}!!!`,
+						createdAt: new Date(Date.now()),
+						isRead: false
+					},
+				});
+
 				return res.status(201).json({
 					status: "success",
 					statusCode: 201,
@@ -350,47 +369,6 @@ const createVAPayment = async (req, res, next) => {
 				});
 			}
 		}
-
-		// let midtransResponse;
-		// if (bank === "mandiri") {
-		// 	midtransResponse = await mandiriDetail(booking, itemDetails, totalPrice);
-		// } else if (bank === "bca") {
-		// 	midtransResponse = await bcaDetail(booking, itemDetails, totalPrice);
-		// } else if (bank === "bni") {
-		// 	midtransResponse = await bniDetail(booking, itemDetails, totalPrice);
-		// } else if (bank === "bri") {
-		// 	midtransResponse = await briDetail(booking, itemDetails, totalPrice);
-		// } else {
-		// 	const error = new Error("Bank not supported");
-		// 	error.statusCode = 400;
-		// 	throw error;
-		// }
-
-		// if (midtransResponse) {
-		// 	const newPayment = await prisma.payments.create({
-		// 		data: {
-		// 			booking: convertBookingId,
-		// 			paymentMethod: "Credit Card",
-		// 			amount: totalPrice,
-		// 			expiredDate: new Date(Date.now() + 60 * 60 * 1000),
-		// 			status: "Unpaid",
-		// 			booking: {
-		// 				connect: { id: convertBookingId },
-		// 			},
-		// 		},
-		// 	});
-
-		// 	if (newPayment) {
-		// 		return res.status(201).json({
-		// 			status: "success",
-		// 			statusCode: 201,
-		// 			message:
-		// 				"Payment created successfully, Please Use The VA Number Below To Pay!",
-		// 			vaCode: midtransResponse.biller_code,
-		// 			vaNumber: midtransResponse.bill_key,
-		// 		});
-		// 	}
-		// }
 	} catch (error) {
 		if (error.httpStatusCode === "406") {
 			const err = new Error(
@@ -459,6 +437,8 @@ const midtransNotification = async (req, res, next) => {
 					status: "SUCCESS",
 				},
 			});
+			console.log(bookingId, '-> from bookingId');
+			
 			await prisma.payments.update({
 				where: { bookingId: parseInt(bookingId) },
 				data: {
@@ -467,33 +447,6 @@ const midtransNotification = async (req, res, next) => {
 				},
 			});
 		}
-
-		// switch (transaction_status) {
-		// 	case "settlement":
-		// 		newStatusPayment = "Issued";
-		// 		newStatusBooking = "SUCCESS";
-		// 		break;
-		// 	case "capture":
-		// 		newStatusPayment = "Issued";
-		// 		newStatusBooking = "SUCCESS";
-		// 		break;
-		// 	case "pending":
-		// 		newStatusPayment = "Unpaid";
-		// 		newStatusBooking = "PENDING";
-		// 		break;
-		// 	case "cancel":
-		// 		newStatusPayment = "Cancelled";
-		// 		newStatusBooking = "CANCEL";
-		// 		break;
-		// 	case "expire":
-		// 		newStatusPayment = "Cancelled";
-		// 		newStatusBooking = "CANCEL";
-		// 		break;
-		// 	default:
-		// 		newStatusPayment = "Error";
-		// 		newStatusBooking = "Error";
-		// }
-
 		await prisma.bookings.update({
 			where: { id: parseInt(bookingId) },
 			data: {
@@ -508,6 +461,20 @@ const midtransNotification = async (req, res, next) => {
 			},
 		});
 
+		const booking = await prisma.bookings.findUnique({
+			where: {orderId: bookingId}
+		});
+
+		await prisma.notifications.create({
+			data: {
+				userId: booking.userId,
+				title: "Payment Status (Paid)",
+				description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
+				createdAt: new Date(Date.now()),
+				isRead: false
+			},
+		});
+
 		res.status(200).json({ message: "Payment status updated" });
 	} catch (error) {
 		next(error);
@@ -516,6 +483,6 @@ const midtransNotification = async (req, res, next) => {
 
 module.exports = {
 	createCCPayment,
-	createVAPayment,
+	createPayment,
 	midtransNotification,
 };

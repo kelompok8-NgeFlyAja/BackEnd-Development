@@ -43,6 +43,22 @@ const startCronJob = () => {
 						status: "CANCEL",
 					},
 				});
+
+				const booking = await prisma.bookings.findUnique({
+					where: {
+						id: payment.bookingId
+					}
+				})
+
+				await prisma.notifications.create({
+					data: {
+						userId: booking.userId,
+						title: "Payment Status (Cancelled)",
+						description: `Your Transaction Has Been Cancelled Because it Passed the Expired Date!`,
+						createdAt: new Date(Date.now()),
+						isRead: false
+					},
+				});
 	
 				console.log(
 					`Payment with Booking ID ${payment.bookingId} has been marked as expired and canceled.`
