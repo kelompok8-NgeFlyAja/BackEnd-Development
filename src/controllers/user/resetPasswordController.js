@@ -32,7 +32,7 @@ const verifyEmail = async (req, res, next) => {
                 }
             });
 
-            const resetUrl = `http://ngeflyaja.shop/verify-token/${token}`;
+            const resetUrl = `http://localhost:5173/verify-token/${token}`;
 
             const mailOptions = {
                 from: '"NgeFlyAja" <no-reply@ngeflyaja.com>',
