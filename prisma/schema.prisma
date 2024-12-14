@@ -74,6 +74,7 @@ model Users {
   password    String
   isActivated Boolean
   role        String     @default("user")
+  notifications Notifications[]
   bookings    Bookings[]
 }
 
@@ -109,9 +110,9 @@ model Passengers {
   identityNumber  String
   identityCountry String
   identityExpired DateTime @db.Timestamptz(3)
-  seatId          Int      @unique
+  seatId          Int?    @unique
   booking         Bookings @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  seat            Seats    @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  seat            Seats?    @relation(fields: [seatId], references: [id], onDelete: Cascade)
 }
 
 model Payments {
@@ -141,4 +142,14 @@ model SeatClasses {
   priceChild Int
   priceBaby  Int
   route      Routes?
+}
+
+model Notifications {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String
+  createdAt   DateTime @db.Timestamptz(3)
+  isRead      Boolean
+  user        Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

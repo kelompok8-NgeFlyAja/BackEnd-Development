@@ -15,7 +15,7 @@ const verifyEmail = async (req, res, next) => {
             }
         });
         if (!user) {
-            throw { error: 'Not found', status: 400, message: 'Email tidak ditemukan' };
+            throw { error: 'Not found', statusCode: 400, message: 'Email tidak ditemukan' };
         } else {
             const token = jwt.sign({
                 email: user.email,
@@ -46,11 +46,11 @@ const verifyEmail = async (req, res, next) => {
 
             transporter.sendMail(mailOptions, (err, info) => {
                 if (err) {
-                    throw { error: 'Internal Server Error', status: 500, message: 'Gagal mengirim email' };
+                    throw { error: 'Internal Server Error', statusCode: 500, message: 'Gagal mengirim email' };
                 } else {
                     res.status(200).json({
                         message: 'Tautan reset password terkirim',
-                        status: 200,
+                        statusCode: 200,
                         token: token,
                     });
                 }
@@ -66,16 +66,16 @@ const verifyToken = (req, res, next) => {
         const { token } = req.params;
 
         if (!token) {
-            throw { error: 'Bad Request', status: 400, message: 'Token diperlukan' };
+            throw { error: 'Bad Request', statusCode: 400, message: 'Token diperlukan' };
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
         if (!decoded || !decoded.id) {
-            throw { error: 'Unauthorized', status: 401, message: 'Token tidak valid' };
+            throw { error: 'Unauthorized', statusCode: 401, message: 'Token tidak valid' };
         }
         res.status(200).json({
             message: 'Token valid',
-            status: 200,
+            statusCode: 200,
             data: decoded,
         });
     } catch (error) {
@@ -89,20 +89,20 @@ const resetPassword = async (req, res, next) => {
         const { newPassword, confirmPassword } = req.body;
 
         if (!token || !newPassword) {
-            throw { error: 'Bad Request', status: 400, message: 'Token dan password diperlukan' };
+            throw { error: 'Bad Request', statusCode: 400, message: 'Token dan password diperlukan' };
         }
 
         if (newPassword !== confirmPassword) {
-            throw { error: 'Bad Request', status: 400, message: 'Password tidak sama' };
+            throw { error: 'Bad Request', statusCode: 400, message: 'Password tidak sama' };
         }
 
         if (newPassword.length < 8) {
-            throw { error: 'Bad Request', status: 400, message: 'Password minimal 8 karakter' };
+            throw { error: 'Bad Request', statusCode: 400, message: 'Password minimal 8 karakter' };
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
         if (!decoded || !decoded.id) {
-            throw { error: 'Unauthorized', status: 401, message: 'Token tidak valid' };
+            throw { error: 'Unauthorized', statusCode: 401, message: 'Token tidak valid' };
         }
 
         const hashedPassword = bcrypt.hashSync(newPassword, BCRYPT_SALT);
@@ -114,7 +114,7 @@ const resetPassword = async (req, res, next) => {
 
         res.status(200).json({
             message: 'Password berhasil direset, silahkan login kembali',
-            status: 200,
+            statusCode: 200,
             data: updateUser,
         });
     } catch (error) {
@@ -122,4 +122,52 @@ const resetPassword = async (req, res, next) => {
     }
 }
 
-module.exports = { verifyEmail, resetPassword, verifyToken };
+const updatePassword = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { oldPassword, newPassword, confirmPassword } = req.body;
+
+        if (!id || !oldPassword || !newPassword || !confirmPassword) {
+            throw { error: 'Bad Request', statusCode: 400, message: 'Semua field diperlukan' };
+        }
+
+        if (newPassword !== confirmPassword) {
+            throw { error: 'Bad Request', statusCode: 400, message: 'Password tidak sama' };
+        }
+
+        if (newPassword.length < 8) {
+            throw { error: 'Bad Request', statusCode: 400, message: 'Password minimal 8 karakter' };
+        }
+
+        const user = await prisma.users.findUnique({
+            where: { id: parseInt(id) }
+        });
+
+        if (!user) {
+            throw { error: 'Not Found', statusCode: 404, message: 'User tidak ditemukan' };
+        }
+
+        const isPasswordMatch = bcrypt.compareSync(oldPassword, user.password);
+        if (!isPasswordMatch) {
+            throw { error: 'Bad Request', statusCode: 400, message: 'Password lama salah' };
+        }
+
+        const hashedPassword = bcrypt.hashSync(newPassword, BCRYPT_SALT);
+
+        const updateUser = await prisma.users.update({
+            where: { id: parseInt(id) },
+            data: { password: hashedPassword },
+        });
+
+        res.status(200).json({
+            message: 'Password berhasil diubah',
+            statusCode: 200,
+            data: updateUser,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { verifyEmail, resetPassword, verifyToken, updatePassword };

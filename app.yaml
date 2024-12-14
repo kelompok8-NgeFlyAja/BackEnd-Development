@@ -1,0 +1,10 @@
+runtime: nodejs22
+
+instance_class: F4
+
+health_check:
+  enable_health_check: true
+
+handlers:
+  - url: /.*  
+    script: auto

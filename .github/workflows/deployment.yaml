@@ -1,0 +1,50 @@
+name: Deploy Node.js Backend API to Google App Engine
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        
+    - name: Deploy to Google App Engine
+      uses: google-github-actions/deploy-appengine@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        env_vars: |
+            NODE_ENV=production
+            PASSWORD_SALT=${{ secrets.PASSWORD_SALT }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SALT=${{ secrets.SALT }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            IMAGEKIT_URL=${{ secrets.IMAGEKIT_URL }}
+            IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
+            IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
+            USER_EMAIL=${{ secrets.USER_EMAIL }}
+            USER_APP=${{ secrets.USER_APP }}
+            MIDTRANS_CLIENT_KEY=${{ secrets.MIDTRANS_CLIENT_KEY }}
+            MIDTRANS_SERVER_KEY=${{ secrets.MIDTRANS_SERVER_KEY }}
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
