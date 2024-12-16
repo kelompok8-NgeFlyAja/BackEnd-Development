@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-	require("dotenv").config();
+  require("dotenv").config();
 }
 
 const express = require("express");
@@ -39,7 +39,7 @@ const corstOption = {
 //This Comment is for testing the github action 6
 //It Shoul Work Fine
 app.get("/test", (req, res) => {
-	res.send("Now I try the action and it should be fine! now it should add this sentences too (4)");
+  res.send("Now I try the action and it should be fine! now it should add this sentences too (4)");
 });
 
 app.use(cors(corstOption));
@@ -47,13 +47,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-startCronJob();
+// startCronJob();
 
 adminRoutes.forEach(route => app.use(route));
 userRoutes.forEach(route => app.use(route));
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-	console.log(`-> Listening on PORT: ${PORT}`);
-});
+// app.listen(PORT, () => {
+// 	console.log(`-> Listening on PORT: ${PORT}`);
+// });
+
+module.exports = app
