@@ -71,7 +71,7 @@ const getTicketDetails = async (req, res, next) => {
 		const convertDepartureTimeToDate = new Date(departureTimeConvert);
 		const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
 
-		return res.status(200).json({
+		res.status(200).json({
 			status: "Success",
 			statusCode: 200,
 			message: "Flight details retrieved successfully",
@@ -110,96 +110,124 @@ const createBooking = async (req, res, next) => {
 			babyPassenger,
 		} = req.body;
 		const timeZone = "Asia/Jakarta";
-        console.log(bookingTicket.flightId);
-        
+		console.log(bookingTicket.flightId);
 
-		if (!bookingTicket || !passengerDetail || !bookingTicket.flightId || !bookingTicket.bookerName || !bookingTicket.bookerEmail || !bookingTicket.bookerPhone || passengerDetail.length === 0) {
-            const error = new Error("Make Sure To Fill All The Booker Forms!");
-            error.statusCode = 400;
-            throw error;
-        }
-		
+		if (
+			!bookingTicket ||
+			!passengerDetail ||
+			!bookingTicket.flightId ||
+			!bookingTicket.bookerName ||
+			!bookingTicket.bookerEmail ||
+			!bookingTicket.bookerPhone ||
+			passengerDetail.length === 0
+		) {
+			const error = new Error("Make Sure To Fill All The Booker Forms!");
+			error.statusCode = 400;
+			throw error;
+		}
+
 		for (let i = 0; i < passengerDetail.length; i++) {
-			if (!passengerDetail[i].title || !passengerDetail[i].fullName || !passengerDetail[i].birthDate || !passengerDetail[i].nationality || !passengerDetail[i].identityNumber || !passengerDetail[i].identityCountry || !passengerDetail[i].identityExpired || !passengerDetail[i].seatName) {
-				const error = new Error("Make Sure To Fill All The Passenger Forms!");
+			if (
+				!passengerDetail[i].title ||
+				!passengerDetail[i].fullName ||
+				!passengerDetail[i].birthDate ||
+				!passengerDetail[i].nationality ||
+				!passengerDetail[i].identityNumber ||
+				!passengerDetail[i].identityCountry ||
+				!passengerDetail[i].identityExpired ||
+				!passengerDetail[i].seatName
+			) {
+				const error = new Error(
+					"Make Sure To Fill All The Passenger Forms!"
+				);
 				error.statusCode = 400;
 				throw error;
 			}
 		}
 
-		if (!Number.isInteger(adultPassenger) || !Number.isInteger(childPassenger) || !Number.isInteger(babyPassenger)) {
-            const error = new Error("Passenger counts must be Number!");
-            error.statusCode = 400;
-            throw error;
-        }
+		if (
+			!Number.isInteger(adultPassenger) ||
+			!Number.isInteger(childPassenger) ||
+			!Number.isInteger(babyPassenger)
+		) {
+			const error = new Error("Passenger counts must be Number!");
+			error.statusCode = 400;
+			throw error;
+		}
 		const totalPassengers = adultPassenger + childPassenger + babyPassenger;
-        if (totalPassengers !== passengerDetail.length) {
-            const error = new Error("The total of passenger details does not match the number of passengers provided!");
-            error.statusCode = 400;
-            throw error;
-        }
+		if (totalPassengers !== passengerDetail.length) {
+			const error = new Error(
+				"The total of passenger details does not match the number of passengers provided!"
+			);
+			error.statusCode = 400;
+			throw error;
+		}
 
 		const planeInfo = await prisma.flights.findUnique({
-            where: { id: bookingTicket.flightId },
-            select: { planeId: true },
-        });
+			where: { id: bookingTicket.flightId },
+			select: { planeId: true },
+		});
 
 		if (!planeInfo) {
-            const error = new Error("Plane Not Found");
-            error.statusCode = 400;
-            throw error;
-        }
+			const error = new Error("Plane Not Found");
+			error.statusCode = 400;
+			throw error;
+		}
 
 		const planeId = planeInfo.planeId;
 
 		for (let i = 0; i < passengerDetail.length; i++) {
-            const selectedSeatName = passengerDetail[i].seatName;
-            const selectedSeat = await prisma.seats.findFirst({
-                where: {
-                    seatNumber: selectedSeatName,
-                    planeId: planeId,
-                },
-            });
+			const selectedSeatName = passengerDetail[i].seatName;
+			const selectedSeat = await prisma.seats.findFirst({
+				where: {
+					seatNumber: selectedSeatName,
+					planeId: planeId,
+				},
+			});
 
-            if (!selectedSeat) {
-				const error = new Error(`No available seat for passenger ${i + 1}`);
+			if (!selectedSeat) {
+				const error = new Error(
+					`No available seat for passenger ${i + 1}`
+				);
 				error.statusCode = 400;
 				throw error;
-            }
+			}
 
-            if (!selectedSeat.isAvailable) {
-				const error = new Error(`Seat ${selectedSeatName} is already taken`);
+			if (!selectedSeat.isAvailable) {
+				const error = new Error(
+					`Seat ${selectedSeatName} is already taken`
+				);
 				error.statusCode = 400;
 				throw error;
-            }
+			}
 
-            await prisma.seats.update({
-                where: { id: selectedSeat.id },
-                data: { isAvailable: false },
-            });
+			await prisma.seats.update({
+				where: { id: selectedSeat.id },
+				data: { isAvailable: false },
+			});
 
-            const dateBirth = moment
-                .utc(`${passengerDetail[i].birthDate}T00:00:00Z`)
-                .tz(timeZone)
-                .format();
-            const dateExpired = moment
-                .utc(`${passengerDetail[i].identityExpired}T00:00:00Z`)
-                .tz(timeZone)
-                .format();
+			const dateBirth = moment
+				.utc(`${passengerDetail[i].birthDate}T00:00:00Z`)
+				.tz(timeZone)
+				.format();
+			const dateExpired = moment
+				.utc(`${passengerDetail[i].identityExpired}T00:00:00Z`)
+				.tz(timeZone)
+				.format();
 
-            passengerData.push({
-                bookingId: null,
-                title: passengerDetail[i].title,
-                fullName: passengerDetail[i].fullName,
-                familyName: passengerDetail[i].familyName,
-                birthDate: dateBirth,
-                nationality: passengerDetail[i].nationality,
-                identityNumber: passengerDetail[i].identityNumber,
-                identityCountry: passengerDetail[i].identityCountry,
-                identityExpired: dateExpired,
-                seatId: selectedSeat.id,
-            });
-        }
+			passengerData.push({
+				bookingId: null,
+				title: passengerDetail[i].title,
+				fullName: passengerDetail[i].fullName,
+				familyName: passengerDetail[i].familyName,
+				birthDate: dateBirth,
+				nationality: passengerDetail[i].nationality,
+				identityNumber: passengerDetail[i].identityNumber,
+				identityCountry: passengerDetail[i].identityCountry,
+				identityExpired: dateExpired,
+				seatId: selectedSeat.id,
+			});
+		}
 
 		const randomCode = await randomGenerator();
 		const randomId = await randomIdGenerator();
@@ -253,8 +281,8 @@ const createBooking = async (req, res, next) => {
 		});
 
 		for (let i = 0; i < passengerData.length; i++) {
-            passengerData[i].bookingId = createdBooking.id;
-        }
+			passengerData[i].bookingId = createdBooking.id;
+		}
 
 		const createdPassengers = await prisma.passengers.createMany({
 			data: passengerData,
@@ -276,5 +304,5 @@ const createBooking = async (req, res, next) => {
 
 module.exports = {
 	createBooking,
-	getTicketDetails
+	getTicketDetails,
 };

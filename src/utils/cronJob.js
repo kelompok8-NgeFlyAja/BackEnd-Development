@@ -5,7 +5,6 @@ const { core } = require("../config/midtrans");
 
 const startCronJob = () => {
 	cron.schedule("*/15 * * * * *", async () => {
-		console.log("Checking for expired payments...");
 		try {
 			const banks = ["mandiri", "bca", "bni", "bri"];
 	
@@ -17,8 +16,6 @@ const startCronJob = () => {
 					},
 				},
 			});
-	
-			console.log(expiredPayments);
 	
 			for (const payment of expiredPayments) {
 				for (let bank of banks) {
@@ -59,10 +56,6 @@ const startCronJob = () => {
 						isRead: false
 					},
 				});
-	
-				console.log(
-					`Payment with Booking ID ${payment.bookingId} has been marked as expired and canceled.`
-				);
 			}
 		} catch (error) {
 			next(error)

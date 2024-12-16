@@ -32,6 +32,7 @@ const verifyEmail = async (req, res, next) => {
                 }
             });
 
+
             const resetUrl = `http://localhost:5173/verify-token/${token}`;
 
             const mailOptions = {
