@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 const newRegister = async (req, res, next) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
-    
+
     //cek apakah semua kolom sudah terisi
     if (!name || !email || !phoneNumber || !password) {
       return res.status(400).json({
@@ -100,7 +100,7 @@ const newRegister = async (req, res, next) => {
 const verifyOtp = async (req, res, next) => {
   try {
     const { otp } = req.body;
-    
+
     if (!otp) {
       return res.status(400).json({
         status: "failed",
@@ -115,9 +115,9 @@ const verifyOtp = async (req, res, next) => {
     );
 
     if (!email) {
-      return res.status(400).json({
+      return res.status(404).json({
         status: "failed",
-        statusCode: 400,
+        statusCode: 404,
         message: "OTP not found or invalid",
       });
     }
@@ -169,7 +169,7 @@ const resendOtp = async (req, res, next) => {
     if (!existingUser) {
       return res.status(404).json({
         status: "failed",
-        statusCode: 400,
+        statusCode: 404,
         message: "User not found",
       });
     }

@@ -69,7 +69,7 @@ describe('Testing For Register User', () => {
 describe('Testing For Verify OTP', () => {
     describe('GET /verify-otp', () => {
         test('It should return 400 if OTP not filled', async () => {
-            const otp = await request(app).get('/verify-otp').send({
+            const otp = await request(app).post('/verify-otp').send({
                 otp: ''
             });
             expect(otp.body).toHaveProperty('statusCode');
@@ -79,13 +79,13 @@ describe('Testing For Verify OTP', () => {
             expect(otp.body).toHaveProperty('message');
             expect(otp.body.message).toBe('OTP is required');
         });
-        test('It should return 400 if OTP not found', async () => {
+        test('It should return 404 if OTP not found', async () => {
             const otp = 123456
-            const checkOTP = await request(app).get('/verify-otp').send({
+            const checkOTP = await request(app).post('/verify-otp').send({
                 otp: otp
             });
             expect(checkOTP.body).toHaveProperty('statusCode');
-            expect(checkOTP.statusCode).toBe(400);
+            expect(checkOTP.statusCode).toBe(404);
             expect(checkOTP.body).toHaveProperty('status');
             expect(checkOTP.body.status).toBe('failed');
             expect(checkOTP.body).toHaveProperty('message');
@@ -111,19 +111,17 @@ describe('Testing For Resend OTP', () => {
             expect(email.body).toHaveProperty('message');
             expect(email.body.message).toBe('Email is required');
         });
-        // test('It should return 400 if email not found', async () => {
-        //     const existingUser = await prisma.users.findUnique({
-        //         where: {
-        //             email: 'test@mail.com'
-        //         }
-        //     });
-        //     expect(existingUser.body).toHaveProperty('statusCode');
-        //     expect(existingUser.statusCode).toBe(400);
-        //     expect(existingUser.body).toHaveProperty('status');
-        //     expect(existingUser.body.status).toBe('failed');
-        //     expect(existingUser.body).toHaveProperty('message');
-        //     expect(existingUser.body.message).toBe('User not found');
-        // });
+        test('It should return 404 if email not found', async () => {
+            const existingUser = await request(app).post('/resend-otp').send({
+                email: 'nonexistent@mail.com',
+            });
+            expect(existingUser.body).toHaveProperty('statusCode');
+            expect(existingUser.statusCode).toBe(404);
+            expect(existingUser.body).toHaveProperty('status');
+            expect(existingUser.body.status).toBe('failed');
+            expect(existingUser.body).toHaveProperty('message');
+            expect(existingUser.body.message).toBe('User not found');
+        });
         // test('It should return 400 if OTP is Invalid', async () => {
         // });
         // test('It should return 200 and success message', async () => {
