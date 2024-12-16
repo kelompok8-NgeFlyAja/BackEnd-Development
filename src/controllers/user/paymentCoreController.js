@@ -331,7 +331,7 @@ const createPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
+					expiredDate: new Date(Date.now() + 20 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
@@ -356,7 +356,7 @@ const createPayment = async (req, res, next) => {
 						title: "Payment Status (Unpaid)",
 						description: `Finish your Payment before ${expDate} at ${expTime}!!!`,
 						createdAt: new Date(Date.now()),
-						isRead: false
+						isRead: false,
 					},
 				});
 
@@ -418,14 +418,8 @@ const midtransNotification = async (req, res, next) => {
 			`${bookingId}-bni`,
 		];
 
-		let newStatusPayment, newStatusBooking;
-
-		if (
-			transaction_status === "settlement" ||
-			transaction_status === "capture"
-		) {
+		if ( transaction_status === "settlement" || transaction_status === "capture") {
 			for (let orderId of listBank) {
-				console.log(orderId, "-> order id from for");
 				if (orderId !== order_id) {
 					await core.transaction.cancel(orderId);
 				}
@@ -437,8 +431,7 @@ const midtransNotification = async (req, res, next) => {
 					status: "SUCCESS",
 				},
 			});
-			console.log(bookingId, '-> from bookingId');
-			
+
 			await prisma.payments.update({
 				where: { bookingId: parseInt(bookingId) },
 				data: {
@@ -447,22 +440,9 @@ const midtransNotification = async (req, res, next) => {
 				},
 			});
 		}
-		await prisma.bookings.update({
-			where: { id: parseInt(bookingId) },
-			data: {
-				status: newStatusBooking,
-			},
-		});
-		await prisma.payments.update({
-			where: { bookingId: parseInt(bookingId) },
-			data: {
-				paymentMethod: payment_type,
-				status: newStatusPayment,
-			},
-		});
 
 		const booking = await prisma.bookings.findUnique({
-			where: {orderId: bookingId}
+			where: { id: parseInt(bookingId) },
 		});
 
 		await prisma.notifications.create({
@@ -471,7 +451,7 @@ const midtransNotification = async (req, res, next) => {
 				title: "Payment Status (Paid)",
 				description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
 				createdAt: new Date(Date.now()),
-				isRead: false
+				isRead: false,
 			},
 		});
 
