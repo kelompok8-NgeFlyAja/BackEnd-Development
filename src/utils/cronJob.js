@@ -5,7 +5,6 @@ const { core } = require("../config/midtrans");
 
 const startCronJob = () => {
 	cron.schedule("*/15 * * * * *", async () => {
-		console.log("Checking for expired payments...");
 		try {
 			const banks = ["mandiri", "bca", "bni", "bri"];
 	
@@ -17,8 +16,6 @@ const startCronJob = () => {
 					},
 				},
 			});
-	
-			console.log(expiredPayments);
 	
 			for (const payment of expiredPayments) {
 				for (let bank of banks) {
@@ -43,10 +40,22 @@ const startCronJob = () => {
 						status: "CANCEL",
 					},
 				});
-	
-				console.log(
-					`Payment with Booking ID ${payment.bookingId} has been marked as expired and canceled.`
-				);
+
+				const booking = await prisma.bookings.findUnique({
+					where: {
+						id: payment.bookingId
+					}
+				})
+
+				await prisma.notifications.create({
+					data: {
+						userId: booking.userId,
+						title: "Payment Status (Cancelled)",
+						description: `Your Transaction Has Been Cancelled Because it Passed the Expired Date!`,
+						createdAt: new Date(Date.now()),
+						isRead: false
+					},
+				});
 			}
 		} catch (error) {
 			next(error)
