@@ -199,7 +199,7 @@ const resendOtp = async (req, res, next) => {
       text: `Your new OTP code is ${otp}. Valid for 15 minutes.`,
     });
     res.status(200).json({
-      status: "succes",
+      status: "success",
       statusCode: 200,
       message: "A new OTP has been sent. Please check your email.",
     });
