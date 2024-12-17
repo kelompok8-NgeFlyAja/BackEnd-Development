@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --detectOpenHandles",
     "start": "node app.js",
     "start-dev": "nodemon app.js"
   },
@@ -16,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@types/jest": "^29.5.14",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "ngrok": "^5.0.0-beta.2",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "supertest": "^7.0.0"
   }
 }
