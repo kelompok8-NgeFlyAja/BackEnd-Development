@@ -17,6 +17,7 @@ const adminRoutes = [
   require("./src/routes/admin/flightRoutesRoute"),
   require("./src/routes/admin/promotionRoute"),
   require("./src/routes/admin/flightRoute"),
+  require("./src/routes/admin/seatRoute"),
 ];
 //User
 const userRoutes = [

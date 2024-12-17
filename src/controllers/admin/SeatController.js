@@ -1,6 +1,23 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+const getSeat = async (req, res, next) => {
+	const seats = await prisma.seats.findMany();
+    return res.status(200).json({ seats });
+}
+
+const getSeatById = async (req, res, next) => {
+	const { id } = req.params;
+
+	const seats = await prisma.seats.findMany({
+		where: {
+			planeId: parseInt(id),
+		},
+	});
+
+    return res.status(200).json({ seats });
+}
+
 const resetSeat = async (req, res, next) => {
 	try {
 		const { planeId } = req.params;
@@ -51,4 +68,4 @@ const resetSeat = async (req, res, next) => {
 	}
 };
 
-module.exports = resetSeat;
+module.exports = {resetSeat, getSeat, getSeatById};
