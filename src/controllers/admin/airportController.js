@@ -110,11 +110,17 @@ const deleteAirport = async (req, res, next) => {
 const addMultipleAirports = async (req, res, next) => {
   try {
     const airports = req.body;
+
+    if (!airports || airports.length === 0) {
+      return res.status(400).json({ message: "No data provided" });
+    }
+
     const airportData = airports
       .map((airport) => {
         const { name, city, country, continent, airportCode } = airport;
+
         if (
-          ![name || city || country || continent || airportCode].every(
+          ![name, city, country, continent, airportCode].every(
             (field) => typeof field === "string" && field.trim() !== ""
           )
         ) {
@@ -130,6 +136,11 @@ const addMultipleAirports = async (req, res, next) => {
         };
       })
       .filter(Boolean);
+
+    if (airportData.length === 0) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+
     const newAirports = await prisma.airports.createMany({
       data: airportData,
     });
@@ -139,10 +150,7 @@ const addMultipleAirports = async (req, res, next) => {
       airports: newAirports,
     });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error adding airports", error: error.message });
+    return res.status(500).json({ message: "Error adding airports" });
   }
 };
 

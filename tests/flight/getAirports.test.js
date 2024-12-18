@@ -166,24 +166,51 @@ describe("Airport Controller Integration Tests", () => {
       expect(res.statusCode).toBe(201);
       expect(res.body).toHaveProperty("message", "Airports added successfully");
       expect(res.body.airports).toBeDefined();
+      expect(res.body.airports.count).toBeGreaterThan(0);
     });
 
-    it("should return 500 if input data is invalid", async () => {
+    it("should return 400 if all input data is invalid", async () => {
       const invalidAirports = [
         {
-          name: "Invalid Bulk Airport",
-          city: "Bulk City",
-          country: "Bulk Country",
-          airportCode: "BLK003",
-        }, // Missing "continent"
+          name: "",
+          city: "",
+          country: "",
+          continent: "",
+          airportCode: "",
+        },
       ];
 
       const res = await request(app)
         .post("/add-airports")
         .send(invalidAirports);
 
-      expect(res.statusCode).toBe(500);
-      expect(res.body).toHaveProperty("message", "Error adding airports");
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty("message", "Invalid input data");
+    });
+
+    it("should return 400 if no data is provided", async () => {
+      const res = await request(app).post("/add-airports").send([]);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty("message", "No data provided");
+    });
+
+    it("should return 400 if input data is invalid", async () => {
+      const invalidAirports = [
+        {
+          name: "Invalid Bulk Airport",
+          city: "Bulk City",
+          country: "Bulk Country",
+          airportCode: "BLK003", // Missing "continent"
+        },
+      ];
+
+      const res = await request(app)
+        .post("/add-airports")
+        .send(invalidAirports);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty("message", "Invalid input data");
     });
   });
 });
