@@ -7,14 +7,13 @@ const {
 	deletePlane,
 	updatePlane,
 } = require("../../controllers/admin/planeController");
-const resetSeat = require("../../controllers/admin/resetSeatController");
+const resetSeat = require("../../controllers/admin/SeatController");
 
 router.post("/add-plane", addNewPlane);
 router.get("/get-planes", getPlanes);
 router.get("/get-plane/:id", getPlaneById);
 router.delete("/delete-plane/:id", deletePlane);
 
-router.get("/reset-plane-seat/:planeId", resetSeat);
 // router.put('/update-plane/:id', updatePlane);
 
 module.exports = router;
