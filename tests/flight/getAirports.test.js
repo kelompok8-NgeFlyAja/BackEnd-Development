@@ -209,7 +209,7 @@ describe("Airport Controller Integration Tests", () => {
         .post("/add-airports")
         .send(invalidAirports);
 
-      expect(res.statusCode).toBe(400); // Changed to 400 instead of 500
+      expect(res.statusCode).toBe(400);
       expect(res.body).toHaveProperty("message", "Invalid input data");
     });
   });
