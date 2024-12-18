@@ -2,8 +2,12 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const getSeat = async (req, res, next) => {
-	const seats = await prisma.seats.findMany();
-    return res.status(200).json({ seats });
+	const seats = await prisma.seats.findMany({
+		orderBy: {
+			id: 'asc'
+		}
+	});
+	return res.status(200).json({ seats });
 }
 
 const getSeatById = async (req, res, next) => {
@@ -13,9 +17,27 @@ const getSeatById = async (req, res, next) => {
 		where: {
 			planeId: parseInt(id),
 		},
+		orderBy: {
+			id: 'asc'
+		}
 	});
 
-    return res.status(200).json({ seats });
+	const groupedSeats = {};
+
+	for (const seat of seats) {
+		const col = seat.seatNumber.slice(-1);
+		if (!groupedSeats[col]) {
+			groupedSeats[col] = [];
+		}
+		groupedSeats[col].push(seat);
+	}
+
+	return res.status(200).json({
+		status: "success",
+		statusCode: 200,
+		message: "Successfully fetched seats",
+		data: groupedSeats
+	});
 }
 
 const resetSeat = async (req, res, next) => {
@@ -68,4 +90,4 @@ const resetSeat = async (req, res, next) => {
 	}
 };
 
-module.exports = {resetSeat, getSeat, getSeatById};
+module.exports = { resetSeat, getSeat, getSeatById };
