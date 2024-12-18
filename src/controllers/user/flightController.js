@@ -45,6 +45,9 @@ const getFlightCard = async (req, res, next) => {
             endDate: flight.promotion.endDate.toISOString().split("T")[0],
         }));
 
+        console.log(formattedDestinations);
+        
+
         res.status(200).json({
             status: "success",
             statusCode: 200,
