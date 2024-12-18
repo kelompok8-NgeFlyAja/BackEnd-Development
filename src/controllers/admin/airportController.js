@@ -110,15 +110,24 @@ const deleteAirport = async (req, res, next) => {
 const addMultipleAirports = async (req, res, next) => {
   try {
     const airports = req.body;
+
+    // Validasi input, pastikan ada data yang dikirim
+    if (!airports || airports.length === 0) {
+      return res.status(400).json({ message: "No data provided" });
+    }
+
+    // Memvalidasi setiap bandara dalam array
     const airportData = airports
       .map((airport) => {
         const { name, city, country, continent, airportCode } = airport;
+
+        // Pastikan semua field valid dan bukan string kosong
         if (
-          ![name || city || country || continent || airportCode].every(
+          ![name, city, country, continent, airportCode].every(
             (field) => typeof field === "string" && field.trim() !== ""
           )
         ) {
-          return null;
+          return null; // Jika ada yang tidak valid, abaikan bandara ini
         }
 
         return {
@@ -129,20 +138,27 @@ const addMultipleAirports = async (req, res, next) => {
           airportCode,
         };
       })
-      .filter(Boolean);
+      .filter(Boolean); // Hanya menyertakan bandara yang valid
+
+    // Jika tidak ada bandara yang valid, kembalikan status 400
+    if (airportData.length === 0) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+
+    // Menambahkan data bandara ke database
     const newAirports = await prisma.airports.createMany({
       data: airportData,
     });
 
+    // Mengembalikan respons sukses
     return res.status(201).json({
       message: "Airports added successfully",
       airports: newAirports,
     });
   } catch (error) {
+    // Menangani error yang mungkin terjadi dan mengembalikan status 500
     console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error adding airports", error: error.message });
+    return res.status(500).json({ message: "Error adding airports" });
   }
 };
 
