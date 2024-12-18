@@ -48,15 +48,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-startCronJob();
+// startCronJob();
 
 adminRoutes.forEach(route => app.use(route));
 userRoutes.forEach(route => app.use(route));
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`-> Listening on PORT: ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`-> Listening on PORT: ${PORT}`);
+// });
 
 module.exports = app
