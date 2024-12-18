@@ -1,4 +1,3 @@
-const crypto = require("crypto");
 const moment = require("moment-timezone");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -7,17 +6,20 @@ const randomIdGenerator = require("../../utils/randomIdGenerator");
 
 const getTicketDetails = async (req, res, next) => {
 	try {
-		const { flightId } = req.params;
+		const { flightId, ap, cp, bp } = req.query;
 
 		if (!flightId) {
 			const error = new Error("Flight ID is required");
 			error.statusCode = 400;
 			throw error;
 		}
+		console.log(flightId);
+		
 
 		const flightDetails = await prisma.flights.findUnique({
 			where: { id: parseInt(flightId) },
 			select: {
+				id: true,
 				departureTime: true,
 				arrivalTime: true,
 				route: {
@@ -36,6 +38,8 @@ const getTicketDetails = async (req, res, next) => {
 							select: {
 								name: true,
 								priceAdult: true,
+								priceChild: true,
+								priceBaby: true,
 							},
 						},
 					},
@@ -51,10 +55,12 @@ const getTicketDetails = async (req, res, next) => {
 				},
 			},
 		});
+		console.log(flightDetails);
+		
 
 		if (!flightDetails) {
 			const error = new Error("Flight not found");
-			error.statusCode = 400;
+			error.statusCode = 404;
 			throw error;
 		}
 
@@ -70,6 +76,10 @@ const getTicketDetails = async (req, res, next) => {
 
 		const convertDepartureTimeToDate = new Date(departureTimeConvert);
 		const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+
+		const totalAdultPrice = flightDetails.route.seatClass.priceAdult * ap;
+		const totalChildPrice = flightDetails.route.seatClass.priceChild * cp;
+		const totalBabyPrice = flightDetails.route.seatClass.priceBaby * bp;
 
 		res.status(200).json({
 			status: "Success",
@@ -89,9 +99,10 @@ const getTicketDetails = async (req, res, next) => {
 				arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
 				arrivalDate: convertArrivalTimeToDate.toLocaleDateString(),
 				arrivalAirportName: flightDetails.route.arrivalAirport.name,
-				priceAdult: flightDetails.route.seatClass.priceAdult,
-				priceChild: flightDetails.route.seatClass.priceChild,
-				priceBaby: flightDetails.route.seatClass.priceBaby,
+				priceAdult: totalAdultPrice,
+				priceChild: totalChildPrice,
+				priceBaby: totalBabyPrice,
+				tax: 300000
 			},
 		});
 	} catch (error) {
@@ -247,7 +258,7 @@ const createBooking = async (req, res, next) => {
 				bookerName: bookingTicket.bookerName,
 				bookerEmail: bookingTicket.bookerEmail,
 				bookerPhone: bookingTicket.bookerPhone,
-				totalPrice: 0,
+				totalPrice: 0
 			},
 		});
 
@@ -277,7 +288,7 @@ const createBooking = async (req, res, next) => {
 
 		await prisma.bookings.update({
 			where: { id: createdBooking.id },
-			data: { totalPrice: totalPrice },
+			data: { totalPrice: totalPrice},
 		});
 
 		for (let i = 0; i < passengerData.length; i++) {
