@@ -5,11 +5,10 @@ const getFlightCard = async (req, res, next) => {
   try {
     const { page = 1, limit = 5, continent } = req.query;
 
-    // Validasi nilai page dan limit
     if (isNaN(page) || page < 1 || isNaN(limit) || limit < 1) {
       return res.status(400).json({
         status: "error",
-        message: "Parameter page atau limit tidak valid",
+        message: "Invalid page or limit parameters",
       });
     }
 
