@@ -87,7 +87,7 @@ describe("Integration Test for getFilteredFlights", () => {
     await prisma.$disconnect();
   });
 
-  test("Should retrieve flights sorted by price", async () => {
+  it("Should retrieve flights sorted by price", async () => {
     const res = await request(app).get("/filter-flight").query({
       page: "1",
       limit: "10",
@@ -104,7 +104,7 @@ describe("Integration Test for getFilteredFlights", () => {
     });
   });
 
-  test("Should return error for invalid sortBy or order", async () => {
+  it("Should return error for invalid sortBy or order", async () => {
     const res = await request(app).get("/filter-flight").query({
       sortBy: "invalidSort",
       order: "asc",
@@ -114,7 +114,7 @@ describe("Integration Test for getFilteredFlights", () => {
     expect(res.body.message).toBe("Invalid sortBy or order value");
   });
 
-  test("Should retrieve flights sorted by duration", async () => {
+  it("Should retrieve flights sorted by duration", async () => {
     const res = await request(app).get("/filter-flight").query({
       page: "1",
       limit: "10",
@@ -128,7 +128,7 @@ describe("Integration Test for getFilteredFlights", () => {
     expect(res.body.data[0].duration).toBe("2h 0m");
   });
 
-  test("Should retrieve flights with specific page and limit", async () => {
+  it("Should retrieve flights with specific page and limit", async () => {
     const res = await request(app).get("/filter-flight").query({
       page: "1",
       limit: "5",
