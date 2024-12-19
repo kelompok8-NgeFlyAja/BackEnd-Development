@@ -17,6 +17,7 @@ const adminRoutes = [
   require("./src/routes/admin/flightRoutesRoute"),
   require("./src/routes/admin/promotionRoute"),
   require("./src/routes/admin/flightRoute"),
+  require("./src/routes/admin/seatRoute"),
 ];
 //User
 const userRoutes = [
@@ -28,6 +29,7 @@ const userRoutes = [
   require("./src/routes/user/resetPasswordRoute"),
   require("./src/routes/user/userAccountRoute"),
   require("./src/routes/user/loginRoute"),
+  require("./src/routes/user/notificationRoutes"),
 ];
 
 const corstOption = {
@@ -47,15 +49,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// startCronJob();
+startCronJob();
 
 adminRoutes.forEach(route => app.use(route));
 userRoutes.forEach(route => app.use(route));
 
 app.use(errorHandler);
 
-// app.listen(PORT, () => {
-// 	console.log(`-> Listening on PORT: ${PORT}`);
-// });
+app.listen(PORT, () => {
+  console.log(`-> Listening on PORT: ${PORT}`);
+});
 
-module.exports = app
+// module.exports = app

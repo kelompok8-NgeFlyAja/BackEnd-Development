@@ -126,6 +126,13 @@ const createCCPayment = async (req, res, next) => {
 			});
 		}
 
+		itemDetails.push({
+			id: `tax`,
+			price: parseInt(booking.tax),
+			quantity: 1,
+			name: `Tax`,
+		});
+
 		const totalPrice = itemDetails.reduce((sum, item) => {
 			return sum + item.price * item.quantity;
 		}, 0);
@@ -177,12 +184,36 @@ const createCCPayment = async (req, res, next) => {
 			});
 
 			if (newPayment) {
-				return res.status(201).json({
+				await prisma.bookings.update({
+					where: { id: parseInt(convertBookingId) },
+					data: {
+						status: "SUCCESS",
+					},
+				});
+	
+				await prisma.payments.update({
+					where: { bookingId: parseInt(convertBookingId) },
+					data: {
+						paymentMethod: "Credit Card",
+						status: "Issued",
+					},
+				});
+
+				await prisma.notifications.create({
+					data: {
+						userId: booking.userId,
+						title: "Payment Status (Paid)",
+						description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
+						createdAt: new Date(Date.now()),
+						isRead: false,
+					},
+				});
+
+				return res.status(200).json({
 					status: "success",
-					statusCode: 201,
+					statusCode: 200,
 					message:
-						"Payment created successfully, Please Wait For A Minute!",
-					token: midtransResponse,
+						"Payment Success!"
 				});
 			}
 		}
@@ -265,6 +296,17 @@ const createPayment = async (req, res, next) => {
 			});
 		}
 
+		const Tax = await prisma.bookings.findUnique({
+			where: {id: parseInt(bookingId)}
+		});
+
+		itemDetails.push({
+			id: `tax`,
+			price: parseInt(Tax.tax),
+			quantity: 1,
+			name: `Tax`,
+		});
+
 		const totalPrice = itemDetails.reduce((sum, item) => {
 			return sum + item.price * item.quantity;
 		}, 0);
@@ -331,7 +373,7 @@ const createPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 20 * 1000),
+					expiredDate: new Date(Date.now() + 30 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
@@ -440,20 +482,6 @@ const midtransNotification = async (req, res, next) => {
 				},
 			});
 		}
-
-		const booking = await prisma.bookings.findUnique({
-			where: { id: parseInt(bookingId) },
-		});
-
-		await prisma.notifications.create({
-			data: {
-				userId: booking.userId,
-				title: "Payment Status (Paid)",
-				description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
-				createdAt: new Date(Date.now()),
-				isRead: false,
-			},
-		});
 
 		res.status(200).json({ message: "Payment status updated" });
 	} catch (error) {

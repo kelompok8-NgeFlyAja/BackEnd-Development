@@ -87,7 +87,7 @@ model Bookings {
   bookerName     String
   bookerEmail    String
   bookerPhone    String
-  tax            Int          @default(0)
+  tax            Int          @default(300000)
   totalPrice     Int
   adultPassenger Int          @default(0)
   babyPassenger  Int          @default(0)
