@@ -296,13 +296,13 @@ const createPayment = async (req, res, next) => {
 			});
 		}
 
-		const getTax = await prisma.bookings.findUnique({
+		const Tax = await prisma.bookings.findUnique({
 			where: {id: parseInt(bookingId)}
 		});
 
 		itemDetails.push({
 			id: `tax`,
-			price: parseInt(getTax.tax),
+			price: parseInt(Tax.tax),
 			quantity: 1,
 			name: `Tax`,
 		});
@@ -373,7 +373,7 @@ const createPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
+					expiredDate: new Date(Date.now() + 10 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
