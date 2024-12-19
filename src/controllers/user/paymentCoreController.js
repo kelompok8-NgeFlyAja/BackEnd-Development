@@ -184,21 +184,6 @@ const createCCPayment = async (req, res, next) => {
 			});
 
 			if (newPayment) {
-				await prisma.bookings.update({
-					where: { id: parseInt(convertBookingId) },
-					data: {
-						status: "SUCCESS",
-					},
-				});
-	
-				await prisma.payments.update({
-					where: { bookingId: parseInt(convertBookingId) },
-					data: {
-						paymentMethod: "Credit Card",
-						status: "Issued",
-					},
-				});
-
 				await prisma.notifications.create({
 					data: {
 						userId: booking.userId,
