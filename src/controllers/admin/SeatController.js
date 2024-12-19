@@ -41,53 +41,54 @@ const getSeatById = async (req, res, next) => {
 }
 
 const resetSeat = async (req, res, next) => {
-	try {
-		const { planeId } = req.params;
-		const convertPlaneId = parseInt(planeId);
+    try {
+        const { planeId } = req.params;
+        const convertPlaneId = parseInt(planeId);
 
-		// const seatInfo = await prisma.seats.findMany({
-		// 	where: { planeId: convertPlaneId },
-		// 	select: { id: true },
-		// });
+        if (isNaN(convertPlaneId)) {
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid plane ID"
+            });
+        }
 
-		// if (seatInfo.length === 0) {
-		// 	const error = new Error("No Seats Found")
-		// 	error.statusCode(404)
-		// 	throw error
-		// }
+        const seats = await prisma.seats.findMany({
+            where: { planeId: convertPlaneId },
+            select: { id: true },
+        });
 
-		if (isNaN(convertPlaneId)) {
-			const error = new Error("Invalid plane ID");
-			error.statusCode = 400;
-			throw error;
-		}
+        if (seats.length === 0) {
+            return res.status(404).json({
+                status: "error",
+                message: "No seats found for the specified plane ID."
+            });
+        }
 
-		const updatedSeats = await prisma.seats.updateMany({
-			where: { planeId: convertPlaneId },
-			data: { isAvailable: true },
-		});
+        const seatIds = seats.map(seat => seat.id);
 
-		// const resetPassengers = await prisma.passengers.updateMany({
-		// 	where: {
-		// 		seatId: { in: seatInfo.map(seat => seat.id) },
-		// 	},
-		// 	data: { seatId: null },
-		// });
+        const updatedSeats = await prisma.seats.updateMany({
+            where: { id: { in: seatIds } },
+            data: { isAvailable: true },
+        });
 
-		if (updatedSeats.count > 0) {
-			return res.status(200).json({
-				status: "success",
-				message: `Successfully reset availability for ${updatedSeats.count} seats.`,
-			});
-		} else {
-			return res.status(404).json({
-				status: "error",
-				message: `No seats found for planeId ${convertPlaneId}.`,
-			});
-		}
-	} catch (error) {
-		next(error);
-	}
+        const resetPassengers = await prisma.passengers.updateMany({
+            where: { seatId: { in: seatIds } },
+            data: { seatId: null },
+        });
+
+        return res.status(200).json({
+            status: "success",
+            message: `Successfully reset availability for ${updatedSeats.count} seats and cleared seat IDs for ${resetPassengers.count} passengers.`
+        });
+
+    } catch (error) {
+        console.error("Error resetting seats: ", error);
+        res.status(500).json({
+            status: "error",
+            message: "An error occurred while resetting seats and passenger seat IDs."
+        });
+    }
 };
+
 
 module.exports = { resetSeat, getSeat, getSeatById };

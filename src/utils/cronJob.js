@@ -27,10 +27,7 @@ const startCronJob = () => {
 			for (const payment of expiredPayments) {
 				for (let bank of banks) {
 					const transactionId = `${payment.bookingId}-${bank}`;
-					console.log(
-						`Canceling payment for : ${transactionId} on ${bank}`
-					);
-	
+
 					await core.transaction.cancel(transactionId);
 				}
 	
@@ -50,6 +47,7 @@ const startCronJob = () => {
 
 				for (const passenger of payment.booking.passengers) {
                     if (passenger.seatId) {
+						console.log(passenger.seatId);
                         await prisma.seats.update({
                             where: { id: passenger.seatId },
                             data: { isAvailable: true }

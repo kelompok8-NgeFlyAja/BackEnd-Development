@@ -373,7 +373,7 @@ const createPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 10 * 1000),
+					expiredDate: new Date(Date.now() + 30 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
