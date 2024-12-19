@@ -5,12 +5,12 @@ const addNewClass = async (req, res, next) => {
     try {
         const {name, priceAdult, priceChild, priceBaby} = req.body;
         if (name == null || priceAdult == null || priceChild == null || priceBaby == null) {
-            const error = new Errror("Please provide all required fields");
+            const error = new Error("Please provide all required fields");
 			error.status(400);
 			throw error;
         }
         if (typeof name !== "string" || isNaN(priceAdult) || isNaN(priceChild) || isNaN(priceBaby)) {
-            const error = new Errror("Invalid input data");
+            const error = new Error("Invalid input data");
 			error.status(400);
 			throw error;
         }        
@@ -46,12 +46,12 @@ const getUniqueClass = async (req, res, next) => {
     try {
         const { id } = req.params;
         if (id == null) {
-            const error = new Errror("Please provide the class ID");
+            const error = new Error("Please provide the class ID");
 			error.status(400);
 			throw error;
         }
         if (isNaN(id)) {
-            const error = new Errror("Invalid class ID");
+            const error = new Error("Invalid class ID");
 			error.status(400);
 			throw error;
         }
@@ -61,7 +61,7 @@ const getUniqueClass = async (req, res, next) => {
             },
         });
         if (seatClass == null) {
-            const error = new Errror("Class not found");
+            const error = new Error("Class not found");
 			error.status(400);
 			throw error;
         }
@@ -76,7 +76,7 @@ const updateClass = async (req, res, next) => {
         const { id } = req.params;
         const {name, priceAdult, priceChild, priceBaby} = req.body;
         if (isNaN(id) || typeof name !== "string" || isNaN(priceAdult) || isNaN(priceChild) || isNaN(priceBaby)) {
-            const error = new Errror("Invalid input data");
+            const error = new Error("Invalid input data");
 			error.status(400);
 			throw error;
         }
@@ -101,12 +101,12 @@ const deleteClass = async (req, res, next) => {
     try {
         const { id } = req.params;
         if (id == null) {
-            const error = new Errror("Please provide the class ID");
+            const error = new Error("Please provide the class ID");
 			error.status(400);
 			throw error;
         }
         if (isNaN(id)) {
-            const error = new Errror("Invalid class ID");
+            const error = new Error("Invalid class ID");
 			error.status(400);
 			throw error;
         }
