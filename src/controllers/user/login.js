@@ -5,6 +5,36 @@ const prisma = new PrismaClient();
 
 const login = async (req, res, next) => {
 	try {
+		// let { identity, password } = req.body;
+
+		// if (!identity || !password) {
+        //     const error = new Error("Email/Phone Number and password are required!");
+        //     error.statusCode = 400;
+        //     throw error;
+        // }
+
+		// const user = await prisma.users.findFirst({
+        //     where: {
+        //         OR: [
+        //             { email: identity },
+        //             { phoneNumber: identity }
+        //         ]
+        //     }
+        // });
+
+		// if (!user) {
+		// 	const error = new Error("Email/Phone Number or password is wrong");
+		// 	error.statusCode = 400;
+		// 	throw error;
+		// }
+
+		// const passwordCheck = await bcrypt.compare(password, user.password);
+		// if (!passwordCheck) {
+		// 	const error = new Error("Email/Phone Number or password is wrong");
+		// 	error.statusCode = 400;
+		// 	throw error;
+		// }
+
 		let { email, password } = req.body;
 		const user = await prisma.users.findUnique({ where: { email: email } });
 

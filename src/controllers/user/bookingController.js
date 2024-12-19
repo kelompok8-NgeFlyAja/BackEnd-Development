@@ -13,8 +13,6 @@ const getTicketDetails = async (req, res, next) => {
 			error.statusCode = 400;
 			throw error;
 		}
-		console.log(flightId);
-		
 
 		const flightDetails = await prisma.flights.findUnique({
 			where: { id: parseInt(flightId) },
@@ -55,8 +53,6 @@ const getTicketDetails = async (req, res, next) => {
 				},
 			},
 		});
-		console.log(flightDetails);
-		
 
 		if (!flightDetails) {
 			const error = new Error("Flight not found");
@@ -80,6 +76,22 @@ const getTicketDetails = async (req, res, next) => {
 		const totalAdultPrice = flightDetails.route.seatClass.priceAdult * ap;
 		const totalChildPrice = flightDetails.route.seatClass.priceChild * cp;
 		const totalBabyPrice = flightDetails.route.seatClass.priceBaby * bp;
+		
+		const totalPassengers = ap + cp + bp
+		let taxFlight;
+		
+		if (totalPassengers >= 1 && totalPassengers <= 2) {
+			taxFlight = 30000;
+        } else if (totalPassengers >= 3 && totalPassengers <= 5) {
+			taxFlight = 50000;
+        } else if (totalPassengers >= 6 && totalPassengers <= 8) {
+			taxFlight = 100000;
+        } else if (totalPassengers > 8) {
+			taxFlight = 125000;
+        } else {
+			taxFlight = 0;
+        }
+		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice + taxFlight
 
 		res.status(200).json({
 			status: "Success",
@@ -102,7 +114,8 @@ const getTicketDetails = async (req, res, next) => {
 				priceAdult: totalAdultPrice,
 				priceChild: totalChildPrice,
 				priceBaby: totalBabyPrice,
-				tax: 300000
+				total: totalPrice,
+				tax: taxFlight
 			},
 		});
 	} catch (error) {
@@ -121,7 +134,6 @@ const createBooking = async (req, res, next) => {
 			babyPassenger,
 		} = req.body;
 		const timeZone = "Asia/Jakarta";
-		console.log(bookingTicket.flightId);
 
 		if (
 			!bookingTicket ||
@@ -243,6 +255,19 @@ const createBooking = async (req, res, next) => {
 		const randomCode = await randomGenerator();
 		const randomId = await randomIdGenerator();
 		const BookingDateUtc7 = moment.utc(new Date()).tz(timeZone).format();
+		let taxFlight;
+		
+		if (totalPassengers >= 1 && totalPassengers <= 2) {
+            taxFlight = 30000;
+        } else if (totalPassengers >= 3 && totalPassengers <= 5) {
+            taxFlight = 50000;
+        } else if (totalPassengers >= 6 && totalPassengers <= 8) {
+            taxFlight = 100000;
+        } else if (totalPassengers > 8) {
+            taxFlight = 125000;
+        } else {
+            taxFlight = 0;
+        }
 
 		const createdBooking = await prisma.bookings.create({
 			data: {
@@ -258,7 +283,8 @@ const createBooking = async (req, res, next) => {
 				bookerName: bookingTicket.bookerName,
 				bookerEmail: bookingTicket.bookerEmail,
 				bookerPhone: bookingTicket.bookerPhone,
-				totalPrice: 0
+				totalPrice: 0,
+				tax: taxFlight
 			},
 		});
 
@@ -284,7 +310,7 @@ const createBooking = async (req, res, next) => {
 		const totalAdultPrice = seatClass.priceAdult * adultPassenger;
 		const totalChildPrice = seatClass.priceChild * childPassenger;
 		const totalBabyPrice = seatClass.priceBaby * babyPassenger;
-		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice;
+		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice + taxFlight;
 
 		await prisma.bookings.update({
 			where: { id: createdBooking.id },
