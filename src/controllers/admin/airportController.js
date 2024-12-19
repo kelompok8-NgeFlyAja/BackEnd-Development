@@ -2,16 +2,36 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const addNewAirport = async (req, res, next) => {
-  try {
-    const { name, city, country, continent, airportCode } = req.body;
-
-    // Periksa apakah ada field yang kosong
-    if (!name || !city || !country || !continent || !airportCode) {
-      return res.status(400).json({
-        status: "failed",
-        statusCode: 400,
-        message: "Please provide all required fields",
-      });
+    try {
+        const { name, city, country, continent, airportCode } = req.body;
+        if(typeof(name)!== 'string' || typeof(city)!== 'string' || typeof(country)!== 'string' || typeof(airportCode)!== 'string' || typeof(continent)!== 'string') {
+            const error = new Error("Invalid input data");
+			error.status(400);
+			throw error;
+        }
+        if (airportCode.length !== 3) {
+            const error = new Error("Invalid input data");
+			error.status(400);
+			throw error;
+        }
+        if (!name || !city || !country || !continent || !airportCode) {
+            return res.status(400).json({ message: 'Please provide all required fields' });
+        }
+        const airport = await prisma.airports.create({
+            data: {
+                name,
+                city,
+                country,
+                continent,
+                airportCode,
+            },
+        });
+        return res.status(201).json({
+            message: 'Airport added successfully',
+            airport,
+        });
+    } catch (error) {
+        next(error);
     }
 
     // Periksa tipe data setelah memastikan semua field ada
@@ -64,9 +84,13 @@ const getAllAirports = async (req, res, next) => {
 };
 
 const deleteAirport = async (req, res, next) => {
-  try {
-    // Mengambil ID dari parameter dan memastikannya berupa angka
-    const id = parseInt(req.params.id);
+    try {
+        const id = Number(req.params.id);
+        if (!id) {
+            const error = new Error("Please provide an ID");
+			error.status(400);
+			throw error;
+        }
 
     // if (isNaN(id)) {
     //   return res.status(400).json({
@@ -76,10 +100,15 @@ const deleteAirport = async (req, res, next) => {
     //   });
     // }
 
-    // Cek apakah bandara dengan ID tersebut ada
-    const airport = await prisma.airports.findUnique({
-      where: { id },
-    });
+        if (!airport) {
+            const error = new Error("Airport not found");
+			error.status(404);
+			throw error;
+        }
+
+        await prisma.airports.delete({
+            where: { id },
+        });
 
     // Jika bandara tidak ditemukan
     if (!airport) {
