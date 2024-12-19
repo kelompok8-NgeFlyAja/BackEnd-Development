@@ -5,7 +5,12 @@ const addNewAirport = async (req, res, next) => {
     try {
         const { name, city, country, continent, airportCode } = req.body;
         if(typeof(name)!== 'string' || typeof(city)!== 'string' || typeof(country)!== 'string' || typeof(airportCode)!== 'string' || typeof(continent)!== 'string') {
-            const error = new Errror("Invalid input data");
+            const error = new Error("Invalid input data");
+			error.status(400);
+			throw error;
+        }
+        if (airportCode.length !== 3) {
+            const error = new Error("Invalid input data");
 			error.status(400);
 			throw error;
         }
@@ -44,7 +49,7 @@ const deleteAirport = async (req, res, next) => {
     try {
         const id = Number(req.params.id);
         if (!id) {
-            const error = new Errror("Please provide an ID");
+            const error = new Error("Please provide an ID");
 			error.status(400);
 			throw error;
         }
@@ -54,7 +59,7 @@ const deleteAirport = async (req, res, next) => {
         });
 
         if (!airport) {
-            const error = new Errror("Airport not found");
+            const error = new Error("Airport not found");
 			error.status(404);
 			throw error;
         }
