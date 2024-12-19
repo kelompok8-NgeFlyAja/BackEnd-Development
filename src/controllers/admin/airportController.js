@@ -2,70 +2,38 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const addNewAirport = async (req, res, next) => {
-    try {
-        const { name, city, country, continent, airportCode } = req.body;
-        if(typeof(name)!== 'string' || typeof(city)!== 'string' || typeof(country)!== 'string' || typeof(airportCode)!== 'string' || typeof(continent)!== 'string') {
-            const error = new Error("Invalid input data");
-			error.status(400);
-			throw error;
-        }
-        if (airportCode.length !== 3) {
-            const error = new Error("Invalid input data");
-			error.status(400);
-			throw error;
-        }
-        if (!name || !city || !country || !continent || !airportCode) {
-            return res.status(400).json({ message: 'Please provide all required fields' });
-        }
-        const airport = await prisma.airports.create({
-            data: {
-                name,
-                city,
-                country,
-                continent,
-                airportCode,
-            },
-        });
-        return res.status(201).json({
-            message: 'Airport added successfully',
-            airport,
-        });
-    } catch (error) {
-        next(error);
-    }
+  try {
+      const { name, city, country, continent, airportCode } = req.body;
 
-    // Periksa tipe data setelah memastikan semua field ada
-    if (
-      typeof name !== "string" ||
-      typeof city !== "string" ||
-      typeof country !== "string" ||
-      typeof airportCode !== "string" ||
-      typeof continent !== "string"
-    ) {
-      return res.status(400).json({
-        status: "failed",
-        statusCode: 400,
-        message: "Invalid input data",
+      if (!name || !city || !country || !continent || !airportCode) {
+          return res.status(400).json({ message: 'Please provide all required fields' });
+      }
+
+      if (typeof name !== 'string' || typeof city !== 'string' || 
+          typeof country !== 'string' || typeof continent !== 'string' || 
+          typeof airportCode !== 'string' || airportCode.length !== 3) {
+          const error = new Error("Invalid input data");
+          error.status = 400;
+          throw error;
+      }
+
+      const airport = await prisma.airports.create({
+          data: {
+              name,
+              city,
+              country,
+              continent,
+              airportCode,
+          },
       });
-    }
 
-    const airport = await prisma.airports.create({
-      data: {
-        name,
-        city,
-        country,
-        continent,
-        airportCode,
-      },
-    });
-    return res.status(201).json({
-      status: "success",
-      statusCode: 201,
-      message: "Airport added successfully",
-      data: airport,
-    });
+      return res.status(201).json({
+          message: 'Airport added successfully',
+          airport,
+      });
+
   } catch (error) {
-    next(error);
+      next(error);
   }
 };
 
