@@ -28,11 +28,17 @@ const searchFlights = async (req, res, next) => {
         const seatClassesLower = seatClasses.toLowerCase();
         const totalPassengers = parseInt(adultPassenger) + parseInt(childPassenger) + parseInt(babyPassenger);
 
+        if(departureAirportCodeLower === arrivalAirportCodeLower) {
+            const error = new Error("Departure and arrival airport cannot be the same");
+            error.status = 400;
+            throw error;
+        }
+
         const parsedDate = new Date(departureTime);
         if (isNaN(parsedDate)) {
             const error = new Error("Invalid date format");
-            error.status = 400;
-            throw error;
+            error.statusCode = 400;
+			throw error;
         }
 
         const departureAirport = await prisma.airports.findMany({
@@ -69,25 +75,20 @@ const searchFlights = async (req, res, next) => {
             throw error;
         }
 
-        const flightsOnDate = await prisma.flights.findMany({
-            where: {
-                route: {
-                    departureAirportId: departureAirport[0].id,
-                    arrivalAirportId: arrivalAirport[0].id,
-                },
-                departureTime: {
-                    gte: new Date(parsedDate.setHours(0, 0, 0)),
-                    lt: new Date(parsedDate.setHours(23, 59, 59)),
-                },
+        const existingRoute = await prisma.routes.findMany({
+            where:{
+                departureAirportId: departureAirport[0].id,
+                arrivalAirportId: arrivalAirport[0].id,
             }
         });
-
-        if (flightsOnDate.length === 0) {
-            const error = new Error("No flights available on the specified date");
-            error.status = 404;
+        if (!existingRoute || existingRoute.length === 0) {
+            const error = new Error("Route not found");
+            error.statusCode = 404;
             throw error;
         }
-        
+
+        // console.log("Existing Route:", existingRoute);
+
         const pageNumber = parseInt(page);
         const itemsPerPage = parseInt(pageSize);
         const offset = (pageNumber - 1) * itemsPerPage;
@@ -124,7 +125,8 @@ const searchFlights = async (req, res, next) => {
             take: itemsPerPage
         });
 
-
+        // console.log("Flights:", flights);
+        
         const availableFlights = flights.filter((flight) => {
             const availableSeats = flight.plane.seats.filter((seat) => seat.isAvailable).length;
             // console.log(`Seat tersedia: ${availableSeats}`);
