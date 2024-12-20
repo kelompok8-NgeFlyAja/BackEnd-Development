@@ -32,4 +32,23 @@ const updateUser = async (req, res, next) => {
     }
 };
 
+const getUser = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+
+        const user = await prisma.users.findUnique({
+            where: {id: userId}
+        });
+
+        if (!user) {
+            const error = new Error("User Not Found");
+            error.statusCodeL = 404
+        }
+
+
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = updateUser;
