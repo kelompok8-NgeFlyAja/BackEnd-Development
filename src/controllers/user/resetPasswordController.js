@@ -14,8 +14,13 @@ const verifyEmail = async (req, res, next) => {
                 email: email
             }
         });
+
+        if (!email) {
+            throw { error: 'Bad Request', statusCode: 400, message: 'Email diperlukan' };
+        }
+
         if (!user) {
-            throw { error: 'Not found', statusCode: 400, message: 'Email tidak ditemukan' };
+            throw { error: 'Not found', statusCode: 404, message: 'Email tidak ditemukan' };
         } else {
             const token = jwt.sign({
                 email: user.email,
@@ -50,6 +55,7 @@ const verifyEmail = async (req, res, next) => {
                     throw { error: 'Internal Server Error', statusCode: 500, message: 'Gagal mengirim email' };
                 } else {
                     res.status(200).json({
+                        status: 'Success',
                         message: 'Tautan reset password terkirim',
                         statusCode: 200,
                         token: token,
@@ -75,6 +81,7 @@ const verifyToken = (req, res, next) => {
             throw { error: 'Unauthorized', statusCode: 401, message: 'Token tidak valid' };
         }
         res.status(200).json({
+            status: 'Success',
             message: 'Token valid',
             statusCode: 200,
             data: decoded,
@@ -114,6 +121,7 @@ const resetPassword = async (req, res, next) => {
         });
 
         res.status(200).json({
+            status: 'Success',
             message: 'Password berhasil direset, silahkan login kembali',
             statusCode: 200,
             data: updateUser,

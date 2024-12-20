@@ -28,7 +28,7 @@ jobs:
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
-        
+
     - name: Deploy to Google App Engine
       uses: google-github-actions/deploy-appengine@v1
       with:
