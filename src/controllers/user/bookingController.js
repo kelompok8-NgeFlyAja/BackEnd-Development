@@ -6,7 +6,7 @@ const randomIdGenerator = require("../../utils/randomIdGenerator");
 
 const getTicketDetails = async (req, res, next) => {
 	try {
-		const { flightId, ap, cp, bp } = req.query;
+		const { flightId, adultPassenger, childPassenger, babyPassenger } = req.query;
 
 		if (!flightId) {
 			const error = new Error("Flight ID is required");
@@ -73,11 +73,11 @@ const getTicketDetails = async (req, res, next) => {
 		const convertDepartureTimeToDate = new Date(departureTimeConvert);
 		const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
 
-		const totalAdultPrice = flightDetails.route.seatClass.priceAdult * ap;
-		const totalChildPrice = flightDetails.route.seatClass.priceChild * cp;
-		const totalBabyPrice = flightDetails.route.seatClass.priceBaby * bp;
+		const totalAdultPrice = flightDetails.route.seatClass.priceAdult * adultPassenger;
+		const totalChildPrice = flightDetails.route.seatClass.priceChild * childPassenger;
+		const totalBabyPrice = flightDetails.route.seatClass.priceBaby * babyPassenger;
 		
-		const totalPassengers = ap + cp + bp
+		const totalPassengers = adultPassenger + childPassenger + babyPassenger
 		let taxFlight;
 		
 		if (totalPassengers >= 1 && totalPassengers <= 2) {

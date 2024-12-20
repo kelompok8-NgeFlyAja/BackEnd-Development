@@ -8,13 +8,13 @@ const addNewFlight = async (req, res, next) => {
         const { routeId, planeId, promotionId, date, departureTime, arrivalTime, flightCode } = req.body;
         if (!routeId  || !planeId  || !promotionId  || !date  || !departureTime  || !arrivalTime  || !flightCode) {
             const error = new Error("Please provide all required fields");
-            error.status = 400;
-            throw error;
+            error.statusCode = 400;
+			throw error;
         } 
         if (isNaN(planeId) || isNaN(routeId) || isNaN(promotionId)) {
             const error = new Error("Invalid input data");
-            error.status = 400;
-            throw error;
+            error.statusCode = 400;
+			throw error;
         }
         const fullDepartureTime = `${date}T${departureTime}+07:00`; 
         const fullArrivalTime = `${date}T${arrivalTime}+07:00`;
@@ -22,8 +22,8 @@ const addNewFlight = async (req, res, next) => {
         const end = dayjs(fullArrivalTime);
         if (!start.isValid() || !end.isValid()) {
             const error = new Error("Invalid departure or arrival time format");
-            error.status = 400;
-            throw error;
+            error.statusCode = 400;
+			throw error;
         }
         const diffMinutes = end.diff(start, "minute");
         const hours = Math.floor(diffMinutes / 60);
@@ -73,12 +73,12 @@ const getFlightDetail = async (req, res, next) => {
         const { id } = req.params;
         if (id == null) {
             const error = new Error("Please provide the class ID");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
         }
         if (isNaN(id)) {
             const error = new Error("Invalid class ID");
-			error.status = 400;
+			error.statusCode = 400;
 			throw error;
         }
         const flight = await prisma.flights.findUnique({
@@ -88,7 +88,7 @@ const getFlightDetail = async (req, res, next) => {
         });
         if (flight == null) {
             const error = new Error("Flight not found");
-			error.status = 404;
+			error.statusCode = 404;
 			throw error;
         }
         res.status(200).json({flight});
@@ -103,21 +103,29 @@ const updateFlight = async (req, res, next) => {
         const { routeId, planeId, promotionId, date, departureTime, arrivalTime, flightCode } = req.body;
 
         if (!id || isNaN(id)) {
-            return res.status(400).json({ message: "Invalid flight ID!" });
+            const error = new Error("Invalid flight ID");
+            error.statusCode = 400;
+			throw error;
         }
         if (!date || !departureTime || !arrivalTime) {
-            return res.status(400).json({ message: "Date, departureTime, and arrivalTime are required!" });
+            const error = new Error("All fields are required");
+            error.statusCode = 400;
+			throw error;
         }
 
         const combinedDeparture = new Date(`${date}T${departureTime}`);
         const combinedArrival = new Date(`${date}T${arrivalTime}`);
     
         if (isNaN(combinedDeparture) || isNaN(combinedArrival)) {
-            return res.status(400).json({ message: "Invalid date or time format!" });
+            const error = new Error("Invalid date or time foemat");
+            error.statusCode = 400;
+			throw error;
         }
 
         if (combinedArrival <= combinedDeparture) {
-            return res.status(400).json({ message: "Arrival time must be after departure time!" });
+            const error = new Error("Arrival time must be after departure time!");
+            error.statusCode = 400;
+			throw error;
         }
         const updateData = {
             routeId: routeId ? parseInt(routeId) : undefined,
@@ -157,13 +165,13 @@ const deleteFlight = async (req, res, next) => {
         const { id } = req.params;
         if (id == null) {
             const error = new Error("Please provide the class ID");
-            error.status = 400;
-            throw error;
+            error.statusCode = 400;
+			throw error;
         }
         if (isNaN(id)) {
             const error = new Error("Invalid class ID");
-            error.status = 400;
-            throw error;
+            error.statusCode = 400;
+			throw error;
         }
         const flight = await prisma.flights.delete({
             where: {
