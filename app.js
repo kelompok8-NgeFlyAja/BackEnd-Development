@@ -36,7 +36,7 @@ const userRoutes = [
 ];
 
 const corstOption = {
-  origin: 'https://ngefly.netlify.app',
+  origin: '*',
   credential: true,
   optionSuccessStatus: 200
 }
