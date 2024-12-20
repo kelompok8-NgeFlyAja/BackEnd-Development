@@ -23,6 +23,8 @@ const updateUser = async (req, res, next) => {
             data: data,
         });
         res.status(200).json({
+            status: "Success",
+            statusCode: 200,
             message: "User updated successfully",
             data: updatedUser,
         });
@@ -42,13 +44,23 @@ const getUser = async (req, res, next) => {
 
         if (!user) {
             const error = new Error("User Not Found");
-            error.statusCodeL = 404
+            error.statusCode = 404
+            throw error;
         }
 
-
+        res.status(200).json({
+            status: "Success",
+            statusCode: 200,
+            message: "Data Retrieved Successfully",
+            data: {
+                name: user.name,
+                phoneNumber: user.phoneNumber,
+                email: user.email
+            }
+        });
     } catch (error) {
         next(error)
     }
 }
 
-module.exports = updateUser;
+module.exports = {updateUser, getUser};
