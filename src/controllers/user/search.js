@@ -69,6 +69,25 @@ const searchFlights = async (req, res, next) => {
             throw error;
         }
 
+        const flightsOnDate = await prisma.flights.findMany({
+            where: {
+                route: {
+                    departureAirportId: departureAirport[0].id,
+                    arrivalAirportId: arrivalAirport[0].id,
+                },
+                departureTime: {
+                    gte: new Date(parsedDate.setHours(0, 0, 0)),
+                    lt: new Date(parsedDate.setHours(23, 59, 59)),
+                },
+            }
+        });
+
+        if (flightsOnDate.length === 0) {
+            const error = new Error("No flights available on the specified date");
+            error.status = 404;
+            throw error;
+        }
+        
         const pageNumber = parseInt(page);
         const itemsPerPage = parseInt(pageSize);
         const offset = (pageNumber - 1) * itemsPerPage;
