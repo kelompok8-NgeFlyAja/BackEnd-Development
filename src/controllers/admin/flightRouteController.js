@@ -9,8 +9,8 @@ const addNewRoute = async (req, res, next) => {
     // Validasi input
     if (!seatClassId || !departureAirportCode || !arrivalAirportCode) {
       const error = new Error("All fields are required!");
-      error.status = 400;
-      throw error;
+      error.statusCode = 400;
+			throw error;
     }
 
     const departureAirport = await prisma.airports.findFirst({
@@ -24,8 +24,8 @@ const addNewRoute = async (req, res, next) => {
 
     if (!departureAirport) {
       const error = new Error("Departure airport not found!");
-      error.status = 404;
-      throw error;
+      error.statusCode = 400;
+			throw error;
     }
 
     const arrivalAirport = await prisma.airports.findFirst({
@@ -39,8 +39,8 @@ const addNewRoute = async (req, res, next) => {
 
     if (!arrivalAirport) {
       const error = new Error("Arrival airport not found!");
-      error.status = 404;
-      throw error;
+      error.statusCode = 400;
+			throw error;
     }
 
     const existingRoute = await prisma.routes.findFirst({
@@ -53,8 +53,8 @@ const addNewRoute = async (req, res, next) => {
 
     if (existingRoute) {
       const error = new Error("Route with these details already exists!");
-      error.status = 400;
-      throw error;
+            error.statusCode = 400;
+			throw error;
     }
     
     // Tambahkan route baru
@@ -104,7 +104,9 @@ const getUniqueRoute = async (req, res, next) => {
 
     // Validasi ID
     if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Valid Route ID is required!" });
+      const error = new Error("Valid Route ID is required!");
+      error.statusCode = 400;
+			throw error;
     }
 
     const route = await prisma.routes.findUnique({
@@ -117,7 +119,9 @@ const getUniqueRoute = async (req, res, next) => {
     });
 
     if (!route) {
-      return res.status(404).json({ message: "Route not found!" });
+      const error = new Error("Route not found!");
+      error.statusCode = 404;
+			throw error;
     }
 
     return res
@@ -137,7 +141,9 @@ const updateRoute = async (req, res, next) => {
 
     // Validasi input
     if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Valid  Route ID is required!" });
+      const error = new Error("Valid Route ID is required!");
+      error.statusCode = 400;
+			throw error;
     }
 
     const updatedRoute = await prisma.routes.update({
@@ -168,7 +174,9 @@ const deleteRoute = async (req, res, next) => {
 
     // Validasi ID
     if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Valid Route ID is required!" });
+      const error = new Error("Valid Route ID is required!");
+      error.statusCode = 400;
+			throw error;
     }
 
     await prisma.routes.delete({
@@ -179,7 +187,9 @@ const deleteRoute = async (req, res, next) => {
   } catch (error) {
     console.error(error);
     if (error.code === "P2025") {
-      return res.status(404).json({ message: "Route not found!" });
+      const error = new Error("Route not found");
+      error.statusCode = 404;
+			throw error;
     }
     next(error);
   }

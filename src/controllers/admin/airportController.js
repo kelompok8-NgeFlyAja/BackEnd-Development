@@ -3,35 +3,37 @@ const prisma = new PrismaClient();
 
 const addNewAirport = async (req, res, next) => {
   try {
-      const { name, city, country, continent, airportCode } = req.body;
-
-      if (!name || !city || !country || !continent || !airportCode) {
-          return res.status(400).json({ message: 'Please provide all required fields' });
-      }
-
-      if (typeof name !== 'string' || typeof city !== 'string' || 
-          typeof country !== 'string' || typeof continent !== 'string' || 
-          typeof airportCode !== 'string' || airportCode.length !== 3) {
-          const error = new Error("Invalid input data");
-          error.status = 400;
-          throw error;
-      }
-
-      const airport = await prisma.airports.create({
-          data: {
-              name,
-              city,
-              country,
-              continent,
-              airportCode,
-          },
-      });
-
-      return res.status(201).json({
-          message: 'Airport added successfully',
-          airport,
-      });
-
+    const { name, city, country, continent, airportCode } = req.body;
+    if(typeof(name)!== 'string' || typeof(city)!== 'string' || typeof(country)!== 'string' || typeof(airportCode)!== 'string' || typeof(continent)!== 'string') {
+      const error = new Error("Invalid input data");
+			error.statusCode = 400;
+			throw error;
+    }
+    if (airportCode.length !== 3) {
+      const error = new Error("Invalid input data");
+      error.status(400);
+      throw error;
+    }
+    if (!name || !city || !country || !continent || !airportCode) {
+      const error = new Error("Please provide all required fields");
+			error.statusCode = 400;
+			throw error;
+    }
+    const airport = await prisma.airports.create({
+        data: {
+            name,
+            city,
+            country,
+            continent,
+            airportCode,
+        },
+    });
+    return res.status(201).json({
+      status: "success",
+      statusCode: 201,
+      message: "Airport added successfully",
+      data: airport,
+    });
   } catch (error) {
       next(error);
   }
@@ -52,46 +54,28 @@ const getAllAirports = async (req, res, next) => {
 };
 
 const deleteAirport = async (req, res, next) => {
-    try {
-        const id = Number(req.params.id);
-        if (!id) {
-            const error = new Error("Please provide an ID");
-			error.status(400);
+  try {
+    const id = Number(req.params.id);
+    if (!id) {
+      const error = new Error("Please provide a valid ID");
+			error.statusCode = 400;
 			throw error;
-        }
-
-    // if (isNaN(id)) {
-    //   return res.status(400).json({
-    //     status: "failed",
-    //     statusCode: 400,
-    //     message: "Please provide a valid ID",
-    //   });
-    // }
-
-        if (!airport) {
-            const error = new Error("Airport not found");
-			error.status(404);
-			throw error;
-        }
-
-        await prisma.airports.delete({
-            where: { id },
-        });
-
-    // Jika bandara tidak ditemukan
-    if (!airport) {
-      return res.status(404).json({
-        status: "failed",
-        statusCode: 404,
-        message: "Airport not found",
-      });
     }
-
-    // Menghapus bandara
+  // if (isNaN(id)) {
+  //   return res.status(400).json({
+  //     status: "failed",
+  //     statusCode: 400,
+  //     message: "Please provide a valid ID",
+  //   });
+  // }
+    if (!airport) {
+      const error = new Error("Airport not found");
+			error.statusCode = 400;
+			throw error;
+    }
     await prisma.airports.delete({
-      where: { id },
+        where: { id },
     });
-
     // Mengembalikan respons jika bandara ditemukan
     return res.status(200).json({
       status: "success",
@@ -135,7 +119,9 @@ const addMultipleAirports = async (req, res, next) => {
       .filter(Boolean);
 
     if (airportData.length === 0) {
-      return res.status(400).json({ message: "Invalid input data" });
+      const error = new Error("Invalid input data");
+			error.statusCode = 400;
+			throw error;
     }
 
     const newAirports = await prisma.airports.createMany({
@@ -147,7 +133,7 @@ const addMultipleAirports = async (req, res, next) => {
       airports: newAirports,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error adding airports" });
+    next(error);
   }
 };
 
