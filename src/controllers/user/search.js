@@ -132,10 +132,10 @@ const searchFlights = async (req, res, next) => {
             // console.log(`Seat tersedia: ${availableSeats}`);
             return availableSeats >= parseInt(totalPassengers);
         });
-
+        
         if (availableFlights.length === 0) {
             const error = new Error("No flights available for the given criteria");
-            error.status = 404;
+            error.statusCode = 404;
             throw error;
         }
 

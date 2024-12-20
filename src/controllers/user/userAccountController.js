@@ -23,6 +23,8 @@ const updateUser = async (req, res, next) => {
             data: data,
         });
         res.status(200).json({
+            status: "Success",
+            statusCode: 200,
             message: "User updated successfully",
             data: updatedUser,
         });
@@ -32,4 +34,33 @@ const updateUser = async (req, res, next) => {
     }
 };
 
-module.exports = updateUser;
+const getUser = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+
+        const user = await prisma.users.findUnique({
+            where: {id: userId}
+        });
+
+        if (!user) {
+            const error = new Error("User Not Found");
+            error.statusCode = 404
+            throw error;
+        }
+
+        res.status(200).json({
+            status: "Success",
+            statusCode: 200,
+            message: "Data Retrieved Successfully",
+            data: {
+                name: user.name,
+                phoneNumber: user.phoneNumber,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        next(error)
+    }
+}
+
+module.exports = {updateUser, getUser};
