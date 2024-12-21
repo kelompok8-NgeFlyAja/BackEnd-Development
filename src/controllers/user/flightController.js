@@ -44,6 +44,10 @@ const getFlightCard = async (req, res, next) => {
     });
 
     const formattedDestinations = destinations.map((flight) => ({
+      departureAirportCode: flight.route.departureAirport.airportCode,
+      arrivalAirportCode: flight.route.arrivalAirport.airportCode,
+      departureTime: flight.departureTime.toISOString().split("T")[0],
+      seatClasses: flight.route.seatClass.name,
       departure: flight.route.departureAirport.city,
       arrival: flight.route.arrivalAirport.city,
       price: flight.route.seatClass.priceAdult - flight.promotion.discount,
@@ -53,7 +57,7 @@ const getFlightCard = async (req, res, next) => {
       endDate: flight.promotion.endDate.toISOString().split("T")[0],
     }));
 
-    console.log(formattedDestinations);
+    // console.log(formattedDestinations);
 
     res.status(200).json({
       status: "success",
