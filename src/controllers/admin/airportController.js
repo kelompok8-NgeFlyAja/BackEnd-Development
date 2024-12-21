@@ -35,7 +35,7 @@ const addNewAirport = async (req, res, next) => {
       data: airport,
     });
   } catch (error) {
-    next(error);
+      next(error);
   }
 };
 

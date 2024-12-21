@@ -1,0 +1,2873 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "NgeFlyAja",
+    "description": "<b> Airfare Application API Documentation </b>\n\nThis comprehensive API documentation provides developers with the necessary resources to integrate airfare booking functionalities into their applications. The API offers the following key features:\n\n-> <b>User Management</b>: Securely manage user accounts with registration and login endpoints.\n\n-> <b>Flight Search</b>: Retrieve and display available flight routes and schedules, empowering users to find the most suitable travel options.\n\n-> <b>Transaction Processing</b>: Seamlessly process payments using the Midtrans payment gateway, ensuring secure and reliable transactions.\n\nDeveloper:\n  [Aldy Ramadhan Syahputra](https://github.com/aldyrmdhns) |\n  | [Adam Arrahman](https://github.com/Dams168) |\n  | [Via Angelyca Patricia](https://github.com/Jaketus0) |\n  | [I Putu Adi Widya Nata](https://github.com/putuadi302) |\n\nSome useful links:\n- [Repository](https://github.com/kelompok8-NgeFlyAja/BackEnd-Development)\n- [Midtrans Simulation Payment](https://simulator.sandbox.midtrans.com)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://ngeflyaja.shop"
+    },
+    {
+      "url": "localhost://"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Flights",
+      "description": "DTO for Flights Destination (Search, Filter, etc)"
+    },
+    {
+      "name": "Authentication",
+      "description": "Authentication for the User (Creating Account, Sign In, Reset Password, etc)"
+    },
+    {
+      "name": "Transaction",
+      "description": "Making The Transaction for The User (Create Ticket Booking, Payment, History)"
+    },
+    {
+      "name": "User Account"
+    },
+    {
+      "name": "Notifications",
+      "description": "Get Notifications for User"
+    }
+  ],
+  "paths": {
+    "/favorite-destination": {
+      "get": {
+        "tags": [
+          "Flights"
+        ],
+        "summary": "Get Favourite flight",
+        "description": "Get List of favourite Destination",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "5"
+          },
+          {
+            "name": "continent",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Asia"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"466-Vmb8lJ8ge4EyYr8NGLdzsMt9mMQ\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "dd0477da237912fb8311fd92a0b4aea1;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:33:19 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "message": "Successfully get flight card",
+                  "total": 13,
+                  "page": 1,
+                  "limit": 5,
+                  "data": [
+                    {
+                      "departure": "Tangerang",
+                      "arrival": "Melbourne",
+                      "price": 5725000,
+                      "imageUrl": "https://ik.imagekit.io/dyrmdhns/Limited_983RGp8eT",
+                      "label": "Limited",
+                      "startDate": "2024-11-30",
+                      "endDate": "2024-12-15"
+                    },
+                    {
+                      "departure": "Tangerang",
+                      "arrival": "Melbourne",
+                      "price": 5880000,
+                      "imageUrl": "https://ik.imagekit.io/dyrmdhns/Holiday_Offer_uLNGyJyKi",
+                      "label": "Holiday Offer",
+                      "startDate": "2024-12-02",
+                      "endDate": "2024-12-25"
+                    },
+                    {
+                      "departure": "Tangerang",
+                      "arrival": "Melbourne",
+                      "price": 6140000,
+                      "imageUrl": "https://ik.imagekit.io/dyrmdhns/Limited_rXs6PJnbU",
+                      "label": "Limited",
+                      "startDate": "2024-12-09",
+                      "endDate": "2025-01-01"
+                    },
+                    {
+                      "departure": "Tangerang",
+                      "arrival": "Melbourne",
+                      "price": 5650000,
+                      "imageUrl": "https://ik.imagekit.io/dyrmdhns/Year-End_Sale_7TtP3hNQp",
+                      "label": "Year-End Sale",
+                      "startDate": "2024-12-14",
+                      "endDate": "2025-01-05"
+                    },
+                    {
+                      "departure": "Tangerang",
+                      "arrival": "Melbourne",
+                      "price": 6035000,
+                      "imageUrl": "https://ik.imagekit.io/dyrmdhns/Christmas_Special_ceTMIZ2fV",
+                      "label": "Christmas Special",
+                      "startDate": "2024-12-19",
+                      "endDate": "2024-12-30"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search-flights": {
+      "get": {
+        "tags": [
+          "Flights"
+        ],
+        "summary": "Search Flight - With Return Date",
+        "parameters": [
+          {
+            "name": "departureAirportCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "CGK"
+          },
+          {
+            "name": "arrivalAirportCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "BKK"
+          },
+          {
+            "name": "departureTime",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2024-12-01"
+          },
+          {
+            "name": "returnTime",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2024-12-08"
+          },
+          {
+            "name": "seatClasses",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Economy"
+          },
+          {
+            "name": "adultPassenger",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "3"
+          },
+          {
+            "name": "childPassenger",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "2"
+          },
+          {
+            "name": "babyPassenger",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"1184-or/er5OHXjIdMyOw9rLwu9wxieo\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "6e2a18fde3a65b6d7c597c9d216e9661"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:33:56 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "message": "Flights retrieved successfully",
+                  "totalPages": 1,
+                  "page": 1,
+                  "totalFlights": 5,
+                  "flights": [
+                    {
+                      "flightId": 2,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "8:00:00 AM",
+                      "departureDate": "12/1/2024",
+                      "arrivalTime": "2:25:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-003",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 3,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 3,
+                        "planeCode": "JT-202",
+                        "description": "In Flight Entertainment",
+                        "baggage": 5,
+                        "cabinBaggage": 15
+                      },
+                      "price": 6000000
+                    },
+                    {
+                      "flightId": 3,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "10:30:00 AM",
+                      "departureDate": "12/1/2024",
+                      "arrivalTime": "4:55:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-005",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 5,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 5,
+                        "planeCode": "JT-203",
+                        "description": "In Flight Entertainment",
+                        "baggage": 7,
+                        "cabinBaggage": 18
+                      },
+                      "price": 6200000
+                    },
+                    {
+                      "flightId": 4,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "12:15:00 PM",
+                      "departureDate": "12/1/2024",
+                      "arrivalTime": "6:40:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-007",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 7,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 7,
+                        "planeCode": "JT-204",
+                        "description": "In Flight Entertainment",
+                        "baggage": 6,
+                        "cabinBaggage": 17
+                      },
+                      "price": 5700000
+                    },
+                    {
+                      "flightId": 5,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "2:00:00 PM",
+                      "departureDate": "12/1/2024",
+                      "arrivalTime": "8:25:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-009",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 9,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 9,
+                        "planeCode": "JT-205",
+                        "description": "In Flight Entertainment",
+                        "baggage": 5,
+                        "cabinBaggage": 15
+                      },
+                      "price": 6100000
+                    },
+                    {
+                      "flightId": 6,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "3:45:00 PM",
+                      "departureDate": "12/1/2024",
+                      "arrivalTime": "10:10:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-011",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 11,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 11,
+                        "planeCode": "JT-206",
+                        "description": "In Flight Entertainment",
+                        "baggage": 7,
+                        "cabinBaggage": 18
+                      },
+                      "price": 6200000
+                    }
+                  ],
+                  "returnFlights": [
+                    {
+                      "flightId": 2,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "2:33:56 PM",
+                      "departureDate": "12/19/2024",
+                      "arrivalTime": "2:25:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-003",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 3,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 3,
+                        "planeCode": "JT-202",
+                        "description": "In Flight Entertainment",
+                        "baggage": 5,
+                        "cabinBaggage": 15
+                      }
+                    },
+                    {
+                      "flightId": 3,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "2:33:56 PM",
+                      "departureDate": "12/19/2024",
+                      "arrivalTime": "4:55:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-005",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 5,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 5,
+                        "planeCode": "JT-203",
+                        "description": "In Flight Entertainment",
+                        "baggage": 7,
+                        "cabinBaggage": 18
+                      }
+                    },
+                    {
+                      "flightId": 4,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "2:33:56 PM",
+                      "departureDate": "12/19/2024",
+                      "arrivalTime": "6:40:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-007",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 7,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 7,
+                        "planeCode": "JT-204",
+                        "description": "In Flight Entertainment",
+                        "baggage": 6,
+                        "cabinBaggage": 17
+                      }
+                    },
+                    {
+                      "flightId": 5,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "2:33:56 PM",
+                      "departureDate": "12/19/2024",
+                      "arrivalTime": "8:25:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-009",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 9,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 9,
+                        "planeCode": "JT-205",
+                        "description": "In Flight Entertainment",
+                        "baggage": 5,
+                        "cabinBaggage": 15
+                      }
+                    },
+                    {
+                      "flightId": 6,
+                      "departureAirport": "CGK",
+                      "arrivalAirport": "BKK",
+                      "departureTime": "2:33:56 PM",
+                      "departureDate": "12/19/2024",
+                      "arrivalTime": "10:10:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "flightCode": "Flight-011",
+                      "duration": "6h 25m",
+                      "route": {
+                        "routeId": 11,
+                        "departureAirport": "CGK",
+                        "arrivalAirport": "BKK",
+                        "seatClass": "Economy"
+                      },
+                      "plane": {
+                        "planeId": 11,
+                        "planeCode": "JT-206",
+                        "description": "In Flight Entertainment",
+                        "baggage": 7,
+                        "cabinBaggage": 18
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filter-flight": {
+      "get": {
+        "tags": [
+          "Flights"
+        ],
+        "summary": "Filter Flight",
+        "description": "Get List of Flight Destination with Specific Conditions (duration, price, departureTime, and arrivalTime)",
+        "parameters": [
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "duration"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "desc"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "5"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"de2-IiXf3Jndi6AL1kBMPQtKTUmvGxU\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "ac86d5943247cbbeeec017689ccf08f6;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:34:18 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "page": 1,
+                  "limit": 5,
+                  "totalCount": 25,
+                  "totalPages": 5,
+                  "data": [
+                    {
+                      "id": 1,
+                      "routeId": 1,
+                      "planeId": 1,
+                      "promotionId": 1,
+                      "duration": "6h 25m",
+                      "durationMinutes": 385,
+                      "departureDate": "12/1/2024",
+                      "departureTime": "5:00:00 AM",
+                      "arrivalDate": "12/1/2024",
+                      "arrivalTime": "11:25:00 AM",
+                      "flightCode": "Flight-001",
+                      "route": {
+                        "id": 1,
+                        "departureAirportId": 1,
+                        "arrivalAirportId": 4,
+                        "seatClassId": 1,
+                        "departureAirport": {
+                          "id": 1,
+                          "name": "Soekarno Hatta - Terminal 1A Domestik",
+                          "city": "Tangerang",
+                          "country": "Indonesia",
+                          "continent": "Asia",
+                          "airportCode": "CGK"
+                        },
+                        "arrivalAirport": {
+                          "id": 4,
+                          "name": "Melbourne Airport",
+                          "city": "Melbourne",
+                          "country": "Australia",
+                          "continent": "Australia",
+                          "airportCode": "MEL"
+                        },
+                        "seatClass": {
+                          "id": 1,
+                          "name": "Economy",
+                          "priceAdult": 5800000,
+                          "priceChild": 5200000,
+                          "priceBaby": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 2,
+                      "routeId": 3,
+                      "planeId": 3,
+                      "promotionId": 3,
+                      "duration": "6h 25m",
+                      "durationMinutes": 385,
+                      "departureDate": "12/1/2024",
+                      "departureTime": "8:00:00 AM",
+                      "arrivalDate": "12/1/2024",
+                      "arrivalTime": "2:25:00 PM",
+                      "flightCode": "Flight-003",
+                      "route": {
+                        "id": 3,
+                        "departureAirportId": 1,
+                        "arrivalAirportId": 4,
+                        "seatClassId": 3,
+                        "departureAirport": {
+                          "id": 1,
+                          "name": "Soekarno Hatta - Terminal 1A Domestik",
+                          "city": "Tangerang",
+                          "country": "Indonesia",
+                          "continent": "Asia",
+                          "airportCode": "CGK"
+                        },
+                        "arrivalAirport": {
+                          "id": 4,
+                          "name": "Melbourne Airport",
+                          "city": "Melbourne",
+                          "country": "Australia",
+                          "continent": "Australia",
+                          "airportCode": "MEL"
+                        },
+                        "seatClass": {
+                          "id": 3,
+                          "name": "Economy",
+                          "priceAdult": 6000000,
+                          "priceChild": 5400000,
+                          "priceBaby": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 3,
+                      "routeId": 5,
+                      "planeId": 5,
+                      "promotionId": 5,
+                      "duration": "6h 25m",
+                      "durationMinutes": 385,
+                      "departureDate": "12/1/2024",
+                      "departureTime": "10:30:00 AM",
+                      "arrivalDate": "12/1/2024",
+                      "arrivalTime": "4:55:00 PM",
+                      "flightCode": "Flight-005",
+                      "route": {
+                        "id": 5,
+                        "departureAirportId": 1,
+                        "arrivalAirportId": 4,
+                        "seatClassId": 5,
+                        "departureAirport": {
+                          "id": 1,
+                          "name": "Soekarno Hatta - Terminal 1A Domestik",
+                          "city": "Tangerang",
+                          "country": "Indonesia",
+                          "continent": "Asia",
+                          "airportCode": "CGK"
+                        },
+                        "arrivalAirport": {
+                          "id": 4,
+                          "name": "Melbourne Airport",
+                          "city": "Melbourne",
+                          "country": "Australia",
+                          "continent": "Australia",
+                          "airportCode": "MEL"
+                        },
+                        "seatClass": {
+                          "id": 5,
+                          "name": "Economy",
+                          "priceAdult": 6200000,
+                          "priceChild": 5600000,
+                          "priceBaby": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 4,
+                      "routeId": 7,
+                      "planeId": 7,
+                      "promotionId": 7,
+                      "duration": "6h 25m",
+                      "durationMinutes": 385,
+                      "departureDate": "12/1/2024",
+                      "departureTime": "12:15:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "arrivalTime": "6:40:00 PM",
+                      "flightCode": "Flight-007",
+                      "route": {
+                        "id": 7,
+                        "departureAirportId": 1,
+                        "arrivalAirportId": 4,
+                        "seatClassId": 7,
+                        "departureAirport": {
+                          "id": 1,
+                          "name": "Soekarno Hatta - Terminal 1A Domestik",
+                          "city": "Tangerang",
+                          "country": "Indonesia",
+                          "continent": "Asia",
+                          "airportCode": "CGK"
+                        },
+                        "arrivalAirport": {
+                          "id": 4,
+                          "name": "Melbourne Airport",
+                          "city": "Melbourne",
+                          "country": "Australia",
+                          "continent": "Australia",
+                          "airportCode": "MEL"
+                        },
+                        "seatClass": {
+                          "id": 7,
+                          "name": "Economy",
+                          "priceAdult": 5700000,
+                          "priceChild": 5100000,
+                          "priceBaby": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 5,
+                      "routeId": 9,
+                      "planeId": 9,
+                      "promotionId": 9,
+                      "duration": "6h 25m",
+                      "durationMinutes": 385,
+                      "departureDate": "12/1/2024",
+                      "departureTime": "2:00:00 PM",
+                      "arrivalDate": "12/1/2024",
+                      "arrivalTime": "8:25:00 PM",
+                      "flightCode": "Flight-009",
+                      "route": {
+                        "id": 9,
+                        "departureAirportId": 1,
+                        "arrivalAirportId": 4,
+                        "seatClassId": 9,
+                        "departureAirport": {
+                          "id": 1,
+                          "name": "Soekarno Hatta - Terminal 1A Domestik",
+                          "city": "Tangerang",
+                          "country": "Indonesia",
+                          "continent": "Asia",
+                          "airportCode": "CGK"
+                        },
+                        "arrivalAirport": {
+                          "id": 4,
+                          "name": "Melbourne Airport",
+                          "city": "Melbourne",
+                          "country": "Australia",
+                          "continent": "Australia",
+                          "airportCode": "MEL"
+                        },
+                        "seatClass": {
+                          "id": 9,
+                          "name": "Economy",
+                          "priceAdult": 6100000,
+                          "priceChild": 5500000,
+                          "priceBaby": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filter-baggage": {
+      "get": {
+        "tags": [
+          "Flights"
+        ],
+        "summary": "Filter Plane Baggage",
+        "description": "Get List of Flight Destination with Specific Plane Baggage",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "5"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "asc"
+          },
+          {
+            "name": "baggage",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "8"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"858-fBh9OvZE30NaBLv76Ve155ZFd5w\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "d9e3e516083cd11e717415c89b93edc6"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:34:24 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "page": 1,
+                  "limit": 5,
+                  "totalCount": 3,
+                  "totalPages": 1,
+                  "data": [
+                    {
+                      "planeId": 1,
+                      "planeName": "Jet Air",
+                      "baggage": 8,
+                      "cabinBaggage": 20,
+                      "flightDetails": {
+                        "routeId": 1,
+                        "promotionId": 1,
+                        "duration": "6h 25m",
+                        "departureTime": "5:00:00 AM",
+                        "departureDate": "12/1/2024",
+                        "arrivalTime": "11:25:00 AM",
+                        "arrivalDate": "12/1/2024",
+                        "flightCode": "Flight-001",
+                        "route": {
+                          "id": 1,
+                          "departureAirport": {
+                            "id": 1,
+                            "name": "Soekarno Hatta - Terminal 1A Domestik",
+                            "city": "Tangerang",
+                            "country": "Indonesia",
+                            "continent": "Asia",
+                            "airportCode": "CGK"
+                          },
+                          "arrivalAirport": {
+                            "id": 4,
+                            "name": "Melbourne Airport",
+                            "city": "Melbourne",
+                            "country": "Australia",
+                            "continent": "Australia",
+                            "airportCode": "MEL"
+                          },
+                          "seatClass": {
+                            "id": 1,
+                            "name": "Economy",
+                            "priceAdult": 5800000,
+                            "priceChild": 5200000,
+                            "priceBaby": 0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "planeId": 13,
+                      "planeName": "Jet Air 7",
+                      "baggage": 8,
+                      "cabinBaggage": 20,
+                      "flightDetails": {
+                        "routeId": 13,
+                        "promotionId": 13,
+                        "duration": "4h 0m",
+                        "departureTime": "7:30:00 AM",
+                        "departureDate": "12/2/2024",
+                        "arrivalTime": "11:30:00 AM",
+                        "arrivalDate": "12/2/2024",
+                        "flightCode": "Flight-013",
+                        "route": {
+                          "id": 13,
+                          "departureAirport": {
+                            "id": 1,
+                            "name": "Soekarno Hatta - Terminal 1A Domestik",
+                            "city": "Tangerang",
+                            "country": "Indonesia",
+                            "continent": "Asia",
+                            "airportCode": "CGK"
+                          },
+                          "arrivalAirport": {
+                            "id": 2,
+                            "name": "Suvarnabhumi Airport",
+                            "city": "Bangkok",
+                            "country": "Thailand",
+                            "continent": "Asia",
+                            "airportCode": "BKK"
+                          },
+                          "seatClass": {
+                            "id": 13,
+                            "name": "Business",
+                            "priceAdult": 10400000,
+                            "priceChild": 9900000,
+                            "priceBaby": 0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "planeId": 21,
+                      "planeName": "Jet Air 11",
+                      "baggage": 8,
+                      "cabinBaggage": 20,
+                      "flightDetails": {
+                        "routeId": 21,
+                        "promotionId": 21,
+                        "duration": "16h 35m",
+                        "departureTime": "7:00:00 AM",
+                        "departureDate": "12/4/2024",
+                        "arrivalTime": "11:35:00 PM",
+                        "arrivalDate": "12/4/2024",
+                        "flightCode": "Flight-021",
+                        "route": {
+                          "id": 21,
+                          "departureAirport": {
+                            "id": 1,
+                            "name": "Soekarno Hatta - Terminal 1A Domestik",
+                            "city": "Tangerang",
+                            "country": "Indonesia",
+                            "continent": "Asia",
+                            "airportCode": "CGK"
+                          },
+                          "arrivalAirport": {
+                            "id": 6,
+                            "name": "Paris Charles de Gaulle Airport",
+                            "city": "Paris",
+                            "country": "France",
+                            "continent": "Europe",
+                            "airportCode": "CDG"
+                          },
+                          "seatClass": {
+                            "id": 21,
+                            "name": "First Class",
+                            "priceAdult": 16000000,
+                            "priceChild": 15000000,
+                            "priceBaby": 0
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filter-cabin-baggage": {
+      "get": {
+        "tags": [
+          "Flights"
+        ],
+        "summary": "Filter Plane Cabin Baggage",
+        "description": "Get List of Flight Destination with Specific Plane Cabin Baggage",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "5"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "asc"
+          },
+          {
+            "name": "cabinBaggage",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "16"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"2f7-3u2LHaH0jPsXlC8qJDtytRCVlWU\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "677e2e6151478c3a714dee9027062814;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:34:31 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "page": 1,
+                  "limit": 5,
+                  "totalCount": 1,
+                  "totalPages": 1,
+                  "data": [
+                    {
+                      "planeId": 2,
+                      "planeName": "Boeing 737",
+                      "cabinBaggage": 16,
+                      "flightDetails": {
+                        "routeId": 2,
+                        "promotionId": 2,
+                        "duration": "6h 25m",
+                        "departureTime": "6:30:00 AM",
+                        "departureDate": "12/4/2024",
+                        "arrivalTime": "12:55:00 PM",
+                        "arrivalDate": "12/4/2024",
+                        "flightCode": "Flight-002",
+                        "route": {
+                          "id": 2,
+                          "departureAirport": {
+                            "id": 4,
+                            "name": "Melbourne Airport",
+                            "city": "Melbourne",
+                            "country": "Australia",
+                            "continent": "Australia",
+                            "airportCode": "MEL"
+                          },
+                          "arrivalAirport": {
+                            "id": 1,
+                            "name": "Soekarno Hatta - Terminal 1A Domestik",
+                            "city": "Tangerang",
+                            "country": "Indonesia",
+                            "continent": "Asia",
+                            "airportCode": "CGK"
+                          },
+                          "seatClass": {
+                            "id": 2,
+                            "name": "Economy",
+                            "priceAdult": 5900000,
+                            "priceChild": 5300000,
+                            "priceBaby": 0
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register",
+        "description": "Create A New Account For The User",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "name": "aldy",
+                  "email": "destra.lockheart002@gmail.com",
+                  "phoneNumber": "89154698612",
+                  "password": "12345678"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"6e-uxaaPRmLyK61DYIWRMgVdldUaV0\""
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "902db6acd2a4633fc74033f31cefe5f5;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:36:27 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "example": "110"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 201,
+                  "message": "Registration is successful. Please check your email for OTP."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify-otp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Verify OTP",
+        "description": "Verifying OTP for Account Activation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "otp": "929638"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"4f-Uis1jz6JCEecUH3bugHLmlUVhqo\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "2e1842fed6dabc6f9db2225247e4d8cd;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:36:54 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "succes",
+                  "statusCode": 200,
+                  "message": "Account successfully activated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resend-otp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Resend OTP",
+        "description": "Resending A New OTP For Account Activation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "email": "aldyramadhans101@gmail.com"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"63-EGkd8sstoqrfYa+1QZckoAhhjTU\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "272d7e1a556a5ebdb6ab650fe67ad2da;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:37:27 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "message": "A new OTP has been sent. Please check your email."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/000/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "description": "Sign in an already created account for the user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "identity": "john@gmail.com",
+                  "password": "password"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IkpvaG4iLCJlbWFpbCI6ImpvaG5AbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTczNDU5NDEyNCwiZXhwIjoxNzM0NjA0OTI0fQ.nTXkK1f7WuMNFjzd2uMxdkxUsGWs0uLw0rVtXzX-E08; Max-Age=10800; Path=/; Expires=Thu, 19 Dec 2024 10:42:04 GMT; HttpOnly"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "example": "291"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"123-KxEtRaM4CYT4fdF3nqCeF3rnuIM\""
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:42:04 GMT"
+                }
+              },
+              "Connection": {
+                "schema": {
+                  "type": "string",
+                  "example": "keep-alive"
+                }
+              },
+              "Keep-Alive": {
+                "schema": {
+                  "type": "string",
+                  "example": "timeout=5"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "Success",
+                  "statusCode": 200,
+                  "message": "Login Successfull",
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IkpvaG4iLCJlbWFpbCI6ImpvaG5AbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTczNDU5NDEyNCwiZXhwIjoxNzM0NjA0OTI0fQ.nTXkK1f7WuMNFjzd2uMxdkxUsGWs0uLw0rVtXzX-E08"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify-email": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Reset Password - Verify Email",
+        "description": "Send Email for Getting the URL to Reset Password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "email": "destra.lockheart002@gmail.com"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/reset-password/{token}": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Reset Password - Change Password",
+        "description": "Change Old Password to New Password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "newPassword": "abcdefgh",
+                  "confirmPassword": "abcdefgh"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/ticket-details": {
+      "get": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Get Ticket Detail",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          },
+          {
+            "name": "flightId",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "2"
+          },
+          {
+            "name": "ap",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "2"
+          },
+          {
+            "name": "cp",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "1"
+          },
+          {
+            "name": "bp",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"215-9cfMfCkEVeTDEOzJ/IIqYYkfR6k\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "7135d61c865a1116801c1d154dc4c684;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:43:43 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "Success",
+                  "statusCode": 200,
+                  "message": "Flight details retrieved successfully",
+                  "data": {
+                    "flightId": 1,
+                    "departureTime": "5:00:00 AM",
+                    "departureDate": "12/1/2024",
+                    "departureAirportName": "Soekarno Hatta - Terminal 1A Domestik",
+                    "planeName": "Jet Air",
+                    "seatClassName": "Economy",
+                    "planeCode": "JT-201",
+                    "description": "In Flight Entertainment",
+                    "baggage": 8,
+                    "cabinBaggage": 20,
+                    "arrivalTime": "11:25:00 AM",
+                    "arrivalDate": "12/1/2024",
+                    "arrivalAirportName": "Melbourne Airport",
+                    "priceAdult": 11600000,
+                    "priceChild": 5200000,
+                    "priceBaby": 0,
+                    "tax": 300000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transaction-history": {
+      "get": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Get Transaction History",
+        "description": "Get The Transaction History of Specific User that has been Already Login",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"42-EewggxiQiq3enhhIzTIP2T0IoZ0\""
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "56b953c8f7c40e4913fd48066be7c0b9;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:30:23 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "example": "66"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "Failed",
+                  "statusCode": 401,
+                  "message": "Unauthorized Page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ticket-booking": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Create Ticket Booking",
+        "description": "Create A New Ticket Booking For The User",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "bookingTicket": {
+                    "flightId": 1,
+                    "bookerName": "John Doe",
+                    "bookerEmail": "john@example.com",
+                    "bookerPhone": "1234567890"
+                  },
+                  "passengerDetail": [
+                    {
+                      "title": "Mr.",
+                      "fullName": "John Doe",
+                      "familyName": "Doe",
+                      "birthDate": "1983-06-15",
+                      "nationality": "US",
+                      "identityNumber": "9876543210",
+                      "identityCountry": "US",
+                      "identityExpired": "2025-06-15",
+                      "seatName": "1A"
+                    },
+                    {
+                      "title": "Mrs.",
+                      "fullName": "Mary Doe",
+                      "familyName": "Doe",
+                      "birthDate": "1985-07-15",
+                      "nationality": "US",
+                      "identityNumber": "9876543210",
+                      "identityCountry": "US",
+                      "identityExpired": "2025-06-15",
+                      "seatName": "2A"
+                    },
+                    {
+                      "title": "Mr.",
+                      "fullName": "Charlie Doe",
+                      "familyName": "Doe",
+                      "birthDate": "2002-07-15",
+                      "nationality": "US",
+                      "identityNumber": "9875233210",
+                      "identityCountry": "US",
+                      "identityExpired": "2025-06-15",
+                      "seatName": "3A"
+                    },
+                    {
+                      "title": "Mrs.",
+                      "fullName": "Mary Doe",
+                      "familyName": "Doe",
+                      "birthDate": "2012-07-15",
+                      "nationality": "US",
+                      "identityNumber": "9876139210",
+                      "identityCountry": "US",
+                      "identityExpired": "2025-06-15",
+                      "seatName": "4A"
+                    }
+                  ],
+                  "adultPassenger": 2,
+                  "childPassenger": 1,
+                  "babyPassenger": 1
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"7e-Lh/KaAsSktO+0pK06t7/COQR5n8\""
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "a9878d012974bbb2eb296e59448c6067"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 10:12:36 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "example": "126"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "Success",
+                  "statusCode": 201,
+                  "message": "Booking Successfully Created",
+                  "bookingId": 77861718,
+                  "bookingCode": "thdt6NoS1b"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment/{bookingId}": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Create Payment",
+        "description": "Create Payment For VA (BNI, MANDIRI, BRI, BCA)",
+        "requestBody": {
+          "content": {}
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          },
+          {
+            "name": "bookingId",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "example": "38724093"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"154-iV2Smq9VAARsUnYPxo7/uTsw/d4\""
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "5d09ad3f0b1421232099347856ea3dda"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 10:50:29 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "example": "340"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 201,
+                  "message": "Payment created successfully, Please use the VA Number below to pay!",
+                  "bankDetails": [
+                    {
+                      "bank": "mandiri",
+                      "vaCode": "70012",
+                      "vaNumber": "135935857639"
+                    },
+                    {
+                      "bank": "bca",
+                      "vaNumber": "72614012599876731453116"
+                    },
+                    {
+                      "bank": "bni",
+                      "vaNumber": "9887261433347078"
+                    },
+                    {
+                      "bank": "bri",
+                      "vaNumber": "726144646790653072"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment-creditcard/{bookingId}": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Payment With Credit Card",
+        "description": "Create Payment Using Credic Card",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "card_number": "4811111111111114",
+                  "card_exp_month": "2",
+                  "card_exp_year": "2025",
+                  "card_cvv": "123"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          },
+          {
+            "name": "bookingId",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "example": "20647547"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"42-1LhqEmXOy1Dj8rZYIOSvWeAkRAg\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "71febc02a5571f1b675260f78be188b6"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 10:59:04 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "statusCode": 200,
+                  "message": "Payment Success!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/update-user": {
+      "put": {
+        "tags": [
+          "User Account"
+        ],
+        "summary": "Update User Profile",
+        "description": "Update the User Profile Account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "name": "vincenzo",
+                  "phoneNumber": "080822223311",
+                  "email": "xrizeno111@gmail.com"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"e9-zRy+cQqIrEku/e7in5oREPJwHc4\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "3429e560e213cc67eb0729a004b78d49"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 07:42:54 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "message": "User updated successfully",
+                  "data": {
+                    "id": 1,
+                    "name": "John Doe",
+                    "email": "john@gmail.com",
+                    "phoneNumber": "08987654321",
+                    "password": "$2b$10$PH2ukcu7NnpI/I7enKgj5.cQPFKKlihFg7u2X0X1x4x50GlwS309a",
+                    "isActivated": true,
+                    "role": "user"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Get All Notification",
+        "description": "Get All Notification From User That Has Been Signin",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "example": "application/json; charset=utf-8"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "example": "Accept-Encoding"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Express"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string",
+                  "example": "*"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "example": "W/\"868-owqULly5z72xmRDBh2fPTXw4Kvo\""
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "gzip"
+                }
+              },
+              "X-Cloud-Trace-Context": {
+                "schema": {
+                  "type": "string",
+                  "example": "6c2e73edc89e9be5a796825c8fb36cd1;o=1"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "type": "string",
+                  "example": "Thu, 19 Dec 2024 12:14:36 GMT"
+                }
+              },
+              "Server": {
+                "schema": {
+                  "type": "string",
+                  "example": "Google Frontend"
+                }
+              },
+              "Transfer-Encoding": {
+                "schema": {
+                  "type": "string",
+                  "example": "chunked"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Notifications retrieved successfully.",
+                  "data": [
+                    {
+                      "id": 18,
+                      "userId": 1,
+                      "title": "Payment Status (Paid)",
+                      "description": "You Have Finished Your Payment, Please Enjoy Your Flight!",
+                      "createdAt": "2024-12-19T10:59:04.051Z",
+                      "isRead": true
+                    },
+                    {
+                      "id": 17,
+                      "userId": 1,
+                      "title": "Payment Status (Cancelled)",
+                      "description": "Your Transaction Has Been Cancelled Because it Passed the Expired Date!",
+                      "createdAt": "2024-12-19T10:50:47.886Z",
+                      "isRead": true
+                    },
+                    {
+                      "id": 16,
+                      "userId": 1,
+                      "title": "Payment Status (Unpaid)",
+                      "description": "Finish your Payment before 12/19/2024 at 5:50:39 PM!!!",
+                      "createdAt": "2024-12-19T10:50:29.523Z",
+                      "isRead": true
+                    },
+                    {
+                      "id": 15,
+                      "userId": 1,
+                      "title": "Payment Status (Cancelled)",
+                      "description": "Your Transaction Has Been Cancelled Because it Passed the Expired Date!",
+                      "createdAt": "2024-12-19T10:48:47.853Z",
+                      "isRead": true
+                    },
+                    {
+                      "id": 14,
+                      "userId": 1,
+                      "title": "Payment Status (Unpaid)",
+                      "description": "Finish your Payment before 12/19/2024 at 5:48:31 PM!!!",
+                      "createdAt": "2024-12-19T10:48:22.033Z",
+                      "isRead": true
+                    },
+                    {
+                      "id": 13,
+                      "userId": 1,
+                      "title": "Payment Status (Cancelled)",
+                      "description": "Your Transaction Has Been Cancelled Because it Passed the Expired Date!",
+                      "createdAt": "2024-12-19T10:46:47.773Z",
+                      "isRead": true
+                    },
+                    {
+                      "id": 12,
+                      "userId": 1,
+                      "title": "Payment Status (Unpaid)",
+                      "description": "Finish your Payment before 12/19/2024 at 5:46:33 PM!!!",
+                      "createdAt": "2024-12-19T10:46:23.641Z",
+                      "isRead": false
+                    },
+                    {
+                      "id": 11,
+                      "userId": 1,
+                      "title": "Payment Status (Cancelled)",
+                      "description": "Your Transaction Has Been Cancelled Because it Passed the Expired Date!",
+                      "createdAt": "2024-12-19T10:43:47.522Z",
+                      "isRead": false
+                    },
+                    {
+                      "id": 10,
+                      "userId": 1,
+                      "title": "Payment Status (Unpaid)",
+                      "description": "Finish your Payment before 12/19/2024 at 5:43:35 PM!!!",
+                      "createdAt": "2024-12-19T10:43:25.648Z",
+                      "isRead": false
+                    },
+                    {
+                      "id": 9,
+                      "userId": 1,
+                      "title": "Payment Status (Cancelled)",
+                      "description": "Your Transaction Has Been Cancelled Because it Passed the Expired Date!",
+                      "createdAt": "2024-12-19T10:24:02.856Z",
+                      "isRead": false
+                    },
+                    {
+                      "id": 8,
+                      "userId": 1,
+                      "title": "Payment Status (Unpaid)",
+                      "description": "Finish your Payment before 12/19/2024 at 5:23:53 PM!!!",
+                      "createdAt": "2024-12-19T10:23:43.642Z",
+                      "isRead": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/{notificationId}": {
+      "put": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Read Notification",
+        "description": "Read Specific Notification",
+        "requestBody": {
+          "content": {}
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "example": "12"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
