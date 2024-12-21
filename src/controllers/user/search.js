@@ -41,6 +41,12 @@ const searchFlights = async (req, res, next) => {
 			throw error;
         }
 
+        if (parsedDate < new Date()) {
+            const error = new Error("Invalid date");
+            error.statusCode = 400;
+            throw error;
+        }
+
         const departureAirport = await prisma.airports.findMany({
             where: {
                 airportCode: {
