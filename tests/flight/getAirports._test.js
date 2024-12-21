@@ -3,13 +3,22 @@ const app = require("../../app");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+let testAirports = []; // Array untuk menyimpan ID data pengujian
+
 beforeAll(async () => {
   // Pastikan database kosong sebelum testing
   await prisma.airports.deleteMany();
 });
 
 afterAll(async () => {
-  // Tutup koneksi Prisma setelah testing selesai
+  // Menghapus semua data yang digunakan dalam pengujian
+  for (let airport of testAirports) {
+    await prisma.airports.delete({
+      where: {
+        id: airport.id,
+      },
+    });
+  }
   await prisma.$disconnect();
 });
 
