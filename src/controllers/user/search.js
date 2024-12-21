@@ -65,6 +65,7 @@ const searchFlights = async (req, res, next) => {
       });
     }
 
+
     const departureAirportCodeLower = departureAirportCode.toLowerCase();
     const arrivalAirportCodeLower = arrivalAirportCode.toLowerCase();
     const seatClassesLower = seatClasses.toLowerCase();
@@ -72,6 +73,16 @@ const searchFlights = async (req, res, next) => {
       parseInt(adultPassenger) +
       parseInt(childPassenger) +
       parseInt(babyPassenger);
+
+
+        const departureAirport = await prisma.airports.findMany({
+            where: {
+                airportCode: {
+                    equals: departureAirportCodeLower,
+                    mode: 'insensitive',
+                }
+            }
+        });
 
     const parsedDate = new Date(departureTime);
     if (isNaN(parsedDate)) {
