@@ -9,21 +9,25 @@ const startCronJob = () => {
 			const banks = ["mandiri", "bca", "bni", "bri"];
 	
 			const expiredPayments = await prisma.payments.findMany({
-				where: {
-					status: "Unpaid",
-					expiredDate: {
-						lt: new Date(),
-					},
-				},
-			});
+                where: {
+                    status: "Unpaid",
+                    expiredDate: {
+                        lt: new Date(),
+                    },
+                },
+                include: {
+                    booking: {
+                        include: {
+                            passengers: true
+                        }
+                    }
+                }
+            });
 	
 			for (const payment of expiredPayments) {
 				for (let bank of banks) {
 					const transactionId = `${payment.bookingId}-${bank}`;
-					console.log(
-						`Canceling payment for : ${transactionId} on ${bank}`
-					);
-	
+
 					await core.transaction.cancel(transactionId);
 				}
 	
@@ -40,6 +44,21 @@ const startCronJob = () => {
 						status: "CANCEL",
 					},
 				});
+
+				for (const passenger of payment.booking.passengers) {
+                    if (passenger.seatId) {
+						console.log(passenger.seatId);
+                        await prisma.seats.update({
+                            where: { id: passenger.seatId },
+                            data: { isAvailable: true }
+                        });
+
+                        await prisma.passengers.update({
+                            where: { id: passenger.id },
+                            data: { seatId: null }
+                        });
+                    }
+                }
 
 				const booking = await prisma.bookings.findUnique({
 					where: {

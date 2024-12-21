@@ -3,10 +3,13 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express");
+const swaggerUI = require("swagger-ui-express");
 const cookieParser = require("cookie-parser");
 const { startCronJob } = require("./src/utils/cronJob");
 const cors = require("cors");
 const errorHandler = require("./src/middlewares/errorHandler");
+const swaggerDocs = require("./src/docs/swagger.json");
+
 const app = express();
 const PORT = process.env.PORT;
 //Admin
@@ -29,6 +32,7 @@ const userRoutes = [
   require("./src/routes/user/resetPasswordRoute"),
   require("./src/routes/user/userAccountRoute"),
   require("./src/routes/user/loginRoute"),
+  require("./src/routes/user/notificationRoutes"),
 ];
 
 const corstOption = {
@@ -50,6 +54,7 @@ app.use(cookieParser());
 
 startCronJob();
 
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 adminRoutes.forEach(route => app.use(route));
 userRoutes.forEach(route => app.use(route));
 

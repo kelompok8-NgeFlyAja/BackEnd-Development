@@ -184,21 +184,6 @@ const createCCPayment = async (req, res, next) => {
 			});
 
 			if (newPayment) {
-				await prisma.bookings.update({
-					where: { id: parseInt(convertBookingId) },
-					data: {
-						status: "SUCCESS",
-					},
-				});
-	
-				await prisma.payments.update({
-					where: { bookingId: parseInt(convertBookingId) },
-					data: {
-						paymentMethod: "Credit Card",
-						status: "Issued",
-					},
-				});
-
 				await prisma.notifications.create({
 					data: {
 						userId: booking.userId,
@@ -296,13 +281,13 @@ const createPayment = async (req, res, next) => {
 			});
 		}
 
-		const getTax = await prisma.bookings.findUnique({
+		const Tax = await prisma.bookings.findUnique({
 			where: {id: parseInt(bookingId)}
 		});
 
 		itemDetails.push({
 			id: `tax`,
-			price: parseInt(getTax.tax),
+			price: parseInt(Tax.tax),
 			quantity: 1,
 			name: `Tax`,
 		});
@@ -373,7 +358,7 @@ const createPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
+					expiredDate: new Date(Date.now() + 30 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
