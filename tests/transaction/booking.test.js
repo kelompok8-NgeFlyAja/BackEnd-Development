@@ -1,4 +1,5 @@
 const request = require("supertest");
+const bcrypt = require('bcrypt');
 const app = require("../../app");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -185,7 +186,7 @@ describe("Testing for Booking Route", () => {
 
 			const ticketBooking = await request(app)
 				.post("/ticket-booking")
-				.send(booking)
+				.send({booking})
 				.set("Authorization", `Bearer ${authToken}`);
             
             global.bookingId = ticketBooking.body.bookingId;
