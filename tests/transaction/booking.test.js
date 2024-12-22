@@ -8,15 +8,165 @@ const salt = parseInt(process.env.SALT)
 
 const hashedPassword = bcrypt.hashSync(password, salt);
 
-let authToken;
+let authToken, bookingId;
 
 const booking = {
 	bookingTicket: {
-		flightId: 1,
+		flightId: 25,
 		bookerName: "John Test",
 		bookerEmail: "test@gmail.com",
 		bookerPhone: "081212123434",
 	},
+	passengerDetail: [
+		{
+			title: "Mr.",
+			fullName: "John Test",
+			familyName: "Test",
+			birthDate: "1983-06-15",
+			nationality: "US",
+			identityNumber: "9876543210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "1E",
+		},
+		{
+			title: "Mrs.",
+			fullName: "Mary Test",
+			familyName: "Test",
+			birthDate: "1985-07-15",
+			nationality: "US",
+			identityNumber: "9876543210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "2E",
+		},
+		{
+			title: "Mr.",
+			fullName: "Charlie Test",
+			familyName: "Test",
+			birthDate: "2002-07-15",
+			nationality: "US",
+			identityNumber: "9875233210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "3E",
+		},
+		{
+			title: "Mrs.",
+			fullName: "Mary Test",
+			familyName: "Test",
+			birthDate: "2012-07-15",
+			nationality: "US",
+			identityNumber: "9876139210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "4E",
+		},
+	],
+	adultPassenger: 2,
+	childPassenger: 1,
+	babyPassenger: 1,
+};
+const bookingPassengerDetail = {
+	bookingTicket: {
+		flightId: 25,
+		bookerName: "John Test",
+		bookerEmail: "test@gmail.com",
+		bookerPhone: "081212123434",
+	},
+	passengerDetail: [
+		{
+			title: "Mr.",
+			fullName: "John Test",
+			familyName: "Test",
+			nationality: "US",
+			identityNumber: "9876543210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "1E",
+		},
+		{
+			title: "Mrs.",
+			fullName: "Mary Test",
+			familyName: "Test",
+			birthDate: "1985-07-15",
+			nationality: "US",
+			identityNumber: "9876543210",
+			identityExpired: "2025-06-15",
+			seatName: "2E",
+		},
+		{
+			title: "Mr.",
+			fullName: "Charlie Test",
+			familyName: "Test",
+			birthDate: "2002-07-15",
+			identityNumber: "9875233210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "3E",
+		},
+		{
+			title: "Mrs.",
+			fullName: "Mary Test",
+			familyName: "Test",
+			birthDate: "2012-07-15",
+			nationality: "US",
+			identityNumber: "9876139210",
+			identityCountry: "US",
+			seatName: "4E",
+		},
+	],
+	adultPassenger: 2,
+	childPassenger: 1,
+	babyPassenger: 1,
+};
+const bookingPassengerFailed = {
+	bookingTicket: {
+		flightId: 25,
+		bookerName: "John Test",
+		bookerEmail: "test@gmail.com",
+		bookerPhone: "081212123434",
+	},
+	passengerDetail: [
+		{
+			title: "Mrs.",
+			fullName: "Mary Test",
+			familyName: "Test",
+			birthDate: "1985-07-15",
+			nationality: "US",
+			identityNumber: "9876543210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "2E",
+		},
+		{
+			title: "Mr.",
+			fullName: "Charlie Test",
+			familyName: "Test",
+			birthDate: "2002-07-15",
+			nationality: "US",
+			identityNumber: "9875233210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "3E",
+		},
+		{
+			title: "Mrs.",
+			fullName: "Mary Test",
+			familyName: "Test",
+			birthDate: "2012-07-15",
+			nationality: "US",
+			identityNumber: "9876139210",
+			identityCountry: "US",
+			identityExpired: "2025-06-15",
+			seatName: "4E",
+		},
+	],
+	adultPassenger: 2,
+	childPassenger: 1,
+	babyPassenger: 1,
+};
+const bookingFailed = {
 	passengerDetail: [
 		{
 			title: "Mr.",
@@ -78,11 +228,16 @@ beforeAll(async () => {
 			isActivated: true,
 		},
 	});
+
+    const login = await request(app).post("/login").send({
+        email: "test@gmail.com",
+        password: "password",
+    });
+
+    authToken = login.body.accessToken;
 });
 
 afterAll(async () => {
-    const bookingId = global.bookingId;
-
     const passengers = await prisma.passengers.findMany({
         where: {
             bookingId: bookingId
@@ -115,7 +270,7 @@ afterAll(async () => {
 
 	await prisma.users.deleteMany({
 		where: {
-			email: "test@mail.com",
+			email: "test@gmail.com",
 		},
 	});
 });
@@ -128,7 +283,7 @@ describe("Testing for Booking Route", () => {
 			const cp = 1;
 			const bp = 1;
 			const ticketDetail = await request(app).get(
-				`/ticket-details?flightId=${flightId}&ap=${ap}&cp=${cp}&bp=${bp}`
+				`/ticket-details?flightId=${flightId}&adultPassenger=${ap}&childPassenger=${cp}&babyPassenger=${bp}`
 			);
 
 			expect(ticketDetail.body).toHaveProperty("status");
@@ -142,7 +297,7 @@ describe("Testing for Booking Route", () => {
 			const cp = 1;
 			const bp = 1;
 			const ticketDetail = await request(app).get(
-				`/ticket-details?flightId=&ap=${ap}&cp=${cp}&bp=${bp}`
+				`/ticket-details?adultPassenger=${ap}&childPassenger=${cp}&babyPassenger=${bp}`
 			);
 
 			expect(ticketDetail.body).toHaveProperty("status");
@@ -158,7 +313,7 @@ describe("Testing for Booking Route", () => {
 			const cp = 1;
 			const bp = 1;
 			const ticketDetail = await request(app).get(
-				`/ticket-details?flightId=${flightId}&ap=${ap}&cp=${cp}&bp=${bp}`
+				`/ticket-details?flightId=${flightId}&adultPassenger=${ap}&childPassenger=${cp}&babyPassenger=${bp}`
 			);
 
 			expect(ticketDetail.body).toHaveProperty("status");
@@ -171,34 +326,87 @@ describe("Testing for Booking Route", () => {
 	});
 
 	describe("POST /ticket-booking", () => {
-		test("It should return 200 when All Requirement are filled", async () => {
-			const login = await request(app).post("/login").send({
-				email: "test@gmail.com",
-				password: "password",
-			});
-
-            console.log(login, '-> Login');
-            
-
-			authToken = login.body.accessToken;
-            console.log(authToken, '-> the token');
-            
-
+		test("It should return 201 when All Requirement are filled", async () => {
 			const ticketBooking = await request(app)
 				.post("/ticket-booking")
-				.send({booking})
+				.send(booking)
 				.set("Authorization", `Bearer ${authToken}`);
-            
-            global.bookingId = ticketBooking.body.bookingId;
+                
+            bookingId = ticketBooking.body.bookingId;
 
 			expect(ticketBooking.body).toHaveProperty("status");
 			expect(ticketBooking.body).toHaveProperty("statusCode");
 			expect(ticketBooking.body).toHaveProperty("bookingId");
 			expect(ticketBooking.body).toHaveProperty("bookingCode");
 			expect(ticketBooking.body).toHaveProperty("message");
-			expect(ticketBooking.statusCode).toBe(200);
+			expect(ticketBooking.statusCode).toBe(201);
 			expect(ticketBooking.body.status).toBe("Success");
 			expect(ticketBooking.body.message).toBe("Booking Successfully Created");
 		});
+        test("It Should return 400 when any of the Requirement are not Filled", async () => {
+            const ticketBooking = await request(app)
+				.post("/ticket-booking")
+				.send(bookingFailed)
+				.set("Authorization", `Bearer ${authToken}`);
+
+            expect(ticketBooking.body).toHaveProperty("status");
+			expect(ticketBooking.body).toHaveProperty("statusCode");;
+			expect(ticketBooking.body).toHaveProperty("message");
+			expect(ticketBooking.statusCode).toBe(400);
+			expect(ticketBooking.body.status).toBe("Failed");
+			expect(ticketBooking.body.message).toBe("Make Sure To Fill All The Booker Forms!");
+        });
+        test("It Should return 400 when The Passenger Form Are Not Equal to the Total of Passenger", async () => {
+            const ticketBooking = await request(app)
+				.post("/ticket-booking")
+				.send(bookingPassengerFailed)
+				.set("Authorization", `Bearer ${authToken}`);
+
+            expect(ticketBooking.body).toHaveProperty("status");
+			expect(ticketBooking.body).toHaveProperty("statusCode");;
+			expect(ticketBooking.body).toHaveProperty("message");
+			expect(ticketBooking.statusCode).toBe(400);
+			expect(ticketBooking.body.status).toBe("Failed");
+			expect(ticketBooking.body.message).toBe("The total of passenger details does not match the number of passengers provided!");
+        });
+        test("It Should return 400 when some of The Passenger Detail are not Filled", async () => {
+            const ticketBooking = await request(app)
+				.post("/ticket-booking")
+				.send(bookingPassengerDetail)
+				.set("Authorization", `Bearer ${authToken}`);
+
+            expect(ticketBooking.body).toHaveProperty("status");
+			expect(ticketBooking.body).toHaveProperty("statusCode");;
+			expect(ticketBooking.body).toHaveProperty("message");
+			expect(ticketBooking.statusCode).toBe(400);
+			expect(ticketBooking.body.status).toBe("Failed");
+			expect(ticketBooking.body.message).toBe("Make Sure To Fill All The Passenger Forms!");
+        });
+        test("It Should return 400 when The Seats Are Already Taken", async () => {
+            const selectedSeatName = "1E";
+            const selectedSeat = await prisma.seats.findFirst({
+				where: {
+					seatNumber: selectedSeatName,
+					planeId: 25,
+				},
+			});
+
+            await prisma.seats.update({
+				where: { id: selectedSeat.id },
+				data: { isAvailable: false },
+			});
+
+            const ticketBooking = await request(app)
+				.post("/ticket-booking")
+				.send(booking)
+				.set("Authorization", `Bearer ${authToken}`);
+
+            expect(ticketBooking.body).toHaveProperty("status");
+			expect(ticketBooking.body).toHaveProperty("statusCode");;
+			expect(ticketBooking.body).toHaveProperty("message");
+			expect(ticketBooking.statusCode).toBe(400);
+			expect(ticketBooking.body.status).toBe("Failed");
+			expect(ticketBooking.body.message).toBe(`Seat ${selectedSeatName} is already taken`);
+        });
 	});
 });
