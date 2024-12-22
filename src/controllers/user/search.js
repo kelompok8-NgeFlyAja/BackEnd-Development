@@ -16,22 +16,36 @@ const searchFlights = async (req, res, next) => {
             pageSize = 10
         } = req.query;
 
-        if (!departureAirportCode || !arrivalAirportCode || !departureTime || !seatClasses || !adultPassenger || !childPassenger || !babyPassenger) {
-            const error = new Error("Please provide all required fields");
-            error.status = 400;
-            throw error;
-        }
+    if (
+      !departureAirportCode ||
+      !arrivalAirportCode ||
+      !departureTime ||
+      !seatClasses ||
+      !adultPassenger ||
+      !childPassenger ||
+      !babyPassenger
+    ) {
+      return res.status(400).json({
+        status: "failed",
+        statusCode: 400,
+        message: "Please provide all required fields",
+      });
+    }
 
-        if (typeof departureAirportCode !== 'string' || typeof arrivalAirportCode !== 'string' || typeof seatClasses !== "string" || isNaN(adultPassenger) || isNaN(childPassenger) || isNaN(babyPassenger)) {
-            const error = new Error("Invalid input data");
-            error.status = 400;
-            throw error;
-        }
-
-        const departureAirportCodeLower = departureAirportCode.toLowerCase();
-        const arrivalAirportCodeLower = arrivalAirportCode.toLowerCase();
-        const seatClassesLower = seatClasses.toLowerCase();
-        const totalPassengers = parseInt(adultPassenger) + parseInt(childPassenger) + parseInt(babyPassenger);
+    if (
+      typeof departureAirportCode !== "string" ||
+      typeof arrivalAirportCode !== "string" ||
+      typeof seatClasses !== "string" ||
+      isNaN(adultPassenger) ||
+      isNaN(childPassenger) ||
+      isNaN(babyPassenger)
+    ) {
+      return res.status(400).json({
+        status: "failed",
+        statusCode: 400,
+        message: "Invalid input data",
+      });
+    }
 
         if (departureAirportCodeLower === arrivalAirportCodeLower) {
             const error = new Error("Departure and arrival airport cannot be the same");
@@ -68,14 +82,7 @@ const searchFlights = async (req, res, next) => {
             throw error;
         }
 
-        const arrivalAirport = await prisma.airports.findMany({
-            where: {
-                airportCode: {
-                    equals: arrivalAirportCodeLower,
-                    mode: 'insensitive',
-                }
-            }
-        });
+    // console.log('departureAirport', departureAirport);
 
         if (!arrivalAirport || arrivalAirport.length === 0) {
             const error = new Error("Airport not found");
@@ -115,21 +122,28 @@ const searchFlights = async (req, res, next) => {
                     lt: new Date(parsedDate.setHours(23, 59, 59)),
                 },
             },
-            include: {
-                route: {
-                    include: {
-                        seatClass: true,
-                    },
-                },
-                plane: {
-                    include: {
-                        seats: true,
-                    },
-                },
-            },
-            skip: offset,
-            take: itemsPerPage
-        });
+          },
+        },
+        departureTime: {
+          gte: new Date(parsedDate.setHours(0, 0, 0)), // Mulai hari
+          lt: new Date(parsedDate.setHours(23, 59, 59)), // Akhir hari
+        },
+      },
+      include: {
+        route: {
+          include: {
+            seatClass: true,
+          },
+        },
+        plane: {
+          include: {
+            seats: true,
+          },
+        },
+      },
+      skip: offset,
+      take: itemsPerPage,
+    });
 
         const availableFlights = flights.filter((flight) => {
             const availableSeats = flight.plane.seats.filter((seat) => seat.isAvailable).length;
@@ -142,46 +156,24 @@ const searchFlights = async (req, res, next) => {
             throw error;
         }
 
-        const availableFlightsResponse = availableFlights.map((flight) => {
-            const timeZone = "Asia/Jakarta";
-            const departureTimeConvert = moment
-                .utc(flight.departureTime)
-                .tz(timeZone)
-                .format("YYYY-MM-DD HH:mm:ss");
-            const arrivalTimeConvert = moment
-                .utc(flight.arrivalTime)
-                .tz(timeZone)
-                .format("YYYY-MM-DD HH:mm:ss");
+    if (availableFlights.length === 0) {
+      return res.status(404).json({
+        status: "failed",
+        statusCode: 404,
+        message: "No flights available for the given criteria",
+      });
+    }
 
-            const convertDepartureTimeToDate = new Date(departureTimeConvert);
-            const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
-            return {
-                flightId: flight.id,
-                departureAirport: departureAirportCode,
-                arrivalAirport: arrivalAirportCode,
-                departureTime: convertDepartureTimeToDate.toLocaleTimeString(),
-                departureDate: convertDepartureTimeToDate.toLocaleDateString(),
-                arrivalTime: convertArrivalTimeToDate.toLocaleTimeString(),
-                arrivalDate: convertArrivalTimeToDate.toLocaleDateString(),
-                flightCode: flight.flightCode,
-                duration: flight.duration,
-                route: {
-                    routeId: flight.route.id,
-                    departureAirport: departureAirportCode,
-                    arrivalAirport: arrivalAirportCode,
-                    seatClass: seatClasses,
-                },
-                plane: {
-                    planeId: flight.plane.id,
-                    planeName: flight.plane.name,
-                    planeCode: flight.plane.planeCode,
-                    description: flight.plane.description,
-                    baggage: flight.plane.baggage,
-                    cabinBaggage: flight.plane.cabinBaggage,
-                },
-                price: flight.route.seatClass.priceAdult
-            };
-        });
+    const availableFlightsResponse = availableFlights.map((flight) => {
+      const timeZone = "Asia/Jakarta";
+      const departureTimeConvert = moment
+        .utc(flight.departureTime)
+        .tz(timeZone)
+        .format("YYYY-MM-DD HH:mm:ss");
+      const arrivalTimeConvert = moment
+        .utc(flight.arrivalTime)
+        .tz(timeZone)
+        .format("YYYY-MM-DD HH:mm:ss");
 
         const totalFlights = await prisma.flights.count({
             where: {
@@ -345,11 +337,13 @@ const returnSearchFlights = async (req, res, next) => {
             return availableSeats >= parseInt(totalPassengers);
         });
 
-        if (availableReturnFlights.length === 0) {
-            const error = new Error("No return flights available for the given criteria");
-            error.status = 404;
-            throw error;
-        }
+    if (availableReturnFlights.length === 0) {
+      return res.status(404).json({
+        status: "failed",
+        statusCode: 404,
+        message: "No return flights available for the given criteria",
+      });
+    }
 
         const availableReturnFlightsResponse = availableReturnFlights.map((flight) => {
             const timeZone = "Asia/Jakarta";
