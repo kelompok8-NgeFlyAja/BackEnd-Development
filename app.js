@@ -33,6 +33,7 @@ const userRoutes = [
   require("./src/routes/user/userAccountRoute"),
   require("./src/routes/user/loginRoute"),
   require("./src/routes/user/notificationRoutes"),
+  require("./src/routes/user/printPDFRoute"),
 ];
 
 const corstOption = {
