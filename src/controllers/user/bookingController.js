@@ -1,4 +1,6 @@
 const moment = require("moment-timezone");
+// import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const randomGenerator = require("../../utils/randomGenerator");
@@ -350,6 +352,10 @@ const createBooking = async (req, res, next) => {
 		next(error);
 	}
 };
+
+const printTicket = async (req, res, next) => {
+
+}
 
 module.exports = {
 	createBooking,
