@@ -61,8 +61,8 @@ userRoutes.forEach(route => app.use(route));
 
 app.use(errorHandler);
 
-// app.listen(PORT, () => {
-//   console.log(`-> Listening on PORT: ${PORT}`);
-// });
+app.listen(PORT, () => {
+  console.log(`-> Listening on PORT: ${PORT}`);
+});
 
-module.exports = app
+// module.exports = app

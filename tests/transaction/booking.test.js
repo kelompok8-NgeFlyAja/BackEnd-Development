@@ -343,6 +343,18 @@ describe("Testing for Booking Route", () => {
 			expect(ticketBooking.body.status).toBe("Success");
 			expect(ticketBooking.body.message).toBe("Booking Successfully Created");
 		});
+		test("It Should return 401 when user hasnt Login", async () => {
+			const ticketBooking = await request(app)
+				.post("/ticket-booking")
+				.send(booking)
+
+				expect(ticketBooking.body).toHaveProperty("status");
+				expect(ticketBooking.body).toHaveProperty("statusCode");
+				expect(ticketBooking.body).toHaveProperty("message");
+				expect(ticketBooking.statusCode).toBe(401);
+				expect(ticketBooking.body.status).toBe("Failed");
+				expect(ticketBooking.body.message).toBe("Unauthorized Page!");
+		})
         test("It Should return 400 when any of the Requirement are not Filled", async () => {
             const ticketBooking = await request(app)
 				.post("/ticket-booking")

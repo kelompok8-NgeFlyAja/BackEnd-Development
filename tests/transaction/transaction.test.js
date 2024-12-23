@@ -5,7 +5,7 @@ describe("Testing for Transaction History Route", () => {
 	describe("GET /transaction-history", () => {
 		test("It Should Return 200 when User Already Login", async () => {
 			const login = await request(app).post("/login").send({
-				email: "johndoe@example.com",
+				email: "john@mai.com",
 				password: "password",
 			});
 
