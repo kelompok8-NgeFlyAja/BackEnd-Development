@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const createSnapPayment = require('../../controllers/user/paymentSnapController');
 const getTransactionHistory = require('../../controllers/user/transactionHistory.js')
-const {createCCPayment,createPayment, midtransNotification} = require('../../controllers/user/paymentCoreController');
+const {createCCPayment,createPayment, midtransNotification, checkPaymentVa} = require('../../controllers/user/paymentCoreController');
 const {getTicketDetails, createBooking} = require('../../controllers/user/bookingController')
 const authMiddleware = require('../../middlewares/authMiddleware');
 
@@ -16,5 +16,6 @@ router.post('/payment-creditcard/:bookingId?', authMiddleware, createCCPayment);
 router.post('/payment/:bookingId?', authMiddleware, createPayment);
 //This is the Callback
 router.post('/midtrans/notification', midtransNotification);
+router.get('/check-payment/:bookingId', authMiddleware, checkPaymentVa);
 
 module.exports = router;

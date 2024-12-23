@@ -9,6 +9,7 @@ const {
 	bniDetail,
 	briDetail,
 } = require("../../utils/paymentProcessor");
+const { stat } = require("fs/promises");
 
 const createCCPayment = async (req, res, next) => {
 	try {
@@ -183,8 +184,7 @@ const createCCPayment = async (req, res, next) => {
 			return res.status(200).json({
 				status: "success",
 				statusCode: 200,
-				message:
-					"Payment Success!"
+				message: "Payment Success!",
 			});
 		}
 	} catch (error) {
@@ -207,22 +207,46 @@ const createPayment = async (req, res, next) => {
 		let itemDetails = [];
 
 		const booking = await prisma.bookings.findUnique({
-			where: { id: convertBookingId },
-			include: {
-				passengers: true,
-				flight: {
-					include: {
-						route: {
-							include: {
-								departureAirport: true,
-								arrivalAirport: true,
-								seatClass: true,
-							},
-						},
-					},
-				},
-			},
-		});
+            where: { id: convertBookingId },
+            include: {
+                passengers: true,
+                flight: {
+                    include: {
+                        route: {
+                            include: {
+                                departureAirport: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                                arrivalAirport: {
+                                    select: {
+                                        name: true,
+                                    },
+                                },
+                                seatClass: {
+                                    select: {
+                                        name: true,
+                                        priceAdult: true,
+                                        priceChild: true,
+                                        priceBaby: true,
+                                    },
+                                },
+                            },
+                        },
+                        plane: {
+                            select: {
+                                planeName: true,
+                                planeCode: true,
+                                description: true,
+                                baggage: true,
+                                cabinBaggage: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
 		if (booking.status !== "PENDING") {
 			const error = new Error(
@@ -267,7 +291,7 @@ const createPayment = async (req, res, next) => {
 		}
 
 		const Tax = await prisma.bookings.findUnique({
-			where: {id: parseInt(bookingId)}
+			where: { id: parseInt(bookingId) },
 		});
 
 		itemDetails.push({
@@ -373,12 +397,30 @@ const createPayment = async (req, res, next) => {
 				});
 
 				return res.status(201).json({
-					status: "success",
-					statusCode: 201,
-					message:
-						"Payment created successfully, Please use the VA Number below to pay!",
-					bankDetails: responses,
-				});
+                    status: "Success",
+                    statusCode: 201,
+                    message: "Flight details and payment information retrieved successfully",
+                    flightDetails: {
+                        flightId: booking.flight.id,
+                        departureTime: booking.flight.departureTime.toLocaleTimeString(),
+                        departureDate: booking.flight.departureTime.toLocaleDateString(),
+                        departureAirportName: booking.flight.route.departureAirport.name,
+                        arrivalTime: booking.flight.arrivalTime.toLocaleTimeString(),
+                        arrivalDate: booking.flight.arrivalTime.toLocaleDateString(),
+                        arrivalAirportName: booking.flight.route.arrivalAirport.name,
+                        planeName: booking.flight.plane.planeName,
+                        planeCode: booking.flight.plane.planeCode,
+                        description: booking.flight.plane.description,
+                        baggage: booking.flight.plane.baggage,
+                        cabinBaggage: booking.flight.plane.cabinBaggage,
+                        priceAdult: seatClass.priceAdult * booking.adultPassenger,
+                        priceChild: seatClass.priceChild * booking.childPassenger,
+                        priceBaby: seatClass.priceBaby * booking.babyPassenger,
+                        total: totalPrice,
+                        tax: booking.tax
+                    },
+                    bankDetails: responses,
+                });
 			}
 		}
 	} catch (error) {
@@ -430,7 +472,10 @@ const midtransNotification = async (req, res, next) => {
 			`${bookingId}-bni`,
 		];
 
-		if ( transaction_status === "settlement" || transaction_status === "capture") {
+		if (
+			transaction_status === "settlement" ||
+			transaction_status === "capture"
+		) {
 			for (let orderId of listBank) {
 				if (orderId !== order_id) {
 					await core.transaction.cancel(orderId);
@@ -459,8 +504,50 @@ const midtransNotification = async (req, res, next) => {
 	}
 };
 
+const checkPaymentVa = async (req, res, next) => {
+	try {
+		const { bookingId } = req.params;
+		const userId = req.user.id;
+
+		if (!bookingId) {
+			const error = new Error("BookingId is Required");
+			error.statusCode = 400;
+			throw error;
+		}
+
+		const booking = await prisma.bookings.findUnique({
+			where: {
+				id: parseInt(bookingId),
+			},
+			include: {
+				payments: true,
+			},
+		});
+
+		if (!booking || booking.userId !== userId) {
+			const error = new Error(
+				"Booking not Found"
+			);
+			error.statusCode = 404;
+			throw error;
+		}
+
+		if (booking.payments && booking.payments.status === "success") {
+			res.status(200).json({
+				status: "Success",
+				statusCode: 200,
+				message: "Payment is successful",
+				data: booking.payments,
+			});
+		}
+	} catch (error) {
+		next(error);
+	}
+};
+
 module.exports = {
 	createCCPayment,
 	createPayment,
 	midtransNotification,
+	checkPaymentVa
 };
