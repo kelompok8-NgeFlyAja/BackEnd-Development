@@ -281,6 +281,10 @@ const createBooking = async (req, res, next) => {
             taxFlight = 0;
         }
 
+		console.log(bookingTicket.flightId, "-> from booking");
+		console.log(parseInt(bookingTicket.flightId), "-> parsed");
+		
+
 		const createdBooking = await prisma.bookings.create({
 			data: {
 				id: parseInt(randomId),
