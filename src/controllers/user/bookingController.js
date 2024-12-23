@@ -88,21 +88,21 @@ const getTicketDetails = async (req, res, next) => {
 		const totalAdultPrice = flightDetails.route.seatClass.priceAdult * adultPassenger;
 		const totalChildPrice = flightDetails.route.seatClass.priceChild * childPassenger;
 		const totalBabyPrice = flightDetails.route.seatClass.priceBaby * babyPassenger;
-		
+
 		const totalPassengers = adultPassenger + childPassenger + babyPassenger
 		let taxFlight;
-		
+
 		if (totalPassengers >= 1 && totalPassengers <= 2) {
 			taxFlight = 30000;
-        } else if (totalPassengers >= 3 && totalPassengers <= 5) {
+		} else if (totalPassengers >= 3 && totalPassengers <= 5) {
 			taxFlight = 50000;
-        } else if (totalPassengers >= 6 && totalPassengers <= 8) {
+		} else if (totalPassengers >= 6 && totalPassengers <= 8) {
 			taxFlight = 100000;
-        } else if (totalPassengers > 8) {
+		} else if (totalPassengers > 8) {
 			taxFlight = 125000;
-        } else {
+		} else {
 			taxFlight = 0;
-        }
+		}
 		const totalPrice = totalAdultPrice + totalChildPrice + totalBabyPrice + taxFlight
 
 		res.status(200).json({
@@ -268,18 +268,18 @@ const createBooking = async (req, res, next) => {
 		const randomId = await randomIdGenerator();
 		const BookingDateUtc7 = moment.utc(new Date()).tz(timeZone).format();
 		let taxFlight;
-		
+
 		if (totalPassengers >= 1 && totalPassengers <= 2) {
-            taxFlight = 30000;
-        } else if (totalPassengers >= 3 && totalPassengers <= 5) {
-            taxFlight = 50000;
-        } else if (totalPassengers >= 6 && totalPassengers <= 8) {
-            taxFlight = 100000;
-        } else if (totalPassengers > 8) {
-            taxFlight = 125000;
-        } else {
-            taxFlight = 0;
-        }
+			taxFlight = 30000;
+		} else if (totalPassengers >= 3 && totalPassengers <= 5) {
+			taxFlight = 50000;
+		} else if (totalPassengers >= 6 && totalPassengers <= 8) {
+			taxFlight = 100000;
+		} else if (totalPassengers > 8) {
+			taxFlight = 125000;
+		} else {
+			taxFlight = 0;
+		}
 
 		const createdBooking = await prisma.bookings.create({
 			data: {
@@ -326,7 +326,7 @@ const createBooking = async (req, res, next) => {
 
 		await prisma.bookings.update({
 			where: { id: createdBooking.id },
-			data: { totalPrice: totalPrice},
+			data: { totalPrice: totalPrice },
 		});
 
 		for (let i = 0; i < passengerData.length; i++) {
@@ -351,7 +351,100 @@ const createBooking = async (req, res, next) => {
 	}
 };
 
+const getBookingById = async (req, res, next) => {
+	try {
+		const { bookingId } = req.params;
+
+		if (!bookingId || isNaN(Number(bookingId))) {
+			const error = new Error("Booking ID must be a valid number");
+			error.statusCode = 400;
+			throw error;
+		}
+		const booking = await prisma.bookings.findUnique({
+
+			where: {
+				id: Number(bookingId),
+			},
+			include: {
+				payments: true,
+				passengers: true,
+				flight: {
+					select: {
+						flightCode: true,
+						departureTime: true,
+						arrivalTime: true,
+						duration: true,
+						plane: {
+							select:
+							{
+								planeName: true,
+								planeCode: true,
+								baggage: true,
+								cabinBaggage: true,
+							}
+						},
+						route: {
+							select: {
+								departureAirport: {
+									select: {
+										name: true,
+										city: true,
+									},
+								},
+								arrivalAirport: {
+									select: {
+										name: true,
+										city: true,
+									}
+								},
+								seatClass: {
+									select: {
+										name: true,
+									}
+								},
+							},
+						},
+					},
+				},
+			},
+		});
+		if (!booking) {
+			const error = new Error("Booking not found");
+			error.statusCode = 404;
+			throw error;
+		}
+		if (booking.flight) {
+			const timeZone = "Asia/Jakarta";
+			const departureTimeConvert = moment
+				.utc(booking.flight.departureTime)
+				.tz(timeZone)
+				.format("YYYY-MM-DD HH:mm:ss");
+			const arrivalTimeConvert = moment
+				.utc(booking.flight.arrivalTime)
+				.tz(timeZone)
+				.format("YYYY-MM-DD HH:mm:ss");
+
+			const convertDepartureTimeToDate = new Date(departureTimeConvert);
+			const convertArrivalTimeToDate = new Date(arrivalTimeConvert);
+
+			booking.flight.departureTime = convertDepartureTimeToDate.toLocaleString();
+			booking.flight.arrivalTime = convertArrivalTimeToDate.toLocaleString();
+		}
+
+
+		res.status(200).json({
+			status: "Success",
+			statusCode: 200,
+			message: "Booking details retrieved successfully",
+			data: booking,
+		});
+	} catch (error) {
+		next(error);
+	}
+}
+
 module.exports = {
 	createBooking,
 	getTicketDetails,
+	getBookingById
 };
