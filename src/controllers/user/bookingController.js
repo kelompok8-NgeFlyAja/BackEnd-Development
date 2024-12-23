@@ -14,6 +14,18 @@ const getTicketDetails = async (req, res, next) => {
 			throw error;
 		}
 
+		if (!adultPassenger && !childPassenger && !babyPassenger) {
+			const error = new Error("Please Fill The Amount of Passenger!");
+			error.statusCode = 400;
+			throw error;
+		}
+
+		if (!adultPassenger) {
+			const error = new Error("There Should Be A minimum of One Adult Passenger!");
+			error.statusCode = 400;
+			throw error;
+		}
+
 		const flightDetails = await prisma.flights.findUnique({
 			where: { id: parseInt(flightId) },
 			select: {
