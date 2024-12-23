@@ -3,13 +3,14 @@ const app = require("../../app");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-beforeAll(async () => {
-  // Pastikan database kosong sebelum testing
-  await prisma.airports.deleteMany();
-});
-
 afterAll(async () => {
-  // Tutup koneksi Prisma setelah testing selesai
+  // Hapus data testing
+  await prisma.airports.deleteMany({
+    where: {
+      airportCode: { in: ["TST123", "BLK001", "BLK002"] },
+    },
+  });
+
   await prisma.$disconnect();
 });
 

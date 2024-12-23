@@ -170,37 +170,22 @@ const createCCPayment = async (req, res, next) => {
 		const midtransResponse = await core.charge(transactionDetails);
 
 		if (midtransResponse) {
-			const newPayment = await prisma.payments.create({
+			await prisma.notifications.create({
 				data: {
-					booking: convertBookingId,
-					paymentMethod: "Credit Card",
-					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
-					status: "Unpaid",
-					booking: {
-						connect: { id: convertBookingId },
-					},
+					userId: booking.userId,
+					title: "Payment Status (Paid)",
+					description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
+					createdAt: new Date(Date.now()),
+					isRead: false,
 				},
 			});
 
-			if (newPayment) {
-				await prisma.notifications.create({
-					data: {
-						userId: booking.userId,
-						title: "Payment Status (Paid)",
-						description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
-						createdAt: new Date(Date.now()),
-						isRead: false,
-					},
-				});
-
-				return res.status(200).json({
-					status: "success",
-					statusCode: 200,
-					message:
-						"Payment Success!"
-				});
-			}
+			return res.status(200).json({
+				status: "success",
+				statusCode: 200,
+				message:
+					"Payment Success!"
+			});
 		}
 	} catch (error) {
 		if (error.httpStatusCode === "406") {
@@ -358,7 +343,7 @@ const createPayment = async (req, res, next) => {
 					booking: convertBookingId,
 					paymentMethod: "Virtual Account	",
 					amount: totalPrice,
-					expiredDate: new Date(Date.now() + 30 * 1000),
+					expiredDate: new Date(Date.now() + 15 * 60 * 1000),
 					status: "Unpaid",
 					booking: {
 						connect: { id: convertBookingId },
