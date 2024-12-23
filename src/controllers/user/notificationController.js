@@ -28,7 +28,6 @@ const getNotification = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.error("Failed to retrieve notifications: ", error);
         next(error);
     }
 };

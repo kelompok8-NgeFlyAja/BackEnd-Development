@@ -205,7 +205,7 @@ const createBooking = async (req, res, next) => {
 
 		if (!planeInfo) {
 			const error = new Error("Plane Not Found");
-			error.statusCode = 400;
+			error.statusCode = 404;
 			throw error;
 		}
 
@@ -310,12 +310,6 @@ const createBooking = async (req, res, next) => {
 				},
 			},
 		});
-
-		if (!seatClassInfo) {
-			const error = new Error("Seat Class Not Found");
-			error.statusCode = 400;
-			throw error;
-		}
 
 		const seatClass = seatClassInfo.route.seatClass;
 

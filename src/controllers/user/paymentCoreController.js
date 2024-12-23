@@ -9,7 +9,6 @@ const {
 	bniDetail,
 	briDetail,
 } = require("../../utils/paymentProcessor");
-const { stat } = require("fs/promises");
 
 const createCCPayment = async (req, res, next) => {
 	try {
@@ -85,6 +84,12 @@ const createCCPayment = async (req, res, next) => {
 			},
 		});
 
+		if (!booking) {
+			const error = new Error("Booking Ticket not found");
+			error.statusCode = 404;
+			throw error;
+		}
+		
 		if (booking.status !== "PENDING") {
 			const error = new Error(
 				"This Transaction Has Already been Finished! Please Make A New One"
@@ -92,14 +97,7 @@ const createCCPayment = async (req, res, next) => {
 			error.statusCode = 409;
 			throw error;
 		}
-
 		const seatClass = booking.flight.route.seatClass;
-
-		if (!booking) {
-			const error = new Error("Booking Ticket not found");
-			error.statusCode = 400;
-			throw error;
-		}
 
 		if (booking.adultPassenger > 0) {
 			itemDetails.push({
@@ -248,6 +246,12 @@ const createPayment = async (req, res, next) => {
             },
         });
 
+		if (!booking) {
+			const error = new Error("Booking Ticket not found");
+			error.statusCode = 404;
+			throw error;
+		}
+
 		if (booking.status !== "PENDING") {
 			const error = new Error(
 				"This Transaction Has Already been Finished! Please Make A New One"
@@ -257,12 +261,6 @@ const createPayment = async (req, res, next) => {
 		}
 
 		const seatClass = booking.flight.route.seatClass;
-
-		if (!booking) {
-			const error = new Error("Booking Ticket not found");
-			error.statusCode = 400;
-			throw error;
-		}
 
 		if (booking.adultPassenger > 0) {
 			itemDetails.push({
@@ -532,13 +530,20 @@ const checkPaymentVa = async (req, res, next) => {
 			throw error;
 		}
 
-		if (booking.payments && booking.payments.status === "success") {
+		if (booking.payments && booking.payments.status === "Issued") {
 			res.status(200).json({
 				status: "Success",
 				statusCode: 200,
 				message: "Payment is successful",
 				data: booking.payments,
 			});
+		} else {
+			res.status(200).json({
+				status: "Success",
+				statusCode: 200,
+				message: "You haven't Finished the Payment for this Payment!",
+				data: booking.payments,
+			})
 		}
 	} catch (error) {
 		next(error);

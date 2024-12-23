@@ -25,11 +25,17 @@ const config = {
 
   // The directory where Jest should output its coverage files
   coverageDirectory: "coverage",
+  verbose: true,
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "\\\\node_modules\\\\"
-  // ],
+  coveragePathIgnorePatterns: [
+    "\\\\node_modules\\\\",
+    "./src/controllers/admin",
+    "./src/controllers/user/paymentSnapController",
+    ".src/utils/cronJob",
+    "./src/utils/generateSeats",
+    "./src/config/multer",
+  ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
@@ -161,7 +167,11 @@ const config = {
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   // testPathIgnorePatterns: [
-  //   "\\\\node_modules\\\\"
+  //   "\\\\node_modules\\\\",
+  //   "./src/controllers/admin",
+  //   ".src/utils/cronJob",
+  //   "./src/utils/generateSeats",
+  //   "./src/config/multer",
   // ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files

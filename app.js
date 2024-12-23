@@ -53,7 +53,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-startCronJob();
+if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "development") {
+  startCronJob();
+}
 
 app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 adminRoutes.forEach(route => app.use(route));
@@ -61,8 +63,11 @@ userRoutes.forEach(route => app.use(route));
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`-> Listening on PORT: ${PORT}`);
-});
+if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "development") {
+  const PORT = process.env.PORT
+  app.listen(PORT, () => {
+    console.log(`-> Listening on PORT: ${PORT}`);
+  });
+}
 
-// module.exports = app
+module.exports = app
