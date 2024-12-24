@@ -89,7 +89,7 @@ const createCCPayment = async (req, res, next) => {
 			error.statusCode = 404;
 			throw error;
 		}
-		
+
 		if (booking.status !== "PENDING") {
 			const error = new Error(
 				"This Transaction Has Already been Finished! Please Make A New One"
@@ -195,46 +195,46 @@ const createPayment = async (req, res, next) => {
 		let itemDetails = [];
 
 		const booking = await prisma.bookings.findUnique({
-            where: { id: convertBookingId },
-            include: {
-                passengers: true,
-                flight: {
-                    include: {
-                        route: {
-                            include: {
-                                departureAirport: {
-                                    select: {
-                                        name: true,
-                                    },
-                                },
-                                arrivalAirport: {
-                                    select: {
-                                        name: true,
-                                    },
-                                },
-                                seatClass: {
-                                    select: {
-                                        name: true,
-                                        priceAdult: true,
-                                        priceChild: true,
-                                        priceBaby: true,
-                                    },
-                                },
-                            },
-                        },
-                        plane: {
-                            select: {
-                                planeName: true,
-                                planeCode: true,
-                                description: true,
-                                baggage: true,
-                                cabinBaggage: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+			where: { id: convertBookingId },
+			include: {
+				passengers: true,
+				flight: {
+					include: {
+						route: {
+							include: {
+								departureAirport: {
+									select: {
+										name: true,
+									},
+								},
+								arrivalAirport: {
+									select: {
+										name: true,
+									},
+								},
+								seatClass: {
+									select: {
+										name: true,
+										priceAdult: true,
+										priceChild: true,
+										priceBaby: true,
+									},
+								},
+							},
+						},
+						plane: {
+							select: {
+								planeName: true,
+								planeCode: true,
+								description: true,
+								baggage: true,
+								cabinBaggage: true,
+							},
+						},
+					},
+				},
+			},
+		});
 
 		if (!booking) {
 			const error = new Error("Booking Ticket not found");
@@ -385,30 +385,39 @@ const createPayment = async (req, res, next) => {
 				});
 
 				return res.status(201).json({
-                    status: "Success",
-                    statusCode: 201,
-                    message: "Flight details and payment information retrieved successfully",
-                    flightDetails: {
-                        flightId: booking.flight.id,
-                        departureTime: booking.flight.departureTime.toLocaleTimeString(),
-                        departureDate: booking.flight.departureTime.toLocaleDateString(),
-                        departureAirportName: booking.flight.route.departureAirport.name,
-                        arrivalTime: booking.flight.arrivalTime.toLocaleTimeString(),
-                        arrivalDate: booking.flight.arrivalTime.toLocaleDateString(),
-                        arrivalAirportName: booking.flight.route.arrivalAirport.name,
-                        planeName: booking.flight.plane.planeName,
-                        planeCode: booking.flight.plane.planeCode,
-                        description: booking.flight.plane.description,
-                        baggage: booking.flight.plane.baggage,
-                        cabinBaggage: booking.flight.plane.cabinBaggage,
-                        priceAdult: seatClass.priceAdult * booking.adultPassenger,
-                        priceChild: seatClass.priceChild * booking.childPassenger,
-                        priceBaby: seatClass.priceBaby * booking.babyPassenger,
-                        total: totalPrice,
-                        tax: booking.tax
-                    },
-                    bankDetails: responses,
-                });
+					status: "Success",
+					statusCode: 201,
+					message:
+						"Flight details and payment information retrieved successfully",
+					flightDetails: {
+						flightId: booking.flight.id,
+						departureTime:
+							booking.flight.departureTime.toLocaleTimeString(),
+						departureDate:
+							booking.flight.departureTime.toLocaleDateString(),
+						departureAirportName:
+							booking.flight.route.departureAirport.name,
+						arrivalTime:
+							booking.flight.arrivalTime.toLocaleTimeString(),
+						arrivalDate:
+							booking.flight.arrivalTime.toLocaleDateString(),
+						arrivalAirportName:
+							booking.flight.route.arrivalAirport.name,
+						planeName: booking.flight.plane.planeName,
+						planeCode: booking.flight.plane.planeCode,
+						description: booking.flight.plane.description,
+						baggage: booking.flight.plane.baggage,
+						cabinBaggage: booking.flight.plane.cabinBaggage,
+						priceAdult:
+							seatClass.priceAdult * booking.adultPassenger,
+						priceChild:
+							seatClass.priceChild * booking.childPassenger,
+						priceBaby: seatClass.priceBaby * booking.babyPassenger,
+						total: totalPrice,
+						tax: booking.tax,
+					},
+					bankDetails: responses,
+				});
 			}
 		}
 	} catch (error) {
@@ -461,13 +470,13 @@ const midtransNotification = async (req, res, next) => {
 		];
 
 		const booking = await prisma.bookings.findUnique({
-            		where: {
-                		id: bookingId
-            		},
-            		select: {
-                		userId: true
-            		}
-        	});
+			where: {
+				id: bookingId,
+			},
+			select: {
+				userId: true,
+			},
+		});
 
 		if (
 			transaction_status === "settlement" ||
@@ -532,9 +541,7 @@ const checkPaymentVa = async (req, res, next) => {
 		});
 
 		if (!booking || booking.userId !== userId) {
-			const error = new Error(
-				"Booking not Found"
-			);
+			const error = new Error("Booking not Found");
 			error.statusCode = 404;
 			throw error;
 		}
@@ -552,7 +559,7 @@ const checkPaymentVa = async (req, res, next) => {
 				statusCode: 200,
 				message: "You haven't Finished the Payment for this Payment!",
 				data: booking.payments,
-			})
+			});
 		}
 	} catch (error) {
 		next(error);
@@ -563,5 +570,5 @@ module.exports = {
 	createCCPayment,
 	createPayment,
 	midtransNotification,
-	checkPaymentVa
+	checkPaymentVa,
 };
