@@ -138,7 +138,7 @@ const getFilteredBaggage = async (req, res, next) => {
 
     if (!baggage || isNaN(parseInt(baggage))) {
       const error = new Error("Baggage query must be a valid number");
-      error.status = 400;
+      error.statusCode = 400;
       throw error;
     }
 
@@ -245,7 +245,7 @@ const getFilteredCabinBaggage = async (req, res, next) => {
 
     if (!cabinBaggage || isNaN(parseInt(cabinBaggage))) {
       const error = new Error("Baggage query must be a valid number");
-      error.status = 400;
+      error.statusCode = 400;
       throw error;
     }
 
@@ -351,14 +351,14 @@ const getFilteredDesc = async (req, res, next) => {
 
     if (!description || typeof description !== "string") {
       const error = new Error("Description query must be a valid string");
-      error.status = 400;
+      error.statusCode = 400;
       throw error;
     }
 
     const validOrders = ["asc", "desc"];
     if (!validOrders.includes(order.toLowerCase())) {
       const error = new Error("Order query must be either 'asc' or 'desc'");
-      error.status = 400;
+      error.statusCode = 400;
       throw error;
     }
 

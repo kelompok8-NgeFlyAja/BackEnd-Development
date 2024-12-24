@@ -223,7 +223,7 @@ const downloadPDF = async (req, res, next) => {
 
 
         doc.end();
-        console.log('PDF download');
+        // console.log('PDF download');
     } catch (error) {
         next(error);
     }

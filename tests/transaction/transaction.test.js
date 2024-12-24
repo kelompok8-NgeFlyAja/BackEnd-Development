@@ -1,11 +1,17 @@
 const request = require("supertest");
 const app = require("../../app");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
+afterAll(async () => {
+    await prisma.$disconnect();
+});
 
 describe("Testing for Transaction History Route", () => {
 	describe("GET /transaction-history", () => {
 		test("It Should Return 200 when User Already Login", async () => {
 			const login = await request(app).post("/login").send({
-				email: "john@mai.com",
+				email: "john@mail.com",
 				password: "password",
 			});
 

@@ -1,5 +1,7 @@
 const errorHandler = (error, req, res, next) => {
-	console.log(error);
+	if (process.env.NODE_ENV !== 'test') {
+        console.log(error);
+    }
 
 	const statusCode = error.statusCode || 500;
 	const message = error.message || "There's Something Wrong with The Server!";
