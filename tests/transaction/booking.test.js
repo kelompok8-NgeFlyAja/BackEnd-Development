@@ -603,8 +603,6 @@ describe("Testing for Booking Route", () => {
 				.send(booking2)
 				.set("Authorization", `Bearer ${authToken}`);
 
-			console.log(ticketBooking.body, "-> tickets");
-
 			expect(ticketBooking.body).toHaveProperty("status");
 			expect(ticketBooking.body).toHaveProperty("statusCode");
 			expect(ticketBooking.body).toHaveProperty("message");

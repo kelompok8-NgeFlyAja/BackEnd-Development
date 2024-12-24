@@ -26,7 +26,6 @@ beforeAll(async () => {
     });
 
     authToken = login.body.accessToken;
-	console.log(authToken, '-> from before');
 	
 });
 
@@ -80,7 +79,6 @@ describe("Testing for Notification Route", () => {
 			const notif = await request(app)
 				.put(`/notifications/${notificationId}`)
 				.set("Authorization", `Bearer ${authToken}`);
-			console.log(notif.body, '->notif 200');
 			
 			expect(notif.body).toHaveProperty("status");
 			expect(notif.body).toHaveProperty("message");
@@ -94,7 +92,6 @@ describe("Testing for Notification Route", () => {
 			const notif = await request(app)
 				.put(`/notifications/${invalidNotificationId}`)
 				.set("Authorization", `Bearer ${authToken}`);
-			console.log(notif.body, '->notif 400');
 	
 			expect(notif.statusCode).toBe(400);
 			expect(notif.body).toHaveProperty("status", "error");
@@ -108,7 +105,6 @@ describe("Testing for Notification Route", () => {
 			const notif = await request(app)
 				.put(`/notifications/${nonExistentNotificationId}`)
 				.set("Authorization", `Bearer ${authToken}`);
-				console.log(notif.body, '->notif 404');
 	
 			expect(notif.statusCode).toBe(404);
 			expect(notif.body).toHaveProperty("status", "error");

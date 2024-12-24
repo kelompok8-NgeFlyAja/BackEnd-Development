@@ -72,7 +72,7 @@ beforeEach(async () => {
 	await prisma.users.create({
 		data: {
 			name: "test",
-			email: "test@gmail.com",
+			email: "test2@gmail.com",
 			phoneNumber: "081212123434",
 			password: hashedPassword,
 			isActivated: true,
@@ -80,7 +80,7 @@ beforeEach(async () => {
 	});
 
 	const login = await request(app).post("/login").send({
-		email: "test@gmail.com",
+		email: "test2@gmail.com",
 		password: "password",
 	});
 
@@ -127,15 +127,11 @@ afterEach(async () => {
 
 	await prisma.users.deleteMany({
 		where: {
-			email: "test@gmail.com",
+			email: "test2@gmail.com",
 		},
 	});
 
     await prisma.$disconnect();
-});
-
-afterAll(async () => {
-	await prisma.$disconnect();
 });
 
 describe("Testing for Payment Route", () => {
@@ -381,11 +377,18 @@ describe("Testing for Payment Route", () => {
 			expect(response.body).toHaveProperty("message", "Booking not Found");
 		});
 		test("It Should Return 200 with a success message when payment status is 'Issued'", async () => {
-			const issuedBookingId = 3465356;
+			const login = await request(app).post("/login").send({
+                email: "john@mail.com",
+                password: "password",
+            });
+        
+            const authTokens = login.body.accessToken;
+            
+            const issuedBookingId = 50055980;
 	
 			const response = await request(app)
 				.get(`/check-payment/${issuedBookingId}`)
-				.set("Authorization", `Bearer ${authToken}`);
+				.set("Authorization", `Bearer ${authTokens}`);
 	
 			expect(response.statusCode).toBe(200);
 			expect(response.body).toHaveProperty("status", "Success");
@@ -395,11 +398,18 @@ describe("Testing for Payment Route", () => {
 			expect(response.body.data).toHaveProperty("status", "Issued");
 		});
 		test("It Should Return 200 with a warning message when payment is not finished", async () => {
-			const pendingBookingId = 3465356;
+			const login = await request(app).post("/login").send({
+                email: "john@mail.com",
+                password: "password",
+            });
+        
+            const authTokens = login.body.accessToken;
+            
+            const pendingBookingId = 54309057;
 	
 			const response = await request(app)
 				.get(`/check-payment/${pendingBookingId}`)
-				.set("Authorization", `Bearer ${authToken}`);
+				.set("Authorization", `Bearer ${authTokens}`);
 	
 			expect(response.statusCode).toBe(200);
 			expect(response.body).toHaveProperty("status", "Success");

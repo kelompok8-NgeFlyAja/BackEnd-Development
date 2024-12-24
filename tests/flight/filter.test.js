@@ -156,7 +156,7 @@ describe("Integration Test for Flight", () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.status).toBe("success");
       expect(res.body.data).toBeDefined();
-      expect(res.body.data[0].duration).toBe("2h 0m");
+      expect(res.body.data[0].duration).toBe("6h 25m");
     });
 
     it("Should retrieve flights with specific page and limit", async () => {

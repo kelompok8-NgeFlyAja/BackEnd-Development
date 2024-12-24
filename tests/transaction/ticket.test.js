@@ -17,7 +17,7 @@ beforeAll(async () => {
 describe("Testing for PDF Route", () => {
     describe("GET /print-pdf/:bookingId", () => {
         test("It should return 200 when the booking is found", async () => {
-            const bookingId = 1;
+            const bookingId = 54309057;
             const response = await request(app)
                 .get(`/print-pdf/${bookingId}`)
                 .set("Authorization", `Bearer ${authToken}`);
@@ -37,7 +37,7 @@ describe("Testing for PDF Route", () => {
     });
     describe("GET /download-pdf/:bookingId", () => {
         test("It should return 200 when the booking is found", async () => {
-            const bookingId = 1;
+            const bookingId = 54309057;
             const response = await request(app)
                 .get(`/download-pdf/${bookingId}`)
                 .set("Authorization", `Bearer ${authToken}`);
