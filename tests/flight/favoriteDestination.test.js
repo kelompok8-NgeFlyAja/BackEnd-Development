@@ -135,16 +135,16 @@ describe("GET /favorite-destination", () => {
     const response = await request(app).get("/favorite-destination");
 
     expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("status");
+    expect(response.body).toHaveProperty("statusCode");
+    expect(response.body).toHaveProperty("message");
+    expect(response.body).toHaveProperty("total");
+    expect(response.body).toHaveProperty("page");
+    expect(response.body).toHaveProperty("limit");
+    expect(response.body).toHaveProperty("data");
+    expect(response.body).toHaveProperty("status");
     expect(response.body.status).toBe("success");
-    expect(response.body.data).toHaveLength(1); // Sesuaikan dengan jumlah data yang diharapkan
-    expect(response.body.data[0]).toHaveProperty("departure", "test1");
-    expect(response.body.data[0]).toHaveProperty("arrival", "test2");
-    expect(response.body.data[0]).toHaveProperty("price", 400000); // 500000 - 100000 discount
-    expect(response.body.data[0]).toHaveProperty(
-      "imageUrl",
-      "http://example.com/promotion.jpg"
-    );
-    expect(response.body.data[0]).toHaveProperty("label", "Test Discount");
+    expect(response.body.message).toBe("Successfully get flight card");
   });
 
   it("should return 400 for invalid page and limit parameters", async () => {

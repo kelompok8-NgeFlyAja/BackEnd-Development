@@ -10,7 +10,7 @@ const updateUser = async (req, res, next) => {
 
         if (!name && !phoneNumber && !email) {
             const error = new Error("At least one field is required to update.");
-            error.status = 400;
+            error.statusCode = 400;
             throw error;
         }
         const data = {};
@@ -29,7 +29,6 @@ const updateUser = async (req, res, next) => {
             data: updatedUser,
         });
     } catch (error) {
-        console.error("Error updating user:", error);
         next(error);
     }
 };
