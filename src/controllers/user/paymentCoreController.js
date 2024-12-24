@@ -169,16 +169,6 @@ const createCCPayment = async (req, res, next) => {
 		const midtransResponse = await core.charge(transactionDetails);
 
 		if (midtransResponse) {
-			await prisma.notifications.create({
-				data: {
-					userId: booking.userId,
-					title: "Payment Status (Paid)",
-					description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
-					createdAt: new Date(Date.now()),
-					isRead: false,
-				},
-			});
-
 			return res.status(200).json({
 				status: "success",
 				statusCode: 200,
@@ -492,6 +482,16 @@ const midtransNotification = async (req, res, next) => {
 				data: {
 					paymentMethod: payment_type,
 					status: "Issued",
+				},
+			});
+
+			await prisma.notifications.create({
+				data: {
+					userId: booking.userId,
+					title: "Payment Status (Paid)",
+					description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
+					createdAt: new Date(Date.now()),
+					isRead: false,
 				},
 			});
 		}
