@@ -460,6 +460,15 @@ const midtransNotification = async (req, res, next) => {
 			`${bookingId}-bni`,
 		];
 
+		const booking = await prisma.bookings.findUnique({
+            		where: {
+                		id: bookingId
+            		},
+            		select: {
+                		userId: true
+            		}
+        	});
+
 		if (
 			transaction_status === "settlement" ||
 			transaction_status === "capture"
@@ -487,7 +496,7 @@ const midtransNotification = async (req, res, next) => {
 
 			await prisma.notifications.create({
 				data: {
-					userId: booking.userId,
+					userId: parseInt(booking.userId),
 					title: "Payment Status (Paid)",
 					description: `You Have Finished Your Payment, Please Enjoy Your Flight!`,
 					createdAt: new Date(Date.now()),
