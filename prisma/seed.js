@@ -1243,6 +1243,16 @@ async function main() {
             }
         });
 
+        await prisma.users.create({
+            data: {
+                name: 'Admin',
+                email: 'admin@mail.com',
+                phoneNumber: '08987654321',
+                password: hashedPassword,
+                isActivated: true,
+            }
+        });
+
         console.log(`Database has been seeded. 🌱`);
     } catch (error) {
         throw error;
