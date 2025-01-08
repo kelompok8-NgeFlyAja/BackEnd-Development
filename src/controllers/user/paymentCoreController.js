@@ -471,7 +471,7 @@ const midtransNotification = async (req, res, next) => {
 
 		const booking = await prisma.bookings.findUnique({
 			where: {
-				id: bookingId,
+				id: parseInt(bookingId),
 			},
 			select: {
 				userId: true,
