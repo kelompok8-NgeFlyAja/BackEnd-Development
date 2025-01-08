@@ -1,11 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const PDFDocument = require('pdfkit');
-var doc = new PDFDocument({ size: 'A4' });
 const moment = require("moment-timezone");
 // const fs = require('fs');
 
 const generatePDF = async (req, res, next) => {
+    var doc = new PDFDocument({ size: 'A4' });
     try {
         const { bookingId } = req.params;
 
@@ -118,6 +118,7 @@ const generatePDF = async (req, res, next) => {
 }
 
 const downloadPDF = async (req, res, next) => {
+    var doc = new PDFDocument({ size: 'A4' });
     try {
         const { bookingId } = req.params;
 
